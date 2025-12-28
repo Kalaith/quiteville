@@ -30,13 +30,15 @@ pub fn draw_zone_list(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Opti
     if is_hover {
         let (_, wheel_y) = mouse_wheel();
         if wheel_y != 0.0 {
-            // Scroll speed
-            let scroll_speed = 30.0;
+            // Scroll speed (Slower for smoothness)
+            let scroll_speed = 15.0;
             let delta = -wheel_y * scroll_speed;
              
-            // Calculate new offset potential
-            // We can't modify state here, so emit action
-            scroll_action = Some(PlayerAction::ScrollZones(delta));
+            // Calculate limits
+            let max_scroll = (total_content_h - list_h).max(0.0);
+            let new_offset = (state.zones_scroll_offset + delta).clamp(0.0, max_scroll);
+            
+            scroll_action = Some(PlayerAction::SetZoneScroll(new_offset));
         }
     }
     

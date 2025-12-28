@@ -121,7 +121,7 @@ pub enum PlayerAction {
     Select(data::Selection),
     ToggleTechTree,
     ToggleBuildMenu,
-    ScrollZones(f32), // Delta
+    SetZoneScroll(f32), // Absolute offset
     Research(String), // Tech ID
     SpeedUp,             // Temporary speed boost for testing
     SlowDown,
@@ -158,12 +158,7 @@ async fn main() {
         clear_background(Color::from_rgba(30, 30, 40, 255));
         
         // Update Camera
-        let mouse_pos = mouse_position();
-        let right_panel_w = 350.0; // From layout.rs
-        let is_over_build_menu = state.show_build_menu && mouse_pos.0 > screen_width() - right_panel_w;
-        
-        // Input is captured if Tech Tree is open (Modal) OR hovering Build Menu
-        let input_captured = state.show_tech_tree || is_over_build_menu;
+        let input_captured = is_mouse_over_ui(&state);
         
         state.camera.update(delta, input_captured);
         
@@ -209,21 +204,18 @@ fn handle_input(state: &GameState, time_scale: &mut f32, paused: &mut bool) -> O
         return Some(PlayerAction::SlowDown);
     }
     
-    // Check UI overlap
-    let mouse_pos = mouse_position();
-    let right_panel_w = 350.0;
-    let is_over_build_menu = state.show_build_menu && mouse_pos.0 > screen_width() - right_panel_w;
-    
-    // If Tech Tree is open OR Mouse over Build Menu, block map interaction (clicks)
-    if state.show_tech_tree || is_over_build_menu {
+    // Check UI overlap (Click blocking)
+    if is_mouse_over_ui(state) {
         return None;
     }
 
-    // Restore zone with R key
+    // Shortcuts
+    if is_key_pressed(KeyCode::B) {
+        return Some(PlayerAction::ToggleBuildMenu);
+    }
     if is_key_pressed(KeyCode::R) {
-        if !state.zones.is_empty() {
-            return Some(PlayerAction::RestoreZone(0));
-        }
+        // User asked for R for Research.
+        return Some(PlayerAction::ToggleTechTree);
     }
     
     // Number keys to restore specific zones
@@ -267,6 +259,42 @@ fn handle_input(state: &GameState, time_scale: &mut f32, paused: &mut bool) -> O
     }
     
     None
+}
+
+fn is_mouse_over_ui(state: &GameState) -> bool {
+    let mouse_pos = macroquad::input::mouse_position();
+    let screen_w = macroquad::window::screen_width();
+    let screen_h = macroquad::window::screen_height();
+    
+    // 1. Tech Tree Modal
+    if state.show_tech_tree {
+        return true;
+    }
+    
+    // 2. Build Menu (Right Panel)
+    if state.show_build_menu {
+        let panel_w = 350.0;
+        if mouse_pos.0 > screen_w - panel_w {
+            return true;
+        }
+    }
+    
+    // 3. Bottom Center Buttons
+    // Metrics from layout.rs
+    let btn_w = 120.0;
+    let btn_h = 40.0;
+    let spacing = 10.0;
+    let total_w = btn_w * 2.0 + spacing;
+    let start_x = (screen_w - total_w) / 2.0;
+    let btn_y = screen_h - btn_h - 20.0;
+    
+    // Check bounding box of button area
+    if mouse_pos.0 >= start_x && mouse_pos.0 <= start_x + total_w &&
+       mouse_pos.1 >= btn_y && mouse_pos.1 <= btn_y + btn_h {
+        return true;
+    }
+    
+    false
 }
 
 /// Apply a player action to the game state
@@ -333,10 +361,8 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
         PlayerAction::ToggleBuildMenu => {
             state.show_build_menu = !state.show_build_menu;
         }
-        PlayerAction::ScrollZones(delta) => {
-            state.zones_scroll_offset = (state.zones_scroll_offset + delta).max(0.0);
-            // Optional: Clamp max if we knew content height?
-            // For now just max(0.0) is enough to prevent negative scroll.
+        PlayerAction::SetZoneScroll(val) => {
+            state.zones_scroll_offset = val;
         }
         PlayerAction::Research(id) => {
             // Find index

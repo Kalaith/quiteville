@@ -25,7 +25,7 @@ impl Default for PopulationPressure {
         Self {
             pressure: 0.0,
             growth_rate: 0.1,
-            decay_rate: 0.05,
+            decay_rate: 0.005,
         }
     }
 }

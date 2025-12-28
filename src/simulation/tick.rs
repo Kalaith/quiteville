@@ -201,24 +201,20 @@ pub fn simulate_ticks(
     }
     
     // Calculate total housing capacity (Base + Tech)
-    // Note: calculate_housing_capacity() iterates zones. We should probably modify that function or add bonus here.
-    // For now, let's just add the flat bonus * number of residential zones? Or just global flat?
-    // Let's assume global flat is added to total.
-    let housing_capacity = state.calculate_housing_capacity() + bonuses.housing_flat;
+    // Add base capacity of 2.0 for "Campsite" so players aren't soft-locked if they restore non-housing first.
+    let housing_capacity = state.calculate_housing_capacity() + bonuses.housing_flat + 2.0;
     
-    // Population only grows if there are active zones!
-    if active_zones > 0 {
-        // Boost growth based on active zones and attractiveness
-        // Tech bonus to attractiveness applied here? Or to resource?
-        // Let's apply to resource delta actually, so it persists.
-        
-        let growth_bonus = active_zones as f32 * 0.5;
-        state.population.tick(
-            state.resources.attractiveness * (1.0 + growth_bonus), 
-            housing_capacity,
-            game_minutes  // Use game time, not real time
-        );
-    }
+    // Population grows based on attractiveness and capacity
+    // Boost growth based on active zones and attractiveness
+    // Tech bonus to attractiveness applied here? Or to resource?
+    // Let's apply to resource delta actually, so it persists.
+    
+    let growth_bonus = active_zones as f32 * 0.5;
+    state.population.tick(
+        state.resources.attractiveness * (1.0 + growth_bonus), 
+        housing_capacity,
+        game_minutes  // Use game time, not real time
+    );
     
     // ...
     
@@ -284,7 +280,8 @@ pub fn simulate_ticks(
     
     // --- AGENT SIMULATION ---
     // Target agent count based on population (capped for performance/visual clutter)
-    let target_agents = (state.population.value() as usize).min(50);
+    // Use round() to avoid flickering at integer boundaries
+    let target_agents = (state.population.value().round() as usize).min(50);
     
     // Spawn
     while state.agents.len() < target_agents {
