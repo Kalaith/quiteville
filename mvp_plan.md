@@ -4,9 +4,9 @@
 
 Version 0.1
 
-- One structure
-- 3 core systems (power, access, habitation)
-- 5–10 autonomous inhabitants
+- One zone (e.g., Old Homestead)
+- 4 core resources (Energy, Maintenance, Attractiveness, Stability)
+- Population pressure system
 - Time progression + decay
 - Logs as the main storytelling device
 
@@ -22,6 +22,6 @@ MVP Scope (2–4 weeks):
 - Population pressure system
 - Offline progression
 - Log-based narrative events
+- Reawakening milestones
 
-If watching numbers drift already feels good, you've nailed it.</content>
-<parameter name="filePath">h:\WebHatchery\games\quiteville\mvp_plan.md
+If watching numbers drift already feels good, you've nailed it.

@@ -328,5 +328,4 @@ Feels alive. Behaves gently.
 - Content expansion is horizontal, not vertical
 - You can add weird zones without rewriting math
 
-This structure will survive years of tinkering.</content>
-<parameter name="filePath">h:\WebHatchery\games\quiteville\idle_city_builder_the_quiet_district.md
+This structure will survive years of tinkering.
