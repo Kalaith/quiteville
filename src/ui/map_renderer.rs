@@ -72,9 +72,10 @@ pub fn draw_map(state: &GameState) {
         }
     }
     
-    // 2. Draw Buildings (Active Zones)
-    for zone in &state.zones {
-        if zone.dormant { continue; }
+    // 2. Draw Buildings (Active Zones and Under Construction)
+    for (zone_idx, zone) in state.zones.iter().enumerate() {
+        // Skip dormant zones that aren't under construction
+        if zone.dormant && !zone.is_under_construction() { continue; }
         
         if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
             if let Some(rect) = template.map_rect {
@@ -91,6 +92,9 @@ pub fn draw_map(state: &GameState) {
                     continue;
                 }
                 
+                // Check if zone is under construction
+                let is_under_construction = zone.is_under_construction();
+                
                 // Map template ID to texture name
                 let tex_name = match template.id.as_str() {
                     "old_homestead" => "building_homestead_large",
@@ -99,7 +103,22 @@ pub fn draw_map(state: &GameState) {
                     "community_market" => "building_market_large",
                     "scavengers_workshop" => "building_workshop_large",
                     "community_farm" => "building_farm_large",
+                    "tent" => "building_tent_large",
+                    "shack" => "building_shack_large",
+                    "cottage" => "building_cottage_large",
+                    "campfire" => "building_campfire_large",
+                    "outhouse" => "building_outhouse_large",
+                    "market_stall" => "building_stall_large",
+                    "woodcutters_block" => "building_woodcutter_large",
+                    "stone_quarry" => "building_quarry_large",
                     _ => "tile_ruins", // Fallback
+                };
+                
+                // Tint for construction or normal
+                let tint = if is_under_construction {
+                    Color::new(0.6, 0.6, 0.8, 0.7) // Blue-ish transparent for construction
+                } else {
+                    WHITE
                 };
                 
                 if let Some(tex) = state.assets.get(tex_name) {
@@ -107,7 +126,7 @@ pub fn draw_map(state: &GameState) {
                         tex,
                         screen_pos.x,
                         screen_pos.y,
-                        WHITE, // Could tint based on condition?
+                        tint,
                         DrawTextureParams {
                             dest_size: Some(vec2(width, height)),
                             ..Default::default()
@@ -115,7 +134,34 @@ pub fn draw_map(state: &GameState) {
                     );
                 } else {
                     // Fallback box
-                    draw_rectangle(screen_pos.x, screen_pos.y, width, height, BROWN);
+                    let color = if is_under_construction { BLUE } else { BROWN };
+                    draw_rectangle(screen_pos.x, screen_pos.y, width, height, color);
+                }
+                
+                // Draw construction progress bar for zones under construction
+                if is_under_construction {
+                    let progress = zone.construction_progress(template.construction_work);
+                    let bar_width = width;
+                    let bar_height = 8.0 * camera.zoom;
+                    let bar_y = screen_pos.y + height + 2.0 * camera.zoom;
+                    
+                    // Background bar
+                    draw_rectangle(screen_pos.x, bar_y, bar_width, bar_height, DARKGRAY);
+                    // Progress fill
+                    draw_rectangle(screen_pos.x, bar_y, bar_width * progress, bar_height, YELLOW);
+                    // Border
+                    draw_rectangle_lines(screen_pos.x, bar_y, bar_width, bar_height, 1.0, BLACK);
+                    
+                    // "Under Construction" text
+                    if camera.zoom > 0.5 {
+                        let text = format!("{:.0}%", progress * 100.0);
+                        draw_text(&text, screen_pos.x + width / 2.0 - 15.0, bar_y - 2.0, 14.0 * camera.zoom, WHITE);
+                    }
+                }
+                
+                // Highlight selected zone
+                if matches!(state.selection, crate::data::Selection::Zone(idx) if idx == zone_idx) {
+                    draw_rectangle_lines(screen_pos.x - 2.0, screen_pos.y - 2.0, width + 4.0, height + 4.0, 3.0, GOLD);
                 }
             }
         }
@@ -123,6 +169,40 @@ pub fn draw_map(state: &GameState) {
     
     // 3. Draw Agents
     draw_agents(state, camera);
+    
+    // 4. Draw Day/Night Overlay
+    draw_day_night_overlay(state.game_hour);
+}
+
+/// Draw a screen-wide tint based on time of day
+fn draw_day_night_overlay(game_hour: f32) {
+    let h = game_hour % 24.0;
+    
+    // Calculate tint color based on time
+    // Dawn: 5-7, Day: 7-18, Dusk: 18-20, Night: 20-5
+    let (r, g, b, a) = if h >= 5.0 && h < 7.0 {
+        // Dawn - orange/pink tint fading out
+        let t = (h - 5.0) / 2.0; // 0 to 1
+        (1.0, 0.8 + t * 0.2, 0.6 + t * 0.4, 0.2 * (1.0 - t))
+    } else if h >= 7.0 && h < 18.0 {
+        // Day - no overlay
+        (1.0, 1.0, 1.0, 0.0)
+    } else if h >= 18.0 && h < 20.0 {
+        // Dusk - orange/red tint fading in to night
+        let t = (h - 18.0) / 2.0; // 0 to 1
+        (1.0 - t * 0.3, 0.7 - t * 0.3, 0.4 - t * 0.2, 0.1 + t * 0.2)
+    } else {
+        // Night - deep blue tint
+        (0.1, 0.1, 0.3, 0.4)
+    };
+    
+    if a > 0.01 {
+        draw_rectangle(
+            0.0, 0.0,
+            screen_width(), screen_height(),
+            Color::new(r, g, b, a)
+        );
+    }
 }
 
 fn draw_agents(state: &GameState, camera: &Camera2D) {

@@ -5,6 +5,7 @@
         "category": "residential",
         "base_throughput": 1.0,
         "construction_cost": 1.0,
+        "construction_work": 15.0,
         "saturation_bias": 0.1,
         "output": {
             "materials": 0.1,
@@ -32,11 +33,118 @@
         }
     },
     {
+        "id": "tent",
+        "name": "Tent",
+        "category": "residential",
+        "base_throughput": 0.5,
+        "construction_cost": 0.5,
+        "construction_work": 5.0,
+        "saturation_bias": 0.1,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": -0.02,
+            "stability": 0.0
+        },
+        "upkeep": {
+            "maintenance": 0.0005
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 3.0,
+            "strain": 0.02,
+            "decay": 0.01
+        },
+        "decay": {
+            "natural_rate": 0.002,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 36,
+            "y": 20,
+            "w": 2,
+            "h": 2
+        }
+    },
+    {
+        "id": "shack",
+        "name": "Shack",
+        "category": "residential",
+        "base_throughput": 0.7,
+        "construction_cost": 3.0,
+        "construction_work": 10.0,
+        "construction_materials": {
+            "materials": 2.0
+        },
+        "saturation_bias": 0.1,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": 0.0,
+            "stability": 0.01
+        },
+        "upkeep": {
+            "maintenance": 0.001
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 5.0,
+            "strain": 0.03,
+            "decay": 0.005
+        },
+        "decay": {
+            "natural_rate": 0.001,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 38,
+            "y": 22,
+            "w": 3,
+            "h": 3
+        }
+    },
+    {
+        "id": "cottage",
+        "name": "Cottage",
+        "category": "residential",
+        "base_throughput": 1.2,
+        "construction_cost": 8.0,
+        "construction_work": 25.0,
+        "construction_materials": {
+            "materials": 5.0
+        },
+        "saturation_bias": 0.1,
+        "output": {
+            "materials": 0.05,
+            "attractiveness": 0.08,
+            "stability": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.002
+        },
+        "population": {
+            "attraction": 0.8,
+            "capacity": 8.0,
+            "strain": 0.04,
+            "decay": 0.003
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.15
+        },
+        "map_rect": {
+            "x": 30,
+            "y": 14,
+            "w": 4,
+            "h": 4
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
         "id": "village_green",
         "name": "Village Green",
         "category": "cultural",
         "base_throughput": 0.8,
         "construction_cost": 2.0,
+        "construction_work": 8.0,
         "saturation_bias": 0.1,
         "output": {
             "materials": 0.0,
@@ -64,11 +172,45 @@
         }
     },
     {
+        "id": "campfire",
+        "name": "Campfire",
+        "category": "cultural",
+        "base_throughput": 0.6,
+        "construction_cost": 0.5,
+        "construction_work": 3.0,
+        "saturation_bias": 0.2,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": 0.02,
+            "stability": 0.03
+        },
+        "upkeep": {
+            "materials": 0.01
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.01,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.001,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 19,
+            "y": 24,
+            "w": 2,
+            "h": 2
+        }
+    },
+    {
         "id": "old_well",
         "name": "Old Well",
         "category": "utility",
         "base_throughput": 1.2,
         "construction_cost": 3.0,
+        "construction_work": 12.0,
         "saturation_bias": 0.2,
         "output": {
             "materials": 0.0,
@@ -96,11 +238,48 @@
         }
     },
     {
+        "id": "outhouse",
+        "name": "Outhouse",
+        "category": "utility",
+        "base_throughput": 0.5,
+        "construction_cost": 1.0,
+        "construction_work": 5.0,
+        "saturation_bias": 0.3,
+        "output": {
+            "materials": 0.0,
+            "stability": 0.05,
+            "attractiveness": -0.02
+        },
+        "upkeep": {
+            "maintenance": 0.001
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.01,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 27,
+            "y": 14,
+            "w": 1,
+            "h": 1
+        }
+    },
+    {
         "id": "community_market",
         "name": "Community Market",
         "category": "market",
         "base_throughput": 1.5,
         "construction_cost": 10.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
         "saturation_bias": 0.3,
         "output": {
             "materials": 0.0,
@@ -128,11 +307,48 @@
         }
     },
     {
+        "id": "market_stall",
+        "name": "Market Stall",
+        "category": "market",
+        "base_throughput": 0.8,
+        "construction_cost": 2.0,
+        "construction_work": 6.0,
+        "saturation_bias": 0.2,
+        "output": {
+            "materials": 0.0,
+            "stability": 0.05,
+            "maintenance": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.001,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 29,
+            "y": 28,
+            "w": 2,
+            "h": 2
+        }
+    },
+    {
         "id": "scavengers_workshop",
         "name": "Scavenger's Workshop",
         "category": "infrastructure",
         "base_throughput": 2.0,
         "construction_cost": 5.0,
+        "construction_work": 20.0,
+        "construction_materials": {
+            "materials": 3.0
+        },
         "saturation_bias": 0.5,
         "output": {
             "materials": 0.5,
@@ -160,11 +376,82 @@
         }
     },
     {
+        "id": "woodcutters_block",
+        "name": "Woodcutter's Block",
+        "category": "infrastructure",
+        "base_throughput": 1.5,
+        "construction_cost": 3.0,
+        "construction_work": 10.0,
+        "saturation_bias": 0.3,
+        "output": {
+            "materials": 0.3,
+            "attractiveness": -0.01,
+            "maintenance": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.05,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 2,
+            "y": 18,
+            "w": 4,
+            "h": 3
+        }
+    },
+    {
+        "id": "stone_quarry",
+        "name": "Stone Quarry",
+        "category": "infrastructure",
+        "base_throughput": 1.2,
+        "construction_cost": 6.0,
+        "construction_work": 25.0,
+        "saturation_bias": 0.4,
+        "output": {
+            "materials": 0.4,
+            "attractiveness": -0.03,
+            "maintenance": 0.08
+        },
+        "upkeep": {
+            "maintenance": 0.03
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.08,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "map_rect": {
+            "x": 40,
+            "y": 5,
+            "w": 6,
+            "h": 5
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
         "id": "community_farm",
         "name": "Community Farm",
         "category": "utility",
         "base_throughput": 1.0,
         "construction_cost": 15.0,
+        "construction_work": 35.0,
+        "construction_materials": {
+            "materials": 5.0
+        },
         "saturation_bias": 0.1,
         "output": {
             "materials": 0.8,

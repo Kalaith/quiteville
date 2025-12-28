@@ -12,6 +12,8 @@ pub mod layout;
 pub mod map_renderer;
 pub mod tech;
 pub mod text_util;
+pub mod tooltip;
+pub mod floating_text;
 
 /// Constants for UI Layout
 pub mod colors {

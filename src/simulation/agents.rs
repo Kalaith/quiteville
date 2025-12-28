@@ -1,5 +1,58 @@
 use macroquad::prelude::*;
 use macroquad::rand;
+use serde::{Deserialize, Serialize};
+
+/// Job roles for agents
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Job {
+    Laborer,   // Default - general work
+    Farmer,    // Works at farms
+    Cook,      // Works at markets/kitchens
+    Scavenger, // Works at workshops
+    Builder,   // Constructs buildings
+}
+
+impl Default for Job {
+    fn default() -> Self {
+        Self::Laborer
+    }
+}
+
+impl Job {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Job::Laborer => "Laborer",
+            Job::Farmer => "Farmer",
+            Job::Cook => "Cook",
+            Job::Scavenger => "Scavenger",
+            Job::Builder => "Builder",
+        }
+    }
+}
+
+/// Time of day for agent schedules
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TimeOfDay {
+    Morning,   // 6:00 - 9:00
+    Work,      // 9:00 - 17:00
+    Evening,   // 17:00 - 22:00
+    Night,     // 22:00 - 6:00
+}
+
+impl TimeOfDay {
+    pub fn from_hour(hour: f32) -> Self {
+        let h = hour % 24.0;
+        if h >= 6.0 && h < 9.0 {
+            TimeOfDay::Morning
+        } else if h >= 9.0 && h < 17.0 {
+            TimeOfDay::Work
+        } else if h >= 17.0 && h < 22.0 {
+            TimeOfDay::Evening
+        } else {
+            TimeOfDay::Night
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AgentState {
@@ -9,6 +62,8 @@ pub enum AgentState {
     Shopping { target: Vec2, duration: f32 },
     Socializing { target: Vec2, duration: f32 },
     GoingHome,
+    Sleeping,
+    Building { target: Vec2, zone_idx: usize },
 }
 
 #[derive(Debug, Clone)]
@@ -21,6 +76,12 @@ pub struct Agent {
     pub energy: f32,
     pub hunger: f32,
     pub social: f32,
+    pub spirit: f32, // Hope/Morale
+    
+    // Job and workplace
+    pub job: Job,
+    pub workplace_id: Option<String>, // Zone template_id this agent works at
+    pub home_pos: Vec2,
     
     // Personality / Stats
     pub speed: f32,
@@ -36,6 +97,10 @@ impl Agent {
             energy: 1.0,
             hunger: 1.0,
             social: 1.0,
+            spirit: 1.0,
+            job: Job::default(),
+            workplace_id: None,
+            home_pos: pos, // Default home is spawn position
             speed: 60.0 + rand::gen_range(-15.0, 15.0),
             color: [
                 rand::gen_range(0.5, 1.0),
@@ -46,43 +111,83 @@ impl Agent {
         }
     }
     
+    pub fn with_job(mut self, job: Job) -> Self {
+        self.job = job;
+        self
+    }
+    
+    pub fn with_home(mut self, home: Vec2) -> Self {
+        self.home_pos = home;
+        self
+    }
+    
     pub fn update(&mut self, delta: f32, world: &WorldInfo) {
+        let time_of_day = TimeOfDay::from_hour(world.game_hour);
+        
         // Needs Decay
-        let decay_rate = 0.05 * delta;
-        self.energy = (self.energy - decay_rate * 0.5).max(0.0);
-        self.hunger = (self.hunger - decay_rate).max(0.0);
-        self.social = (self.social - decay_rate * 0.8).max(0.0);
+        let decay_rate = 0.02 * delta;
+        self.energy = (self.energy - decay_rate * 0.3).max(0.0);
+        self.hunger = (self.hunger - decay_rate * 0.5).max(0.0);
+        self.social = (self.social - decay_rate * 0.4).max(0.0);
+        self.spirit = (self.spirit - decay_rate * 0.1).max(0.0);
         
         match self.state {
             AgentState::Idle => {
-                // Decision Tree
-                if self.energy < 0.2 {
-                    self.state = AgentState::GoingHome;
-                } else if self.hunger < 0.3 && !world.markets.is_empty() {
-                    // Go Shopping
-                    let target = self.find_nearest(world.markets.as_slice());
-                    self.state = AgentState::Wandering { target };
-                    // After wandering, we will switch to Shopping? 
-                    // Need a way to pass "Next State". For now, logic in Wandering arrival.
-                } else if self.social < 0.4 && !world.parks.is_empty() {
-                    let target = self.find_nearest(world.parks.as_slice());
-                    self.state = AgentState::Wandering { target };
-                } else if rand::gen_range(0, 100) < 1 { // 1% chance to Work
-                     if !world.workshops.is_empty() {
-                         let target = self.find_nearest(world.workshops.as_slice());
-                         self.state = AgentState::Wandering { target };
-                     }
-                } else if rand::gen_range(0, 100) < 2 {
-                    // Random wander
-                    let target = self.pick_random_target();
-                    self.state = AgentState::Wandering { target };
+                // Time-of-day based decision tree
+                match time_of_day {
+                    TimeOfDay::Night => {
+                        // At night, go home and sleep
+                        if self.pos.distance(self.home_pos) > 20.0 {
+                            self.state = AgentState::GoingHome;
+                        } else {
+                            self.state = AgentState::Sleeping;
+                        }
+                    },
+                    TimeOfDay::Morning => {
+                        // Morning routine: eat if hungry
+                        if self.hunger < 0.5 && !world.markets.is_empty() {
+                            let target = self.find_nearest(world.markets.as_slice());
+                            self.state = AgentState::Wandering { target };
+                        } else if self.energy < 0.3 {
+                            self.state = AgentState::Sleeping;
+                        }
+                    },
+                    TimeOfDay::Work => {
+                        // Work time: go to workplace or find work
+                        if self.energy < 0.2 {
+                            self.state = AgentState::GoingHome;
+                        } else if self.hunger < 0.3 && !world.markets.is_empty() {
+                            let target = self.find_nearest(world.markets.as_slice());
+                            self.state = AgentState::Wandering { target };
+                        } else if !world.workshops.is_empty() && rand::gen_range(0, 100) < 5 {
+                            let target = self.find_nearest(world.workshops.as_slice());
+                            self.state = AgentState::Wandering { target };
+                        } else if !world.construction_sites.is_empty() && self.job == Job::Builder {
+                            // Builders go to construction sites
+                            let (target, zone_idx) = world.construction_sites[0];
+                            self.state = AgentState::Building { target, zone_idx };
+                        }
+                    },
+                    TimeOfDay::Evening => {
+                        // Evening: socialize, eat, relax
+                        if self.hunger < 0.4 && !world.markets.is_empty() {
+                            let target = self.find_nearest(world.markets.as_slice());
+                            self.state = AgentState::Wandering { target };
+                        } else if self.social < 0.5 && !world.parks.is_empty() {
+                            let target = self.find_nearest(world.parks.as_slice());
+                            self.state = AgentState::Wandering { target };
+                        } else if rand::gen_range(0, 100) < 3 {
+                            let target = self.pick_random_target();
+                            self.state = AgentState::Wandering { target };
+                        }
+                    },
                 }
             },
             AgentState::Wandering { target } => {
                 let dist = self.pos.distance(target);
                 if dist < 10.0 {
                     // Arrived! Determine what we are doing based on location
-                    self.state = AgentState::Idle; // Default
+                    self.state = AgentState::Idle;
                     
                     // Check local zones
                     if self.is_at_location(target, world.markets.as_slice()) && self.hunger < 0.5 {
@@ -100,28 +205,57 @@ impl Agent {
             AgentState::Shopping { ref mut duration, .. } => {
                 *duration -= delta;
                 if *duration <= 0.0 {
-                    self.hunger = 1.0; // Fed!
+                    self.hunger = 1.0;
+                    self.spirit = (self.spirit + 0.1).min(1.0);
                     self.state = AgentState::Idle;
                 }
             },
             AgentState::Socializing { ref mut duration, .. } => {
                 *duration -= delta;
                 if *duration <= 0.0 {
-                    self.social = 1.0; // Happy!
+                    self.social = 1.0;
+                    self.spirit = (self.spirit + 0.2).min(1.0);
                     self.state = AgentState::Idle;
                 }
             },
             AgentState::Working { ref mut duration, .. } => {
                 *duration -= delta;
+                self.energy = (self.energy - delta * 0.1).max(0.0);
                 if *duration <= 0.0 {
-                    // Earned money? For now just done
+                    self.spirit = (self.spirit + 0.05).min(1.0);
                     self.state = AgentState::Idle;
                 }
             },
+            AgentState::Building { target, .. } => {
+                let dist = self.pos.distance(target);
+                if dist < 10.0 {
+                    // At construction site - work being done in tick.rs
+                    self.energy = (self.energy - delta * 0.15).max(0.0);
+                    if self.energy < 0.2 {
+                        self.state = AgentState::GoingHome;
+                    }
+                } else {
+                    // Move toward site
+                    let dir = (target - self.pos).normalize();
+                    self.pos += dir * self.speed * delta;
+                }
+            },
             AgentState::GoingHome => {
-                self.energy += delta * 0.5;
-                if self.energy >= 1.0 {
-                    self.state = AgentState::Idle;
+                let dist = self.pos.distance(self.home_pos);
+                if dist < 10.0 {
+                    self.state = AgentState::Sleeping;
+                } else {
+                    let dir = (self.home_pos - self.pos).normalize();
+                    self.pos += dir * self.speed * delta;
+                }
+            },
+            AgentState::Sleeping => {
+                self.energy = (self.energy + delta * 0.3).min(1.0);
+                if self.energy >= 0.9 {
+                    let time_of_day = TimeOfDay::from_hour(world.game_hour);
+                    if time_of_day != TimeOfDay::Night {
+                        self.state = AgentState::Idle;
+                    }
                 }
             }
         }
@@ -161,4 +295,7 @@ pub struct WorldInfo {
     pub markets: Vec<Vec2>,
     pub workshops: Vec<Vec2>,
     pub parks: Vec<Vec2>,
+    pub construction_sites: Vec<(Vec2, usize)>, // Position and zone index
+    pub game_hour: f32, // 0-24 hour cycle
 }
+

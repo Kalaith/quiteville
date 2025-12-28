@@ -1,6 +1,28 @@
 use serde::{Deserialize, Serialize};
 // use crate::data::ResourceDelta;
 
+/// Condition for unlocking a tech node
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum UnlockCondition {
+    /// Standard cost-based purchase
+    Cost { materials: f32 },
+    /// Requires a milestone to be achieved
+    MilestoneAchieved { milestone_id: String },
+    /// Requires a certain number of zones built
+    ZonesBuilt { count: u32 },
+    /// Requires specific zone to be active
+    ZoneActive { zone_id: String },
+    /// Automatically available once parent is unlocked
+    ParentOnly,
+}
+
+impl Default for UnlockCondition {
+    fn default() -> Self {
+        Self::ParentOnly
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TechNode {
     pub id: String,
@@ -10,6 +32,10 @@ pub struct TechNode {
     pub parent_id: Option<String>,
     pub unlocked: bool,
     pub effect: TechEffect,
+    
+    /// Optional unlock condition (if None, just requires cost and parent)
+    #[serde(default)]
+    pub unlock_condition: Option<UnlockCondition>,
     
     // UI layout hint
     pub x: f32,
@@ -34,9 +60,15 @@ impl TechNode {
             parent_id: parent.map(|s| s.to_string()),
             unlocked: false,
             effect,
+            unlock_condition: None,
             x,
             y,
         }
+    }
+    
+    pub fn with_unlock_condition(mut self, condition: UnlockCondition) -> Self {
+        self.unlock_condition = Some(condition);
+        self
     }
 }
 

@@ -54,6 +54,10 @@ pub struct GameState {
     /// Total game time in hours
     pub game_time_hours: f32,
     
+    /// Current game hour (0-24 cycle for day/night)
+    #[serde(default)]
+    pub game_hour: f32,
+    
     // UI State
     #[serde(skip)]
     pub show_tech_tree: bool,
@@ -112,6 +116,7 @@ impl GameState {
             agents: Vec::new(),
             log: GameLog::new(100),
             game_time_hours: 0.0,
+            game_hour: 8.0, // Start at 8 AM
             show_tech_tree: false,
             show_build_menu: false,
             zones_scroll_offset: 0.0,

@@ -12,9 +12,17 @@ pub struct ZoneTemplate {
     /// Base throughput before condition/activity multipliers
     pub base_throughput: f32,
     
-    /// Cost to build/restore
+    /// Cost to build/restore (material units)
     #[serde(default)]
     pub construction_cost: f32,
+    
+    /// Work units required to complete construction
+    #[serde(default = "default_construction_work")]
+    pub construction_work: f32,
+    
+    /// Materials required for construction
+    #[serde(default)]
+    pub construction_materials: ResourceDelta,
     
     /// How fast diminishing returns kick in (higher = faster plateau)
     pub saturation_bias: f32,
@@ -34,6 +42,14 @@ pub struct ZoneTemplate {
     /// Map coordinates for this zone (Phase 4.2)
     #[serde(default)]
     pub map_rect: Option<MapRect>,
+    
+    /// Tech ID required to unlock this zone (if any)
+    #[serde(default)]
+    pub locked_by_tech: Option<String>,
+}
+
+fn default_construction_work() -> f32 {
+    10.0 // Default 10 work units
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]

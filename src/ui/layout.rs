@@ -123,7 +123,11 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      // Status line at bottom (adjusted Y dynamically)
                      let status_y = y + h - 50.0; // Stick to bottom
                      
-                     if zone.condition < 1.0 {
+                     if zone.is_under_construction() {
+                         // Show construction progress
+                         let progress = zone.construction_progress(template.construction_work);
+                         draw_text(&format!("BUILDING: {:.0}%", progress * 100.0), x + 10.0, status_y + 20.0, 20.0, YELLOW);
+                     } else if zone.condition < 1.0 {
                          // Restore/Repair Button
                          let btn_h = 30.0;
                          let btn_w = 120.0;
@@ -154,19 +158,23 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
         crate::data::Selection::Agent(id) => {
              if let Some(agent) = state.agents.iter().find(|a| a.id == id) {
                  draw_text(&format!("Villager #{}", id % 1000), x + 10.0, y + 30.0, 30.0, WHITE);
-                 draw_text(&format!("Energy: {:.0}%", agent.energy * 100.0), x + 10.0, y + 60.0, 20.0, get_bar_color(agent.energy));
-                 draw_text(&format!("Hunger: {:.0}%", agent.hunger * 100.0), x + 10.0, y + 85.0, 20.0, get_bar_color(agent.hunger));
-                 draw_text(&format!("Social: {:.0}%", agent.social * 100.0), x + 10.0, y + 110.0, 20.0, get_bar_color(agent.social));
+                 draw_text(&format!("Job: {}", agent.job.name()), x + 10.0, y + 55.0, 18.0, colors::ACCENT);
+                 draw_text(&format!("Energy: {:.0}%", agent.energy * 100.0), x + 10.0, y + 80.0, 20.0, get_bar_color(agent.energy));
+                 draw_text(&format!("Hunger: {:.0}%", agent.hunger * 100.0), x + 10.0, y + 105.0, 20.0, get_bar_color(agent.hunger));
+                 draw_text(&format!("Social: {:.0}%", agent.social * 100.0), x + 10.0, y + 130.0, 20.0, get_bar_color(agent.social));
+                 draw_text(&format!("Spirit: {:.0}%", agent.spirit * 100.0), x + 10.0, y + 155.0, 20.0, get_bar_color(agent.spirit));
                  
                  let state_text = match agent.state {
                      crate::simulation::agents::AgentState::Idle => "Idle".to_string(),
-                     crate::simulation::agents::AgentState::Wandering { .. } => "Wandering".to_string(),
+                     crate::simulation::agents::AgentState::Wandering { .. } => "Walking".to_string(),
                      crate::simulation::agents::AgentState::Working { .. } => "Working".to_string(),
                      crate::simulation::agents::AgentState::Shopping { .. } => "Shopping".to_string(),
                      crate::simulation::agents::AgentState::Socializing { .. } => "Socializing".to_string(),
                      crate::simulation::agents::AgentState::GoingHome => "Going Home".to_string(),
+                     crate::simulation::agents::AgentState::Sleeping => "Sleeping".to_string(),
+                     crate::simulation::agents::AgentState::Building { .. } => "Building".to_string(),
                  };
-                 draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 150.0, 20.0, YELLOW);
+                 draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 185.0, 20.0, YELLOW);
              }
         },
         _ => {}

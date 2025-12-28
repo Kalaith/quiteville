@@ -297,6 +297,10 @@ pub fn simulate_ticks(
         state.agents.pop();
     }
     
+    // Update game hour (24-hour cycle, 1 game minute = 1 real second)
+    // So 1 real minute = 1 game hour, 24 real minutes = 1 game day
+    state.game_hour = (state.game_hour + game_minutes / 60.0) % 24.0;
+    
     // Update Agents
     // We update agents in real-time delta (approx), not batched game_minutes
     // Because movement is visual.
@@ -314,37 +318,48 @@ pub fn simulate_ticks(
     let mut markets = Vec::new();
     let mut workshops = Vec::new();
     let mut parks = Vec::new();
+    let mut construction_sites = Vec::new();
     
-    for zone in &state.zones {
-        if !zone.dormant {
-            if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
-                // Get Center Position
-                let pos = if let Some(rect) = template.map_rect {
-                    macroquad::prelude::vec2(
-                        (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
-                        (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
-                    )
-                } else {
-                    continue; // No physical location
-                };
-                
-                match template.category {
-                    crate::data::ZoneCategory::Market => markets.push(pos),
-                    crate::data::ZoneCategory::Infrastructure => workshops.push(pos),
-                    crate::data::ZoneCategory::Cultural => parks.push(pos),
-                    _ => {},
-                }
+    for (zone_idx, zone) in state.zones.iter().enumerate() {
+        if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+            // Get Center Position
+            let pos = if let Some(rect) = template.map_rect {
+                macroquad::prelude::vec2(
+                    (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
+                    (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
+                )
+            } else {
+                continue; // No physical location
+            };
+            
+            // Check for construction sites
+            if zone.is_under_construction() {
+                construction_sites.push((pos, zone_idx));
+                continue;
+            }
+            
+            if zone.dormant {
+                continue;
+            }
+            
+            match template.category {
+                crate::data::ZoneCategory::Market => markets.push(pos),
+                crate::data::ZoneCategory::Infrastructure => workshops.push(pos),
+                crate::data::ZoneCategory::Cultural => parks.push(pos),
+                _ => {},
             }
         }
     }
     
-    let mut world_info = crate::simulation::agents::WorldInfo {
+    let world_info = crate::simulation::agents::WorldInfo {
         markets,
         workshops,
         parks,
+        construction_sites,
+        game_hour: state.game_hour,
     };
     for agent in &mut state.agents {
-        agent.update(agent_delta, &mut world_info);
+        agent.update(agent_delta, &world_info);
     }
 
     // Apply population-based maintenance cost

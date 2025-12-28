@@ -28,6 +28,12 @@ pub enum MilestoneCondition {
     ZoneCondition { zone_id: String, min_condition: f32 },
     /// Time played in hours
     TimePlayed { hours: f32 },
+    /// Count of zones of a specific type (category or id prefix)
+    ZoneTypeCount { zone_type: String, count: u32 },
+    /// A specific zone was restored/built
+    ZoneRestored { zone_id: String },
+    /// Total zones built/restored
+    TotalZonesBuilt { count: u32 },
 }
 
 /// An effect applied when milestone is reached
