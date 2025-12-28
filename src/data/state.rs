@@ -59,6 +59,8 @@ pub struct GameState {
     pub show_tech_tree: bool,
     #[serde(skip)]
     pub show_build_menu: bool,
+    #[serde(skip)]
+    pub zones_scroll_offset: f32,
     
     /// Milestones that have been achieved (by ID)
     pub achieved_milestones: Vec<String>,
@@ -112,6 +114,7 @@ impl GameState {
             game_time_hours: 0.0,
             show_tech_tree: false,
             show_build_menu: false,
+            zones_scroll_offset: 0.0,
             achieved_milestones: Vec::new(),
             selection: Selection::None,
         }

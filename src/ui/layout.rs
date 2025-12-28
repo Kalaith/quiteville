@@ -16,8 +16,9 @@ pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
     
     // Right Panel (Zones / Projects) - Hidden by default
     let zones_x = screen_w - panel_width - 10.0;
+    let list_h = screen_h - top_margin - 10.0;
     let mut action = if state.show_build_menu {
-        zones::draw_zone_list(state, zones_x, top_margin, panel_width)
+        zones::draw_zone_list(state, zones_x, top_margin, panel_width, list_h)
     } else {
         None
     };
@@ -91,12 +92,10 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
                      let mut output_y = 115.0;
                      if template.population.capacity > 0.0 {
                          draw_text(&format!("Housing: {:.0}", template.population.capacity), x + 10.0, y + output_y, 20.0, WHITE);
-                         output_y += 25.0;
                      }
                      
                      if template.output.materials > 0.0 {
                          draw_text(&format!("Production: +{:.3} Material", template.output.materials), x + 10.0, y + output_y, 20.0, WHITE);
-                         output_y += 25.0;
                      }
                      
                      // Status line at bottom (adjusted Y)
@@ -142,14 +141,19 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     draw_text("Town Chronicles", x + 10.0, y + 25.0, 24.0, colors::ACCENT);
     
     let start_y = y + 50.0;
-    let line_height = 20.0;
-    // Show last 15-20 lines?
-    // Using simple recent log for now.
-    let recent = state.log.recent(15);
+    let max_y = y + h - 10.0;
+    let line_height = 18.0;
+    let font_size = 16.0;
+    let text_width = w - 20.0;
     
-    for (i, entry) in recent.iter().enumerate() {
-        let text_y = start_y + i as f32 * line_height;
-        if text_y > y + h - 10.0 { break; }
+    let mut current_y = start_y;
+    
+    // Get all entries and iterate REVERSE (newest first)
+    // Use a larger window then break when we fill the box
+    let recent = state.log.recent(50); 
+    
+    for entry in recent.iter().rev() {
+        if current_y >= max_y { break; }
         
         let color = match entry.category {
              crate::narrative::LogCategory::System => colors::TEXT,
@@ -159,9 +163,16 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
              crate::narrative::LogCategory::Event => ORANGE,
         };
         
-        draw_text(
-            &format!("[{:.1}h] {}", entry.timestamp, entry.message),
-            x + 10.0, text_y, 16.0, color
-        );
+        let full_text = format!("[{:.1}h] {}", entry.timestamp, entry.message);
+        let wrapped_lines = super::text_util::wrap_text(&full_text, font_size, text_width);
+        
+        for line in wrapped_lines {
+             if current_y + line_height > max_y { break; }
+             draw_text(&line, x + 10.0, current_y + 12.0, font_size, color);
+             current_y += line_height;
+        }
+        
+        // Extra spacing between entries
+        current_y += 5.0;
     }
 }

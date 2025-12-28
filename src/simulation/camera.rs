@@ -43,7 +43,7 @@ impl Camera2D {
     }
     
     /// Handle Input (WASD + Mouse)
-    pub fn update(&mut self, delta: f32) {
+    pub fn update(&mut self, delta: f32, input_captured: bool) {
         let speed = 500.0 / self.zoom;
         
         // Keyboard Pan
@@ -52,35 +52,39 @@ impl Camera2D {
         if is_key_down(KeyCode::A) || is_key_down(KeyCode::Left) { self.target.x -= speed * delta; }
         if is_key_down(KeyCode::D) || is_key_down(KeyCode::Right) { self.target.x += speed * delta; }
         
-        // Mouse Drag (Reliable Origin-based)
-        if is_mouse_button_pressed(MouseButton::Left) {
-            self.drag_start = Some(mouse_position().into());
-            self.cam_start = self.target;
-        }
-        
-        if is_mouse_button_down(MouseButton::Left) {
-            if let Some(start) = self.drag_start {
-                let current: Vec2 = mouse_position().into();
-                let screen_delta = current - start;
-                // Convert screen delta to world delta
-                let world_delta = screen_delta / self.zoom;
-                
-                // Move target opposite to drag to pull map
-                self.target = self.cam_start - world_delta;
+        // Mouse Input (Only if not interacting with UI)
+        if !input_captured {
+            // Mouse Drag (Reliable Origin-based)
+            if is_mouse_button_pressed(MouseButton::Left) {
+                self.drag_start = Some(mouse_position().into());
+                self.cam_start = self.target;
+            }
+            
+            if is_mouse_button_down(MouseButton::Left) {
+                if let Some(start) = self.drag_start {
+                    let current: Vec2 = mouse_position().into();
+                    let screen_delta = current - start;
+                    // Convert screen delta to world delta
+                    let world_delta = screen_delta / self.zoom;
+                    
+                    // Move target opposite to drag to pull map
+                    self.target = self.cam_start - world_delta;
+                }
+            }
+            
+            // Mouse Wheel Zoom
+            let (_, wheel_y) = mouse_wheel();
+            if wheel_y != 0.0 {
+                // Smooth zoom around center? 
+                // For now just basic zoom
+                let zoom_factor = if wheel_y > 0.0 { 1.1 } else { 0.9 };
+                self.zoom *= zoom_factor;
             }
         }
         
+        // Always reset drag if button released (safety)
         if is_mouse_button_released(MouseButton::Left) {
             self.drag_start = None;
-        }
-        
-        // Mouse Wheel Zoom
-        let (_, wheel_y) = mouse_wheel();
-        if wheel_y != 0.0 {
-            // Smooth zoom around center? 
-            // For now just basic zoom
-            let zoom_factor = if wheel_y > 0.0 { 1.1 } else { 0.9 };
-            self.zoom *= zoom_factor;
         }
         
         // Keyboard Zoom

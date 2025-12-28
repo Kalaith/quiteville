@@ -121,6 +121,7 @@ pub enum PlayerAction {
     Select(data::Selection),
     ToggleTechTree,
     ToggleBuildMenu,
+    ScrollZones(f32), // Delta
     Research(String), // Tech ID
     SpeedUp,             // Temporary speed boost for testing
     SlowDown,
@@ -156,10 +157,15 @@ async fn main() {
         // Background color
         clear_background(Color::from_rgba(30, 30, 40, 255));
         
-        // Update Camera (Only if Tech Tree is closed)
-        if !state.show_tech_tree {
-            state.camera.update(delta);
-        }
+        // Update Camera
+        let mouse_pos = mouse_position();
+        let right_panel_w = 350.0; // From layout.rs
+        let is_over_build_menu = state.show_build_menu && mouse_pos.0 > screen_width() - right_panel_w;
+        
+        // Input is captured if Tech Tree is open (Modal) OR hovering Build Menu
+        let input_captured = state.show_tech_tree || is_over_build_menu;
+        
+        state.camera.update(delta, input_captured);
         
         // Draw World (Behind UI)
         ui::map_renderer::draw_map(&state);
@@ -203,8 +209,13 @@ fn handle_input(state: &GameState, time_scale: &mut f32, paused: &mut bool) -> O
         return Some(PlayerAction::SlowDown);
     }
     
-    // If Tech Tree is open, block map interaction
-    if state.show_tech_tree {
+    // Check UI overlap
+    let mouse_pos = mouse_position();
+    let right_panel_w = 350.0;
+    let is_over_build_menu = state.show_build_menu && mouse_pos.0 > screen_width() - right_panel_w;
+    
+    // If Tech Tree is open OR Mouse over Build Menu, block map interaction (clicks)
+    if state.show_tech_tree || is_over_build_menu {
         return None;
     }
 
@@ -321,6 +332,11 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
         }
         PlayerAction::ToggleBuildMenu => {
             state.show_build_menu = !state.show_build_menu;
+        }
+        PlayerAction::ScrollZones(delta) => {
+            state.zones_scroll_offset = (state.zones_scroll_offset + delta).max(0.0);
+            // Optional: Clamp max if we knew content height?
+            // For now just max(0.0) is enough to prevent negative scroll.
         }
         PlayerAction::Research(id) => {
             // Find index

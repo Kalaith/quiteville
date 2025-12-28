@@ -4,21 +4,92 @@ use crate::PlayerAction;
 use super::colors;
 
 /// Draw the list of zones with interactive buttons
-pub fn draw_zone_list(state: &GameState, x: f32, y: f32, w: f32) -> Option<PlayerAction> {
-    // Header
-    draw_text("Zones", x, y - 10.0, 24.0, colors::TEXT);
+pub fn draw_zone_list(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Option<PlayerAction> {
     
-    let mut action_to_emit = None;
+    // Draw Background Panel for the List
+    draw_rectangle(x, y, w, h, Color::new(0.1, 0.1, 0.1, 0.95));
+    draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
+    
+    // Header
+    draw_text("Zones", x + 10.0, y + 25.0, 24.0, colors::TEXT);
+    
+    let list_y = y + 40.0;
+    let list_h = h - 50.0; // Margin at bottom
+    
+    // Content metrics
     let card_height = 100.0;
     let margin = 10.0;
+    let total_content_h = (state.zones.len() as f32) * (card_height + margin);
+    
+    // Mouse Interaction for Scroll
+    let mouse_pos = mouse_position();
+    let is_hover = mouse_pos.0 >= x && mouse_pos.0 <= x + w && mouse_pos.1 >= list_y && mouse_pos.1 <= list_y + list_h;
+    
+    let mut scroll_action = None;
+    
+    if is_hover {
+        let (_, wheel_y) = mouse_wheel();
+        if wheel_y != 0.0 {
+            // Scroll speed
+            let scroll_speed = 30.0;
+            let delta = -wheel_y * scroll_speed;
+             
+            // Calculate new offset potential
+            // We can't modify state here, so emit action
+            scroll_action = Some(PlayerAction::ScrollZones(delta));
+        }
+    }
+    
+    // Clipping (Scissor)
+    unsafe {
+        let mut gl = macroquad::window::get_internal_gl();
+        gl.flush(); // Flush batch before setting scissor
+        
+        let screen_h = screen_height();
+        // Convert Y to bottom-up
+        let scissor_y = screen_h - (list_y + list_h);
+        
+        // Ensure values are positive integers
+        let sx = x as i32;
+        let sy = scissor_y as i32;
+        let sw = w as i32;
+        let sh = list_h as i32;
+        
+        gl.quad_gl.scissor(Some((sx, sy, sw, sh)));
+    }
+    
+    let mut action_to_emit = scroll_action;
     
     for (i, zone) in state.zones.iter().enumerate() {
-        let card_y = y + i as f32 * (card_height + margin);
+        let card_realtive_y = i as f32 * (card_height + margin) - state.zones_scroll_offset;
+        let card_y = list_y + card_realtive_y;
+        
+        // Visibility Culling
+        if card_realtive_y + card_height < 0.0 || card_realtive_y > list_h {
+            continue;
+        }
         
         // Draw individual zone card
-        if let Some(action) = draw_zone_card(state, zone, i, x, card_y, w, card_height) {
+        if let Some(action) = draw_zone_card(state, zone, i, x + 5.0, card_y, w - 10.0, card_height) {
             action_to_emit = Some(action);
         }
+    }
+    
+    // End Scissor
+    unsafe {
+        let mut gl = macroquad::window::get_internal_gl();
+        gl.flush();
+        gl.quad_gl.scissor(None);
+    }
+    
+    // Draw Scrollbar if needed
+    if total_content_h > list_h {
+        let scroll_pct = state.zones_scroll_offset / (total_content_h - list_h);
+        let bar_h = (list_h / total_content_h) * list_h;
+        let bar_y = list_y + scroll_pct * (list_h - bar_h);
+        let bar_x = x + w - 5.0;
+        
+        draw_rectangle(bar_x, bar_y.clamp(list_y, list_y + list_h - bar_h), 4.0, bar_h, LIGHTGRAY);
     }
     
     action_to_emit

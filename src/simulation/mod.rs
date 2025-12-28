@@ -2,7 +2,7 @@
 
 
 
-pub use tick::{TickTimer, TimeTracker, process_offline_time, simulate_ticks};
+pub use tick::{TickTimer, simulate_ticks};
 
 pub mod tick;
 pub mod map;

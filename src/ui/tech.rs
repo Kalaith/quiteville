@@ -81,7 +81,7 @@ pub fn draw_tech_tree_window(state: &GameState, x: f32, y: f32, w: f32, h: f32) 
                     mouse_pos.1 >= ny && mouse_pos.1 <= ny + node_h {
                         
                         // Show tooltip
-                        let tooltip = format!("{}\nEffect: {:?}", tech.description, tech.effect);
+                        let _tooltip = format!("{}\nEffect: {:?}", tech.description, tech.effect);
                         // Simplified tooltip for now
                         draw_text(&tech.description, x + 20.0, y + h - 30.0, 20.0, WHITE);
                         

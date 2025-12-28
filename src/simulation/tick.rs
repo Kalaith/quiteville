@@ -179,7 +179,7 @@ pub fn simulate_ticks(
     let total_hours = game_minutes / 60.0;
     
     // Track population before update for milestone checking
-    let pop_before = state.population.value();
+    let _pop_before = state.population.value();
     
     // Update game time
     state.game_time_hours += total_hours;
