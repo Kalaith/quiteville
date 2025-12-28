@@ -46,6 +46,10 @@ pub struct ZoneTemplate {
     /// Tech ID required to unlock this zone (if any)
     #[serde(default)]
     pub locked_by_tech: Option<String>,
+    
+    /// Template ID this zone can upgrade to (if any)
+    #[serde(default)]
+    pub upgrade_to: Option<String>,
 }
 
 fn default_construction_work() -> f32 {

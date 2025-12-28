@@ -37,7 +37,7 @@ impl FloatingText {
 }
 
 /// Manages a collection of floating text popups
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct FloatingTextManager {
     texts: Vec<FloatingText>,
 }

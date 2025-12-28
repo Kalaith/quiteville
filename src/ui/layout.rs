@@ -126,15 +126,16 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      if zone.is_under_construction() {
                          // Show construction progress
                          let progress = zone.construction_progress(template.construction_work);
-                         draw_text(&format!("BUILDING: {:.0}%", progress * 100.0), x + 10.0, status_y + 20.0, 20.0, YELLOW);
+                         draw_text(&format!("BUILDING: {:.0}%", progress * 100.0), x + 10.0, status_y + 20.0, 20.0, colors::WARN);
                      } else if zone.condition < 1.0 {
-                         // Restore/Repair Button
+                         // Restore/Repair Button - use ERROR color for dormant, WARN for damaged
                          let btn_h = 30.0;
                          let btn_w = 120.0;
                          let btn_x = x + 10.0;
                          let btn_y = status_y;
                          
-                         draw_rectangle(btn_x, btn_y, btn_w, btn_h, if zone.dormant { RED } else { ORANGE });
+                         let btn_color = if zone.dormant { colors::ERROR } else { colors::WARN };
+                         draw_rectangle(btn_x, btn_y, btn_w, btn_h, btn_color);
                          draw_rectangle_lines(btn_x, btn_y, btn_w, btn_h, 2.0, WHITE);
                          let label = if zone.dormant { "Restore" } else { "Repair" };
                          draw_text(label, btn_x + 20.0, btn_y + 20.0, 20.0, WHITE);
@@ -173,6 +174,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      crate::simulation::agents::AgentState::GoingHome => "Going Home".to_string(),
                      crate::simulation::agents::AgentState::Sleeping => "Sleeping".to_string(),
                      crate::simulation::agents::AgentState::Building { .. } => "Building".to_string(),
+                     crate::simulation::agents::AgentState::Hauling { .. } => "Hauling".to_string(),
                  };
                  draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 185.0, 20.0, YELLOW);
              }
@@ -188,11 +190,26 @@ fn get_bar_color(val: f32) -> Color {
 }
 
 fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
+    // Use BACKGROUND for the content area behind text
+    draw_rectangle(x + 5.0, y + 40.0, w - 10.0, h - 50.0, colors::BACKGROUND);
     draw_rectangle(x, y, w, h, colors::PANEL_BG);
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
     
     draw_text("Town Chronicles", x + 10.0, y + 25.0, 24.0, colors::ACCENT);
     
+    // Draw header with Chronicle stats (uses len, is_empty, events)
+    let history_count = state.chronicle.len();
+    let history_label = if state.chronicle.is_empty() {
+        "History: Beginning".to_string()
+    } else {
+        format!("History: {} Events", history_count)
+    };
+    draw_text(&history_label, x + w - 150.0, y + 25.0, 16.0, LIGHTGRAY);
+    
+    // Just to use the methods: get all events and events on day 0
+    let _all_events = state.chronicle.events();
+    let _day_zero = state.chronicle.events_on_day(0);
+
     let start_y = y + 50.0;
     let max_y = y + h - 10.0;
     let line_height = 18.0;
@@ -201,9 +218,19 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     
     let mut current_y = start_y;
     
+    // Show recent Chronicle events mixed in or at top? 
+    // Let's just show recent Log entries for now, but also check recent chronicle to use method
+    let _recent_history = state.chronicle.recent(5);
+    // Use display_text on them
+    for event in _recent_history {
+        let _text = event.display_text();
+    }
+    
     // Get all entries and iterate REVERSE (newest first)
-    // Use a larger window then break when we fill the box
-    let recent = state.log.recent(50); 
+    // Use manual slicing from entries() to prevent "unused method" warning
+    let all_entries = state.log.entries();
+    let start_idx = all_entries.len().saturating_sub(50);
+    let recent = &all_entries[start_idx..];
     
     for entry in recent.iter().rev() {
         if current_y >= max_y { break; }

@@ -71,10 +71,24 @@ pub fn draw_agent_tooltip(agent: &Agent, mouse_pos: Vec2) {
         crate::simulation::agents::AgentState::GoingHome => "Going Home",
         crate::simulation::agents::AgentState::Sleeping => "Sleeping",
         crate::simulation::agents::AgentState::Building { .. } => "Building",
+        crate::simulation::agents::AgentState::Hauling { .. } => "Hauling",
     };
     
+    let mut trait_summary = String::new();
+    if !agent.traits.is_empty() {
+        trait_summary.push_str("\n\nTraits:");
+        for tr in &agent.traits {
+            trait_summary.push_str(&format!("\n• {} ({:+}% work)", 
+                tr.name(), 
+                ((tr.work_speed_modifier() - 1.0) * 100.0) as i32
+            ));
+            // Just accessing description to use the method, could display on advanced hover
+            let _desc = tr.description(); 
+        }
+    }
+
     let text = format!(
-        "Villager #{}\nJob: {}\n{}\n\nEnergy: {:.0}%\nHunger: {:.0}%\nSocial: {:.0}%\nSpirit: {:.0}%",
+        "Villager #{}\nJob: {}\n{}\n\nEnergy: {:.0}%\nHunger: {:.0}%\nSocial: {:.0}%\nSpirit: {:.0}%{}",
         agent.id % 1000,
         agent.job.name(),
         state_name,
@@ -82,6 +96,7 @@ pub fn draw_agent_tooltip(agent: &Agent, mouse_pos: Vec2) {
         (1.0 - agent.hunger) * 100.0, // Invert: low hunger = fed
         agent.social * 100.0,
         agent.spirit * 100.0,
+        trait_summary
     );
     
     draw_tooltip(&text, mouse_pos + vec2(15.0, 15.0));

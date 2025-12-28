@@ -184,6 +184,56 @@ pub fn simulate_ticks(
     // Update game time
     state.game_time_hours += total_hours;
     
+    // Update season and weather
+    let season_changed = state.season_state.update(total_hours);
+    if season_changed {
+        let season_name = state.season_state.season.name().to_string();
+        state.log.add(
+            state.game_time_hours,
+            format!("{} has arrived!", season_name),
+            crate::narrative::LogCategory::Event,
+        );
+        // Record in chronicle
+        state.chronicle.record(
+            state.game_time_hours,
+            crate::narrative::ChronicleEventType::SeasonChanged { season: season_name },
+        );
+    }
+    
+    // Apply seasonal morale bonus to agents
+    let morale_change = state.season_state.season.morale_bonus() * total_hours / 24.0;
+    for agent in &mut state.agents {
+        agent.spirit = (agent.spirit + morale_change).clamp(0.0, 1.0);
+    }
+    
+    // Update caravans (uses Caravan::update)
+    let days_elapsed = total_hours / 24.0;
+    for caravan in &mut state.trade_manager.caravans {
+        // Assume 2-day travel time for now
+        let (arrived, returned) = caravan.update(2.0, days_elapsed);
+        if arrived {
+            // Caravan delivered goods - could add resources here
+        }
+        if returned {
+            // Caravan returned home - could respawn it
+        }
+    }
+    
+    // Update town proxies (uses TownProxyManager methods)
+    state.town_proxies.update_all(days_elapsed);
+    
+    // Check for proxy crises (uses crisis_count, all, get)
+    let crisis_count = state.town_proxies.crisis_count();
+    if crisis_count > 0 {
+        // Could add notification about towns in crisis
+        for proxy in state.town_proxies.all() {
+            if proxy.needs_attention() {
+                let _status = proxy.status();
+                // Could log or notify player
+            }
+        }
+    }
+    
     // Count active zones for population growth
     let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
     
@@ -216,7 +266,23 @@ pub fn simulate_ticks(
         game_minutes  // Use game time, not real time
     );
     
-    // ...
+    // Get seasonal and weather modifiers (uses Season and Weather methods)
+    let season = state.season_state.season;
+    let weather = state.season_state.weather;
+    let farm_mult = season.farm_growth_multiplier();
+    let move_mult = season.movement_multiplier() * (1.0 - weather.movement_penalty());
+    let _weather_visibility = weather.visibility_reduction();
+    let _waters_crops = weather.waters_crops();
+    let building_damage = weather.building_damage_chance();
+    
+    // Apply random building damage during storms
+    if building_damage > 0.0 && rand::gen_range(0.0, 1.0) < building_damage * game_minutes / 60.0 {
+        for zone in &mut state.zones {
+            if !zone.dormant {
+                zone.condition = (zone.condition - 0.01).max(0.5);
+            }
+        }
+    }
     
     // Calculate and apply resource changes (batched)
     let mut total_output = crate::data::ResourceDelta::default();
@@ -225,13 +291,14 @@ pub fn simulate_ticks(
     // PASSIVE GATHERING:
     // 1. Base passive gain = 10.0 per game day (Buffed to prevent sticking)
     // 2. Population gain = 0.2 * sqrt(pop) per day (Diminishing returns)
+    // Apply seasonal farm multiplier to production
     
     // We need RATE per minute. Day = 1440 minutes.
-    let base_rate_per_min = (10.0 / 1440.0) * bonuses.production_multi;
+    let base_rate_per_min = (10.0 / 1440.0) * bonuses.production_multi * farm_mult;
     
     // Population gain: Diminishing returns using SQRT
-    // This prevents massive exponential explosions at high pop
-    let pop_rate_per_min = ((0.2 * state.population.value().sqrt()) / 1440.0) * bonuses.production_multi;
+    // Movement multiplier affects gathering efficiency
+    let pop_rate_per_min = ((0.2 * state.population.value().sqrt()) / 1440.0) * bonuses.production_multi * move_mult;
     
     // Add rates to accumulator
     total_output.materials += base_rate_per_min + pop_rate_per_min;
@@ -283,13 +350,19 @@ pub fn simulate_ticks(
     // Use round() to avoid flickering at integer boundaries
     let target_agents = (state.population.value().round() as usize).min(50);
     
-    // Spawn
+    // Spawn (uses Agent::with_job and with_home builder methods)
     while state.agents.len() < target_agents {
         // Spawn at a random location (ideally at a house, but random for now)
         let id = rand::rand() as u64;
         let x = rand::gen_range(500.0, 800.0);
         let y = rand::gen_range(500.0, 800.0);
-        state.agents.push(crate::simulation::agents::Agent::new(id, macroquad::prelude::vec2(x, y)));
+        let home_pos = macroquad::prelude::vec2(x + rand::gen_range(-50.0, 50.0), y + rand::gen_range(-50.0, 50.0));
+        let job = crate::simulation::agents::Job::Laborer;
+        
+        let agent = crate::simulation::agents::Agent::new(id, macroquad::prelude::vec2(x, y))
+            .with_job(job)
+            .with_home(home_pos);
+        state.agents.push(agent);
     }
     
     // Despawn (if population drops)
@@ -365,6 +438,33 @@ pub fn simulate_ticks(
     // Apply population-based maintenance cost
     let maint_cost = state.calculate_maintenance_cost() * game_minutes;
     net_delta.maintenance -= maint_cost;
+    
+    // Add floating text for significant material changes (uses add_gain/add_loss)
+    if net_delta.materials.abs() > 0.5 {
+        // Find a zone to spawn the text near (first active zone)
+        let spawn_pos = if let Some(zone) = state.zones.iter().find(|z| !z.dormant) {
+            if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+                if let Some(rect) = template.map_rect {
+                    macroquad::prelude::vec2(
+                        (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
+                        (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
+                    )
+                } else {
+                    macroquad::prelude::vec2(500.0, 300.0)
+                }
+            } else {
+                macroquad::prelude::vec2(500.0, 300.0)
+            }
+        } else {
+            macroquad::prelude::vec2(500.0, 300.0)
+        };
+        
+        if net_delta.materials > 0.0 {
+            state.floating_texts.add_gain(net_delta.materials, "Materials", spawn_pos);
+        } else {
+            state.floating_texts.add_loss(net_delta.materials.abs(), "Materials", spawn_pos);
+        }
+    }
     
     state.resources.apply_delta(&net_delta);
 }

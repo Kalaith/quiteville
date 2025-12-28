@@ -170,8 +170,65 @@ pub fn draw_map(state: &GameState) {
     // 3. Draw Agents
     draw_agents(state, camera);
     
-    // 4. Draw Day/Night Overlay
+    // 4. Draw Seasonal Overlay
+    let season_tint = state.season_state.season.color_tint();
+    if season_tint[3] > 0.01 {
+        draw_rectangle(
+            0.0, 0.0,
+            screen_width(), screen_height(),
+            Color::new(season_tint[0], season_tint[1], season_tint[2], season_tint[3])
+        );
+    }
+    
+    // 5. Draw Day/Night Overlay
     draw_day_night_overlay(state.game_hour);
+    
+    // 6. Draw Weather Effects
+    draw_weather_effects(&state.season_state);
+    
+    // 7. Draw Season/Weather HUD
+    draw_season_hud(state);
+}
+
+/// Draw weather particle effects
+fn draw_weather_effects(season_state: &crate::simulation::seasons::SeasonState) {
+    use crate::simulation::seasons::Weather;
+    
+    let (color, count, speed) = match season_state.weather {
+        Weather::Rain => (Color::new(0.6, 0.6, 1.0, 0.3), 100, 400.0),
+        Weather::Storm => (Color::new(0.4, 0.4, 0.8, 0.4), 150, 600.0),
+        Weather::Snow => (Color::new(1.0, 1.0, 1.0, 0.5), 80, 60.0),
+        _ => return,
+    };
+    
+    // Simple particle simulation using time as seed
+    let time = macroquad::time::get_time() as f32;
+    for i in 0..count {
+        let seed = (i as f32) * 7.13;
+        let x = ((seed * 123.456 + time * 50.0) % screen_width()).abs();
+        let y = ((seed * 789.012 + time * speed) % screen_height()).abs();
+        
+        match season_state.weather {
+            Weather::Snow => {
+                draw_circle(x, y, 2.0, color);
+            },
+            _ => {
+                // Rain drops
+                draw_line(x, y, x - 2.0, y + 10.0, 1.0, color);
+            }
+        }
+    }
+}
+
+/// Draw season and weather info in corner
+fn draw_season_hud(state: &GameState) {
+    let text = state.season_state.display_string();
+    let x = screen_width() - 200.0;
+    let y = 50.0;
+    
+    // Background
+    draw_rectangle(x - 5.0, y - 15.0, 195.0, 25.0, Color::new(0.0, 0.0, 0.0, 0.5));
+    draw_text(&text, x, y, 18.0, WHITE);
 }
 
 /// Draw a screen-wide tint based on time of day

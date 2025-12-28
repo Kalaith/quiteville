@@ -477,5 +477,112 @@
             "w": 10,
             "h": 10
         }
+    },
+    {
+        "id": "sawmill",
+        "name": "Sawmill",
+        "category": "infrastructure",
+        "base_throughput": 1.5,
+        "construction_cost": 12.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 6.0
+        },
+        "saturation_bias": 0.3,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": -0.02
+        },
+        "upkeep": {
+            "maintenance": 0.03
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.08,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.15
+        },
+        "map_rect": {
+            "x": 16,
+            "y": 5,
+            "w": 4,
+            "h": 4
+        },
+        "locked_by_tech": "masonry"
+    },
+    {
+        "id": "masons_yard",
+        "name": "Mason's Yard",
+        "category": "infrastructure",
+        "base_throughput": 1.2,
+        "construction_cost": 15.0,
+        "construction_work": 35.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
+        "saturation_bias": 0.35,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": -0.01
+        },
+        "upkeep": {
+            "maintenance": 0.04
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.1,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.15
+        },
+        "map_rect": {
+            "x": 42,
+            "y": 12,
+            "w": 4,
+            "h": 4
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "windmill",
+        "name": "Windmill",
+        "category": "infrastructure",
+        "base_throughput": 1.0,
+        "construction_cost": 10.0,
+        "construction_work": 25.0,
+        "construction_materials": {
+            "materials": 5.0
+        },
+        "saturation_bias": 0.25,
+        "output": {
+            "materials": 0.0,
+            "attractiveness": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.05,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 2,
+            "y": 30,
+            "w": 3,
+            "h": 5
+        }
     }
 ]

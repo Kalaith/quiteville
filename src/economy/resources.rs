@@ -2,9 +2,10 @@
 
 use serde::{Deserialize, Serialize};
 
-/// The 4 core resources that drive the game
+/// The core resources that drive the game
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Resources {
+    // === Abstract Resources (Original) ===
     /// Raw materials for building and repair
     pub materials: f32,
     /// How well it stays running
@@ -13,16 +14,44 @@ pub struct Resources {
     pub attractiveness: f32,
     /// How predictable the city is
     pub stability: f32,
+    
+    // === Raw Materials (Phase 2) ===
+    /// Raw logs from woodcutters
+    #[serde(default)]
+    pub logs: f32,
+    /// Raw stone chunks from quarry
+    #[serde(default)]
+    pub stone_chunks: f32,
+    /// Raw grain from farms
+    #[serde(default)]
+    pub grain: f32,
+    
+    // === Processed Materials (Phase 2) ===
+    /// Processed lumber (from logs)
+    #[serde(default)]
+    pub lumber: f32,
+    /// Cut stone (from stone chunks)
+    #[serde(default)]
+    pub cut_stone: f32,
+    /// Flour (from grain)
+    #[serde(default)]
+    pub flour: f32,
 }
 
 impl Resources {
-    /// Create resources with initial values
+    /// Create resources with initial values (legacy)
     pub fn new(materials: f32, maintenance: f32, attractiveness: f32, stability: f32) -> Self {
         Self {
             materials,
             maintenance,
             attractiveness,
             stability,
+            logs: 0.0,
+            stone_chunks: 0.0,
+            grain: 0.0,
+            lumber: 0.0,
+            cut_stone: 0.0,
+            flour: 0.0,
         }
     }
 
@@ -38,6 +67,74 @@ impl Resources {
         self.maintenance = self.maintenance.max(0.0);
         self.attractiveness = self.attractiveness.max(0.0);
         self.stability = self.stability.max(0.0);
+    }
+    
+    /// Apply a raw/processed resource delta
+    pub fn apply_resource_change(&mut self, resource: ResourceType, amount: f32) {
+        match resource {
+            ResourceType::Materials => self.materials = (self.materials + amount).max(0.0),
+            ResourceType::Logs => self.logs = (self.logs + amount).max(0.0),
+            ResourceType::StoneChunks => self.stone_chunks = (self.stone_chunks + amount).max(0.0),
+            ResourceType::Grain => self.grain = (self.grain + amount).max(0.0),
+            ResourceType::Lumber => self.lumber = (self.lumber + amount).max(0.0),
+            ResourceType::CutStone => self.cut_stone = (self.cut_stone + amount).max(0.0),
+            ResourceType::Flour => self.flour = (self.flour + amount).max(0.0),
+        }
+    }
+    
+    /// Check if we have enough of a resource
+    pub fn has(&self, resource: ResourceType, amount: f32) -> bool {
+        self.get(resource) >= amount
+    }
+    
+    /// Get amount of a specific resource
+    pub fn get(&self, resource: ResourceType) -> f32 {
+        match resource {
+            ResourceType::Materials => self.materials,
+            ResourceType::Logs => self.logs,
+            ResourceType::StoneChunks => self.stone_chunks,
+            ResourceType::Grain => self.grain,
+            ResourceType::Lumber => self.lumber,
+            ResourceType::CutStone => self.cut_stone,
+            ResourceType::Flour => self.flour,
+        }
+    }
+}
+
+/// Types of resources for the resource chain system
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResourceType {
+    Materials,
+    Logs,
+    StoneChunks,
+    Grain,
+    Lumber,
+    CutStone,
+    Flour,
+}
+
+impl ResourceType {
+    pub fn name(&self) -> &'static str {
+        match self {
+            ResourceType::Materials => "Materials",
+            ResourceType::Logs => "Logs",
+            ResourceType::StoneChunks => "Stone Chunks",
+            ResourceType::Grain => "Grain",
+            ResourceType::Lumber => "Lumber",
+            ResourceType::CutStone => "Cut Stone",
+            ResourceType::Flour => "Flour",
+        }
+    }
+    
+    /// Is this a raw material?
+    pub fn is_raw(&self) -> bool {
+        matches!(self, ResourceType::Logs | ResourceType::StoneChunks | ResourceType::Grain)
+    }
+    
+    /// Is this a processed material?
+    pub fn is_processed(&self) -> bool {
+        matches!(self, ResourceType::Lumber | ResourceType::CutStone | ResourceType::Flour)
     }
 }
 

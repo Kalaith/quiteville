@@ -8,4 +8,5 @@ pub mod tick;
 pub mod map;
 pub mod camera;
 pub mod agents;
-
+pub mod seasons;
+pub mod traits;

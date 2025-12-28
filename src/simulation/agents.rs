@@ -10,6 +10,7 @@ pub enum Job {
     Cook,      // Works at markets/kitchens
     Scavenger, // Works at workshops
     Builder,   // Constructs buildings
+    Hauler,    // Transports resources between buildings
 }
 
 impl Default for Job {
@@ -26,6 +27,7 @@ impl Job {
             Job::Cook => "Cook",
             Job::Scavenger => "Scavenger",
             Job::Builder => "Builder",
+            Job::Hauler => "Hauler",
         }
     }
 }
@@ -64,6 +66,7 @@ pub enum AgentState {
     GoingHome,
     Sleeping,
     Building { target: Vec2, zone_idx: usize },
+    Hauling { source: Vec2, destination: Vec2, carrying: bool },
 }
 
 #[derive(Debug, Clone)]
@@ -86,6 +89,7 @@ pub struct Agent {
     // Personality / Stats
     pub speed: f32,
     pub color: [f32; 4], // RGBA
+    pub traits: Vec<crate::simulation::traits::Trait>,
 }
 
 impl Agent {
@@ -108,6 +112,7 @@ impl Agent {
                 rand::gen_range(0.5, 1.0),
                 1.0
             ],
+            traits: crate::simulation::traits::generate_random_traits(),
         }
     }
     
@@ -124,12 +129,24 @@ impl Agent {
     pub fn update(&mut self, delta: f32, world: &WorldInfo) {
         let time_of_day = TimeOfDay::from_hour(world.game_hour);
         
-        // Needs Decay
+        // Calculate trait modifiers
+        let mut energy_mod = 1.0f32;
+        let mut hunger_mod = 1.0f32;
+        let mut social_mod = 1.0f32;
+        let mut spirit_mod = 1.0f32;
+        for t in &self.traits {
+            energy_mod *= t.energy_decay_modifier();
+            hunger_mod *= t.hunger_decay_modifier();
+            social_mod *= t.social_decay_modifier();
+            spirit_mod *= t.spirit_decay_modifier();
+        }
+        
+        // Needs Decay (with trait modifiers)
         let decay_rate = 0.02 * delta;
-        self.energy = (self.energy - decay_rate * 0.3).max(0.0);
-        self.hunger = (self.hunger - decay_rate * 0.5).max(0.0);
-        self.social = (self.social - decay_rate * 0.4).max(0.0);
-        self.spirit = (self.spirit - decay_rate * 0.1).max(0.0);
+        self.energy = (self.energy - decay_rate * 0.3 * energy_mod).max(0.0);
+        self.hunger = (self.hunger - decay_rate * 0.5 * hunger_mod).max(0.0);
+        self.social = (self.social - decay_rate * 0.4 * social_mod).max(0.0);
+        self.spirit = (self.spirit - decay_rate * 0.1 * spirit_mod).max(0.0);
         
         match self.state {
             AgentState::Idle => {
@@ -256,6 +273,27 @@ impl Agent {
                     if time_of_day != TimeOfDay::Night {
                         self.state = AgentState::Idle;
                     }
+                }
+            },
+            AgentState::Hauling { source, destination, carrying } => {
+                // Move towards source if not carrying, destination if carrying
+                let target = if carrying { destination } else { source };
+                
+                if self.pos.distance(target) < 5.0 {
+                    if carrying {
+                        // Delivered - go back to idle
+                        self.state = AgentState::Idle;
+                    } else {
+                        // Picked up - now go to destination
+                        self.state = AgentState::Hauling { 
+                            source, 
+                            destination, 
+                            carrying: true 
+                        };
+                    }
+                } else {
+                    let dir = (target - self.pos).normalize();
+                    self.pos += dir * self.speed * 0.8 * delta; // Slightly slower when hauling
                 }
             }
         }

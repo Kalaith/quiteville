@@ -58,6 +58,10 @@ pub struct GameState {
     #[serde(default)]
     pub game_hour: f32,
     
+    /// Season and weather state
+    #[serde(default)]
+    pub season_state: crate::simulation::seasons::SeasonState,
+    
     // UI State
     #[serde(skip)]
     pub show_tech_tree: bool,
@@ -72,6 +76,32 @@ pub struct GameState {
     /// Currently selected entity
     #[serde(skip)]
     pub selection: Selection,
+    
+    /// Town history chronicle
+    #[serde(default)]
+    pub chronicle: crate::narrative::Chronicle,
+    
+    // === Phase 3: Regional Expansion ===
+    
+    /// Scene manager for view switching
+    #[serde(skip)]
+    pub scene_manager: crate::scene::SceneManager,
+    
+    /// Region/world map with all towns
+    #[serde(default)]
+    pub region_map: crate::region::RegionMap,
+    
+    /// Manager for archived (inactive) towns
+    #[serde(default)]
+    pub town_proxies: crate::region::TownProxyManager,
+    
+    /// Trade routes and caravans
+    #[serde(default)]
+    pub trade_manager: crate::region::TradeManager,
+    
+    /// Floating text notifications
+    #[serde(skip)]
+    pub floating_texts: crate::ui::floating_text::FloatingTextManager,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -117,11 +147,19 @@ impl GameState {
             log: GameLog::new(100),
             game_time_hours: 0.0,
             game_hour: 8.0, // Start at 8 AM
+            season_state: crate::simulation::seasons::SeasonState::default(),
             show_tech_tree: false,
             show_build_menu: false,
             zones_scroll_offset: 0.0,
             achieved_milestones: Vec::new(),
             selection: Selection::None,
+            chronicle: crate::narrative::Chronicle::new(200),
+            // Phase 3 - Use procedural generation (uses generate_region from generation.rs)
+            scene_manager: crate::scene::SceneManager::new(),
+            region_map: crate::region::RegionMap::generate_procedural(12345, 6),
+            town_proxies: crate::region::TownProxyManager::new(),
+            trade_manager: crate::region::TradeManager::new(),
+            floating_texts: crate::ui::floating_text::FloatingTextManager::new(),
         }
     }
 
@@ -180,6 +218,73 @@ impl GameState {
             }
         }
         total
+    }
+    
+    /// Archive the current town as a proxy (uses TownProxy::from_town_state, TownProxyManager::set)
+    pub fn archive_current_town(&mut self) {
+        if let Some(town_id) = self.region_map.active_town_id {
+            // Calculate net output based on current zones
+            let net_materials = self.resources.materials * 0.1; // Simplified
+            let net_food = self.resources.attractiveness * 0.05;
+            
+            let proxy = crate::region::TownProxy::from_town_state(
+                town_id,
+                self.agents.len() as u32,
+                net_materials,
+                net_food,
+                0.0, // wood
+                0.0, // stone
+            );
+            
+            self.town_proxies.set(proxy);
+        }
+    }
+    
+    /// Restore a town from proxy (uses TownProxyManager::get, remove)
+    pub fn restore_town(&mut self, town_id: u32) -> bool {
+        // Check if town exists in proxies
+        if let Some(proxy) = self.town_proxies.get(town_id) {
+            // Get accumulated resources before removing
+            let _accumulated_materials = proxy.stockpile_materials;
+            let _accumulated_food = proxy.stockpile_food;
+        }
+        
+        // Remove from proxies
+        if self.town_proxies.remove(town_id).is_some() {
+            self.region_map.active_town_id = Some(town_id);
+            return true;
+        }
+        
+        false
+    }
+    
+    /// Settle a new town (uses RegionMap::get_node_mut)
+    pub fn settle_town(&mut self, town_id: u32) -> bool {
+        if let Some(node) = self.region_map.get_node_mut(town_id) {
+            if !node.settled {
+                node.settled = true;
+                self.log.add(
+                    self.game_time_hours,
+                    format!("Settled new town: {}", node.name),
+                    crate::narrative::LogCategory::Event,
+                );
+                
+                // Record in chronicle
+                self.chronicle.record(
+                    self.game_time_hours,
+                    crate::narrative::ChronicleEventType::MilestoneAchieved { 
+                        milestone_name: format!("Settled {}", node.name) 
+                    },
+                );
+                return true;
+            }
+        }
+        false
+    }
+    
+    /// Switch to static starter map instead of procedural (uses generate_starter)
+    pub fn use_static_map(&mut self, seed: u64) {
+        self.region_map = crate::region::RegionMap::generate_starter(seed);
     }
 }
 

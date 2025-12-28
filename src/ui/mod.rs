@@ -14,6 +14,7 @@ pub mod tech;
 pub mod text_util;
 pub mod tooltip;
 pub mod floating_text;
+pub mod region_ui;
 
 /// Constants for UI Layout
 pub mod colors {
