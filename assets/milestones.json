@@ -1,0 +1,23 @@
+[
+    {
+        "id": "first_settlers",
+        "name": "The First Settlers Arrive",
+        "description": "Word has spread. The peace of this place is drawing the first wanderers home.",
+        "conditions": [
+            {
+                "type": "population_min",
+                "value": 5.0
+            }
+        ],
+        "effects": [
+            {
+                "type": "add_log",
+                "message": "A family has arrived. They speak of a long journey."
+            },
+            {
+                "type": "modify_population_k",
+                "delta": 2.0
+            }
+        ]
+    }
+]

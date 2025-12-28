@@ -1,0 +1,13 @@
+{
+    "population_k": 10.0,
+    "maintenance_cost_coefficient": 0.002,
+    "offline_time_cap_hours": 72.0,
+    "starting_resources": {
+        "materials": 0.5,
+        "maintenance": 1.0,
+        "attractiveness": 0.5,
+        "stability": 1.0
+    },
+    "tick_rate_seconds": 0.1,
+    "game_minutes_per_real_second": 1.0
+}
