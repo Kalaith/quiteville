@@ -3,7 +3,7 @@
     "maintenance_cost_coefficient": 0.002,
     "offline_time_cap_hours": 72.0,
     "starting_resources": {
-        "materials": 0.5,
+        "materials": 2.0,
         "maintenance": 1.0,
         "attractiveness": 0.5,
         "stability": 1.0

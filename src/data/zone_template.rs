@@ -12,6 +12,10 @@ pub struct ZoneTemplate {
     /// Base throughput before condition/activity multipliers
     pub base_throughput: f32,
     
+    /// Cost to build/restore
+    #[serde(default)]
+    pub construction_cost: f32,
+    
     /// How fast diminishing returns kick in (higher = faster plateau)
     pub saturation_bias: f32,
     
@@ -26,6 +30,18 @@ pub struct ZoneTemplate {
     
     /// Decay behavior
     pub decay: DecayModel,
+    
+    /// Map coordinates for this zone (Phase 4.2)
+    #[serde(default)]
+    pub map_rect: Option<MapRect>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct MapRect {
+    pub x: usize,
+    pub y: usize,
+    pub w: usize,
+    pub h: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

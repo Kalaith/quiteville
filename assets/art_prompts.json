@@ -1,0 +1,104 @@
+[
+    {
+        "filename": "tile_grass",
+        "prompt": "Top down 2d game tile, lush green grass, seamless texture, stylized rpg art, high resolution, flat lighting",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "tile_dirt",
+        "prompt": "Top down 2d game tile, brown dirt path, seamless texture, stylized rpg art, high resolution, flat lighting",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "tile_water",
+        "prompt": "Top down 2d game tile, blue clear water, seamless texture, stylized rpg art, high resolution, flat lighting",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "tile_floor",
+        "prompt": "Top down 2d game tile, wooden floorboards, seamless texture, stylized rpg art, high resolution, flat lighting",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "tile_wall",
+        "prompt": "Top down 2d game tile, gray stone wall block, top view, stylized rpg art, high resolution, flat lighting",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "tile_ruins",
+        "prompt": "Top down 2d game tile, broken stone rubble, ancient ruins debris, seamless texture, stylized rpg art",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "building_homestead_large",
+        "prompt": "Top down 2d game map asset, large rustic wooden homestead house footprint, 6x6 tile size, highly detailed roof and surrounding yard, stylized rpg art, isolated on black background",
+        "width": 192,
+        "height": 192
+    },
+    {
+        "filename": "building_well_large",
+        "prompt": "Top down 2d game map asset, village water well layout, 2x2 tile size, stone well in center with cobblestone surround, stylized rpg art, isolated on black background",
+        "width": 64,
+        "height": 64
+    },
+    {
+        "filename": "building_village_green_large",
+        "prompt": "Top down 2d game map asset, village park layout, 8x8 tile size, large central oak tree, paths, benches, green grass, stylized rpg art, isolated on black background",
+        "width": 256,
+        "height": 256
+    },
+    {
+        "filename": "building_market_large",
+        "prompt": "Top down 2d game map asset, marketplace area layout, 6x4 tile size, multiple market stalls with colorful awnings arranged in a row, stylized rpg art, isolated on black background",
+        "width": 192,
+        "height": 128
+    },
+    {
+        "filename": "building_workshop_large",
+        "prompt": "Top down 2d game map asset, scavenger workshop compound layout, 5x5 tile size, main workshop building with scrap yard, stylized rpg art, isolated on black background",
+        "width": 160,
+        "height": 160
+    },
+    {
+        "filename": "building_farm_large",
+        "prompt": "Top down 2d game map asset, community farm field layout, 10x10 tile size, grid of vegetable patches and wooden fences, stylized rpg art, isolated on black background",
+        "width": 320,
+        "height": 320
+    },
+    {
+        "filename": "agent_villager",
+        "prompt": "Top down 2d game character sprite, villagers head and shoulders, simple round token style, stylized rpg art, isolated on black background",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "icon_thought_shopping",
+        "prompt": "Game icon, gold coin symbol, pixel art style, isolated on black background",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "icon_thought_working",
+        "prompt": "Game icon, blue hammer and wrench symbol, pixel art style, isolated on black background",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "icon_thought_social",
+        "prompt": "Game icon, pink heart symbol, pixel art style, isolated on black background",
+        "width": 32,
+        "height": 32
+    },
+    {
+        "filename": "icon_thought_sleep",
+        "prompt": "Game icon, purple Zzz sleep symbol, pixel art style, isolated on black background",
+        "width": 32,
+        "height": 32
+    }
+]

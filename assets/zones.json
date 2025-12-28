@@ -4,6 +4,7 @@
         "name": "Old Homestead",
         "category": "residential",
         "base_throughput": 1.0,
+        "construction_cost": 1.0,
         "saturation_bias": 0.1,
         "output": {
             "materials": 0.1,
@@ -22,6 +23,12 @@
         "decay": {
             "natural_rate": 0.0,
             "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 22,
+            "y": 20,
+            "w": 6,
+            "h": 6
         }
     },
     {
@@ -29,6 +36,7 @@
         "name": "Village Green",
         "category": "cultural",
         "base_throughput": 0.8,
+        "construction_cost": 2.0,
         "saturation_bias": 0.1,
         "output": {
             "materials": 0.0,
@@ -47,6 +55,12 @@
         "decay": {
             "natural_rate": 0.0,
             "neglect_threshold": 0.15
+        },
+        "map_rect": {
+            "x": 10,
+            "y": 20,
+            "w": 8,
+            "h": 8
         }
     },
     {
@@ -54,6 +68,7 @@
         "name": "Old Well",
         "category": "utility",
         "base_throughput": 1.2,
+        "construction_cost": 3.0,
         "saturation_bias": 0.2,
         "output": {
             "materials": 0.0,
@@ -72,6 +87,108 @@
         "decay": {
             "natural_rate": 0.0,
             "neglect_threshold": 0.2
+        },
+        "map_rect": {
+            "x": 24,
+            "y": 14,
+            "w": 2,
+            "h": 2
+        }
+    },
+    {
+        "id": "community_market",
+        "name": "Community Market",
+        "category": "market",
+        "base_throughput": 1.5,
+        "construction_cost": 10.0,
+        "saturation_bias": 0.3,
+        "output": {
+            "materials": 0.0,
+            "stability": 0.2,
+            "maintenance": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.05
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 0.0,
+            "strain": 0.1,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 22,
+            "y": 28,
+            "w": 6,
+            "h": 4
+        }
+    },
+    {
+        "id": "scavengers_workshop",
+        "name": "Scavenger's Workshop",
+        "category": "infrastructure",
+        "base_throughput": 2.0,
+        "construction_cost": 5.0,
+        "saturation_bias": 0.5,
+        "output": {
+            "materials": 0.5,
+            "attractiveness": 0.0,
+            "maintenance": 0.1
+        },
+        "upkeep": {
+            "stability": 0.05
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.1,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 30,
+            "y": 20,
+            "w": 5,
+            "h": 5
+        }
+    },
+    {
+        "id": "community_farm",
+        "name": "Community Farm",
+        "category": "utility",
+        "base_throughput": 1.0,
+        "construction_cost": 15.0,
+        "saturation_bias": 0.1,
+        "output": {
+            "materials": 0.8,
+            "stability": 0.1,
+            "attractiveness": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.1
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 0.0,
+            "strain": 0.1,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0,
+            "neglect_threshold": 0.1
+        },
+        "map_rect": {
+            "x": 5,
+            "y": 5,
+            "w": 10,
+            "h": 10
         }
     }
 ]

@@ -1,6 +1,27 @@
 //! Game tick system - Time management and simulation stepping
 
 use serde::{Deserialize, Serialize};
+use macroquad::rand;
+
+// Helper struct for aggregating tech effects
+#[derive(Default)]
+struct TechBonuses {
+    production_multi: f32,
+    maintenance_factor: f32,
+    attractiveness_flat: f32,
+    housing_flat: f32,
+}
+// Manually impl default to set multipliers to 1.0
+impl TechBonuses {
+    fn default() -> Self {
+        Self {
+            production_multi: 1.0,
+            maintenance_factor: 1.0,
+            attractiveness_flat: 0.0,
+            housing_flat: 0.0,
+        }
+    }
+}
 
 /// Manages game tick timing
 /// 
@@ -166,12 +187,31 @@ pub fn simulate_ticks(
     // Count active zones for population growth
     let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
     
-    // Calculate total housing capacity
-    let housing_capacity = state.calculate_housing_capacity();
+    // --- TECH BONUSES ---
+    let mut bonuses = TechBonuses::default();
+    for tech in &state.tech_tree {
+        if tech.unlocked {
+            match tech.effect {
+                crate::data::TechEffect::ProductionMulti(m) => bonuses.production_multi *= m,
+                crate::data::TechEffect::EfficiencyMulti(m) => bonuses.maintenance_factor *= m,
+                crate::data::TechEffect::AttractivenessFlat(v) => bonuses.attractiveness_flat += v,
+                crate::data::TechEffect::HousingGlobal(v) => bonuses.housing_flat += v,
+            }
+        }
+    }
+    
+    // Calculate total housing capacity (Base + Tech)
+    // Note: calculate_housing_capacity() iterates zones. We should probably modify that function or add bonus here.
+    // For now, let's just add the flat bonus * number of residential zones? Or just global flat?
+    // Let's assume global flat is added to total.
+    let housing_capacity = state.calculate_housing_capacity() + bonuses.housing_flat;
     
     // Population only grows if there are active zones!
     if active_zones > 0 {
         // Boost growth based on active zones and attractiveness
+        // Tech bonus to attractiveness applied here? Or to resource?
+        // Let's apply to resource delta actually, so it persists.
+        
         let growth_bonus = active_zones as f32 * 0.5;
         state.population.tick(
             state.resources.attractiveness * (1.0 + growth_bonus), 
@@ -180,67 +220,28 @@ pub fn simulate_ticks(
         );
     }
     
-    let pop_after = state.population.value();
-    let eff_pop = state.effective_population();
-    
-    // Log population milestones (every 5 population units)
-    let milestone_before = (pop_before / 5.0) as u32;
-    let milestone_after = (pop_after / 5.0) as u32;
-    if milestone_after > milestone_before && pop_after > 1.0 {
-        let messages = [
-            "A wanderer has arrived, seeking refuge.",
-            "A small family has settled in the homestead.",
-            "Word is spreading. More travelers arrive.",
-            "The town is starting to feel alive again.",
-            "New faces appear. The community grows.",
-            "People speak of this place with hope.",
-        ];
-        let msg_idx = (milestone_after as usize - 1).min(messages.len() - 1);
-        state.log.add(
-            state.game_time_hours,
-            messages[msg_idx].to_string(),
-            crate::narrative::LogCategory::Population,
-        );
-    }
-    
-    // Process each zone
-    for zone in &mut state.zones {
-        if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
-            // Only update activity if zone is not dormant
-            if !zone.dormant {
-                zone.update_activity(eff_pop);
-                // zone.apply_decay(template, game_minutes);  // Disabled by user request (Anti-frustration)
-                
-                // Check dormancy
-                if zone.should_go_dormant(template) {
-                    zone.dormant = true;
-                    state.log.add(
-                        state.game_time_hours,
-                        format!("{} has fallen into disrepair.", template.name),
-                        crate::narrative::LogCategory::Zone,
-                    );
-                }
-            }
-        }
-    }
+    // ...
     
     // Calculate and apply resource changes (batched)
     let mut total_output = crate::data::ResourceDelta::default();
     let mut total_upkeep = crate::data::ResourceDelta::default();
     
     // PASSIVE GATHERING:
-    // 1. Base passive gain = 2.0 per game day (Buffed start)
+    // 1. Base passive gain = 10.0 per game day (Buffed to prevent sticking)
     // 2. Population gain = 0.2 * sqrt(pop) per day (Diminishing returns)
     
     // We need RATE per minute. Day = 1440 minutes.
-    let base_rate_per_min = 2.0 / 1440.0;
+    let base_rate_per_min = (10.0 / 1440.0) * bonuses.production_multi;
     
     // Population gain: Diminishing returns using SQRT
     // This prevents massive exponential explosions at high pop
-    let pop_rate_per_min = (0.2 * state.population.value().sqrt()) / 1440.0;
+    let pop_rate_per_min = ((0.2 * state.population.value().sqrt()) / 1440.0) * bonuses.production_multi;
     
     // Add rates to accumulator
     total_output.materials += base_rate_per_min + pop_rate_per_min;
+    total_output.attractiveness += bonuses.attractiveness_flat * 0.001; // Small trickle or flat boost?
+    // Actually flat bonus should probably be permanent stat, but here we deal with deltas.
+    // Let's just say Tech gives +Attractiveness RATE.
     
     for zone in &state.zones {
         if zone.dormant {
@@ -251,17 +252,18 @@ pub fn simulate_ticks(
             let throughput = zone.calculate_throughput(template);
             let multiplier = crate::economy::calculate_output(throughput, &state.resources);
             
-            // Accumulate scaled outputs
-            total_output.materials += template.output.materials * multiplier;
-            total_output.maintenance += template.output.maintenance * multiplier;
+            // Accumulate scaled outputs (Applied Production Multiplier)
+            total_output.materials += template.output.materials * multiplier * bonuses.production_multi;
+            total_output.maintenance += template.output.maintenance * multiplier; // Maintenance output usually 0
             total_output.attractiveness += template.output.attractiveness * multiplier;
             total_output.stability += template.output.stability * multiplier;
             
             // Accumulate upkeep (these are costs, will be subtracted)
-            total_upkeep.materials += template.upkeep.materials;
-            total_upkeep.maintenance += template.upkeep.maintenance;
-            total_upkeep.attractiveness += template.upkeep.attractiveness;
-            total_upkeep.stability += template.upkeep.stability;
+            // Apply Efficiency Multiplier to upkeep
+            total_upkeep.materials += template.upkeep.materials * bonuses.maintenance_factor;
+            total_upkeep.maintenance += template.upkeep.maintenance * bonuses.maintenance_factor;
+            total_upkeep.attractiveness += template.upkeep.attractiveness * bonuses.maintenance_factor;
+            total_upkeep.stability += template.upkeep.stability * bonuses.maintenance_factor;
         }
     }
     
@@ -280,6 +282,74 @@ pub fn simulate_ticks(
     net_delta.attractiveness -= state.resources.attractiveness * decay_rate;
     net_delta.stability -= state.resources.stability * decay_rate;
     
+    // --- AGENT SIMULATION ---
+    // Target agent count based on population (capped for performance/visual clutter)
+    let target_agents = (state.population.value() as usize).min(50);
+    
+    // Spawn
+    while state.agents.len() < target_agents {
+        // Spawn at a random location (ideally at a house, but random for now)
+        let id = rand::rand() as u64;
+        let x = rand::gen_range(500.0, 800.0);
+        let y = rand::gen_range(500.0, 800.0);
+        state.agents.push(crate::simulation::agents::Agent::new(id, macroquad::prelude::vec2(x, y)));
+    }
+    
+    // Despawn (if population drops)
+    while state.agents.len() > target_agents {
+        state.agents.pop();
+    }
+    
+    // Update Agents
+    // We update agents in real-time delta (approx), not batched game_minutes
+    // Because movement is visual.
+    // However, simulate_ticks is called with game_minutes batches.
+    // For movement, we should use a fixed small delta step or just use game_minutes if it represents "fast forward".
+    // Actually, agent movement should be decoupled from economy ticks if economy is super fast?
+    // But for MVP, let's just step them.
+    // We need to pass a "Visual Delta" vs "Game Delta".
+    // But `simulate_ticks` is disconnected from frame time in the arguments.
+    // Let's assume 1 tick = 1 update step for agents.
+    // Movement speed should be scaled appropriately.
+    let agent_delta = 0.016; // Approx 60fps step
+    
+    // Populate World Info for Agents
+    let mut markets = Vec::new();
+    let mut workshops = Vec::new();
+    let mut parks = Vec::new();
+    
+    for zone in &state.zones {
+        if !zone.dormant {
+            if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+                // Get Center Position
+                let pos = if let Some(rect) = template.map_rect {
+                    macroquad::prelude::vec2(
+                        (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
+                        (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
+                    )
+                } else {
+                    continue; // No physical location
+                };
+                
+                match template.category {
+                    crate::data::ZoneCategory::Market => markets.push(pos),
+                    crate::data::ZoneCategory::Infrastructure => workshops.push(pos),
+                    crate::data::ZoneCategory::Cultural => parks.push(pos),
+                    _ => {},
+                }
+            }
+        }
+    }
+    
+    let mut world_info = crate::simulation::agents::WorldInfo {
+        markets,
+        workshops,
+        parks,
+    };
+    for agent in &mut state.agents {
+        agent.update(agent_delta, &mut world_info);
+    }
+
     // Apply population-based maintenance cost
     let maint_cost = state.calculate_maintenance_cost() * game_minutes;
     net_delta.maintenance -= maint_cost;

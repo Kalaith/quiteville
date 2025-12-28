@@ -47,17 +47,38 @@ fn draw_zone_card(
     draw_text(&template.name, x + 10.0, y + 25.0, 24.0, name_color);
     
     // Stats (Condition, etc.)
+    // Stats & Effects
+    let mut y_offset = 50.0;
+    
     draw_text(
         &format!("Condition: {:.0}%", zone.condition * 100.0),
-        x + 10.0, y + 50.0, 18.0, colors::TEXT
+        x + 10.0, y + y_offset, 18.0, colors::TEXT
     );
+    y_offset += 20.0;
     
-    let cap_text = if template.population.capacity > 0.0 {
-        format!("Housing: {:.0}", template.population.capacity)
-    } else {
-        "Housing: None".to_string()
-    };
-    draw_text(&cap_text, x + 10.0, y + 70.0, 16.0, LIGHTGRAY);
+    // Effects Summary
+    let mut effects = Vec::new();
+    
+    if template.population.capacity > 0.0 {
+        effects.push(format!("Housing: +{:.0}", template.population.capacity));
+    }
+    
+    if template.output.materials > 0.0 {
+         effects.push(format!("Materials: +{:.3}", template.output.materials));
+    }
+    
+    if template.output.attractiveness > 0.0 {
+        effects.push(format!("Attract: +{:.1}", template.output.attractiveness));
+    }
+    
+    if template.output.stability > 0.0 {
+        effects.push(format!("Stability: +{:.1}", template.output.stability));
+    }
+    
+    // Join effects into a single line or two
+    // For small card, maybe just 1-2 lines.
+    let effects_str = effects.join(", ");
+    draw_text(&effects_str, x + 10.0, y + y_offset, 16.0, LIGHTGRAY);
 
     // Interactive Button (Restore)
     // Only if damaged (< 100%) or dormant
@@ -74,7 +95,7 @@ fn draw_zone_card(
         let is_hover = mx >= btn_x && mx <= btn_x + btn_w && my >= btn_y && my <= btn_y + btn_h;
         
         // Cost check
-        let cost = 0.5; // Hardcoded for UI now, should pull from somewhere
+        let cost = template.construction_cost;
         let can_afford = state.resources.materials >= cost;
         
         let btn_color = if can_afford {
@@ -84,7 +105,7 @@ fn draw_zone_card(
         };
         
         draw_rectangle(btn_x, btn_y, btn_w, btn_h, btn_color);
-        draw_text("Restore (0.5)", btn_x + 5.0, btn_y + 20.0, 16.0, WHITE);
+        draw_text(&format!("Restore ({:.1})", cost), btn_x + 5.0, btn_y + 20.0, 16.0, WHITE);
         
         if is_hover && is_mouse_button_pressed(MouseButton::Left) {
             return Some(PlayerAction::RestoreZone(index));
