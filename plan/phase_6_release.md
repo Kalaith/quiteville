@@ -9,15 +9,4 @@
 
 ## Week 22: Achievements & Steam Integration
 *   [ ] **Achievement Logic**: "First House", "Millionaire", "Utopia".
-*   [ ] **Cloud Saves**: Integrating Steam Cloud or similar platform features.
 *   [ ] **Stats Tracking**: "Total Bricks Laid", "Generations Born".
-
-## Week 23: Human Balancing
-*   [ ] **Playtesting**: Beta testing with real users to find pacing issues.
-*   [ ] **Curve Smoothing**: adjusting cost scaling to prevent "walls" or "boredom".
-*   [ ] **Performance**: Optimization pass for late-game cities (1000+ agents).
-
-## Week 24: Launch Prep
-*   [ ] **Trailer Production**: Capturing footage of the polished game.
-*   [ ] **Localization**: Implementing translation keys (even if just for future use).
-*   [ ] **Golden Master**: Final bug-free build.

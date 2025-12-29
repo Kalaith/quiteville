@@ -584,5 +584,1020 @@
             "w": 3,
             "h": 5
         }
+    },
+    {
+        "id": "manor_house",
+        "name": "Manor House",
+        "category": "residential",
+        "base_throughput": 1.5,
+        "construction_cost": 50.0,
+        "construction_work": 80.0,
+        "construction_materials": {
+            "materials": 30.0
+        },
+        "output": {
+            "attractiveness": 0.2,
+            "stability": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.05
+        },
+        "population": {
+            "attraction": 2.0,
+            "capacity": 25.0,
+            "strain": 0.1,
+            "decay": 0.001
+        },
+        "decay": {
+            "natural_rate": 0.0001,
+            "neglect_threshold": 0.2
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "townhouse",
+        "name": "Townhouse",
+        "category": "residential",
+        "base_throughput": 1.3,
+        "construction_cost": 25.0,
+        "construction_work": 40.0,
+        "construction_materials": {
+            "materials": 15.0
+        },
+        "output": {
+            "attractiveness": 0.1,
+            "stability": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 1.2,
+            "capacity": 15.0,
+            "strain": 0.06,
+            "decay": 0.002
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "inn",
+        "name": "Inn",
+        "category": "residential",
+        "base_throughput": 1.0,
+        "construction_cost": 20.0,
+        "construction_work": 35.0,
+        "construction_materials": {
+            "materials": 12.0
+        },
+        "output": {
+            "attractiveness": 0.15,
+            "stability": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.03
+        },
+        "population": {
+            "attraction": 1.5,
+            "capacity": 12.0,
+            "strain": 0.05,
+            "decay": 0.003
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.12
+        }
+    },
+    {
+        "id": "lodge",
+        "name": "Hunting Lodge",
+        "category": "residential",
+        "base_throughput": 0.9,
+        "construction_cost": 15.0,
+        "construction_work": 25.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
+        "output": {
+            "materials": 0.1,
+            "attractiveness": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.015
+        },
+        "population": {
+            "attraction": 0.8,
+            "capacity": 8.0,
+            "strain": 0.04,
+            "decay": 0.003
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "cabin",
+        "name": "Cabin",
+        "category": "residential",
+        "base_throughput": 0.8,
+        "construction_cost": 5.0,
+        "construction_work": 12.0,
+        "construction_materials": {
+            "materials": 3.0
+        },
+        "output": {
+            "stability": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.005
+        },
+        "population": {
+            "attraction": 0.4,
+            "capacity": 4.0,
+            "strain": 0.02,
+            "decay": 0.004
+        },
+        "decay": {
+            "natural_rate": 0.0008,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "farmhouse",
+        "name": "Farmhouse",
+        "category": "residential",
+        "base_throughput": 1.1,
+        "construction_cost": 12.0,
+        "construction_work": 28.0,
+        "construction_materials": {
+            "materials": 7.0
+        },
+        "output": {
+            "materials": 0.15,
+            "attractiveness": 0.03
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 0.7,
+            "capacity": 10.0,
+            "strain": 0.04,
+            "decay": 0.002
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        }
+    },
+    {
+        "id": "dormitory",
+        "name": "Dormitory",
+        "category": "residential",
+        "base_throughput": 0.9,
+        "construction_cost": 18.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 10.0
+        },
+        "output": {
+            "stability": 0.03,
+            "attractiveness": -0.02
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 20.0,
+            "strain": 0.08,
+            "decay": 0.003
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "estate",
+        "name": "Noble Estate",
+        "category": "residential",
+        "base_throughput": 1.8,
+        "construction_cost": 100.0,
+        "construction_work": 120.0,
+        "construction_materials": {
+            "materials": 60.0
+        },
+        "output": {
+            "attractiveness": 0.3,
+            "stability": 0.15
+        },
+        "upkeep": {
+            "maintenance": 0.1
+        },
+        "population": {
+            "attraction": 3.0,
+            "capacity": 35.0,
+            "strain": 0.12,
+            "decay": 0.001
+        },
+        "decay": {
+            "natural_rate": 0.0001,
+            "neglect_threshold": 0.25
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "longhouse",
+        "name": "Longhouse",
+        "category": "residential",
+        "base_throughput": 1.0,
+        "construction_cost": 10.0,
+        "construction_work": 20.0,
+        "construction_materials": {
+            "materials": 6.0
+        },
+        "output": {
+            "stability": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 15.0,
+            "strain": 0.05,
+            "decay": 0.003
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "blacksmith",
+        "name": "Blacksmith",
+        "category": "infrastructure",
+        "base_throughput": 1.5,
+        "construction_cost": 20.0,
+        "construction_work": 40.0,
+        "construction_materials": {
+            "materials": 12.0
+        },
+        "output": {
+            "materials": 0.3,
+            "maintenance": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.03
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 0.0,
+            "strain": 0.06,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "tannery",
+        "name": "Tannery",
+        "category": "infrastructure",
+        "base_throughput": 1.2,
+        "construction_cost": 15.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
+        "output": {
+            "materials": 0.25,
+            "attractiveness": -0.05
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.05,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "brewery",
+        "name": "Brewery",
+        "category": "infrastructure",
+        "base_throughput": 1.3,
+        "construction_cost": 18.0,
+        "construction_work": 35.0,
+        "construction_materials": {
+            "materials": 10.0
+        },
+        "output": {
+            "attractiveness": 0.08,
+            "stability": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.025
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 0.0,
+            "strain": 0.04,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        }
+    },
+    {
+        "id": "bakery",
+        "name": "Bakery",
+        "category": "market",
+        "base_throughput": 1.1,
+        "construction_cost": 10.0,
+        "construction_work": 20.0,
+        "construction_materials": {
+            "materials": 6.0
+        },
+        "output": {
+            "attractiveness": 0.05,
+            "stability": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.015
+        },
+        "population": {
+            "attraction": 0.4,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "fishing_dock",
+        "name": "Fishing Dock",
+        "category": "infrastructure",
+        "base_throughput": 1.4,
+        "construction_cost": 12.0,
+        "construction_work": 25.0,
+        "construction_materials": {
+            "materials": 7.0
+        },
+        "output": {
+            "materials": 0.4
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.04,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0006,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "mine",
+        "name": "Mine",
+        "category": "infrastructure",
+        "base_throughput": 1.5,
+        "construction_cost": 30.0,
+        "construction_work": 50.0,
+        "construction_materials": {
+            "materials": 15.0
+        },
+        "output": {
+            "materials": 0.6,
+            "attractiveness": -0.05
+        },
+        "upkeep": {
+            "maintenance": 0.04
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.1,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "clay_pit",
+        "name": "Clay Pit",
+        "category": "infrastructure",
+        "base_throughput": 1.1,
+        "construction_cost": 8.0,
+        "construction_work": 18.0,
+        "construction_materials": {
+            "materials": 4.0
+        },
+        "output": {
+            "materials": 0.2
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "lumber_mill",
+        "name": "Lumber Mill",
+        "category": "infrastructure",
+        "base_throughput": 1.6,
+        "construction_cost": 25.0,
+        "construction_work": 45.0,
+        "construction_materials": {
+            "materials": 14.0
+        },
+        "output": {
+            "materials": 0.5,
+            "attractiveness": -0.03
+        },
+        "upkeep": {
+            "maintenance": 0.035
+        },
+        "population": {
+            "attraction": 0.15,
+            "capacity": 0.0,
+            "strain": 0.08,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.12
+        },
+        "locked_by_tech": "masonry"
+    },
+    {
+        "id": "chapel",
+        "name": "Chapel",
+        "category": "cultural",
+        "base_throughput": 1.0,
+        "construction_cost": 20.0,
+        "construction_work": 40.0,
+        "construction_materials": {
+            "materials": 12.0
+        },
+        "output": {
+            "attractiveness": 0.12,
+            "stability": 0.15
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.8,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "tavern",
+        "name": "Tavern",
+        "category": "cultural",
+        "base_throughput": 1.2,
+        "construction_cost": 15.0,
+        "construction_work": 28.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
+        "output": {
+            "attractiveness": 0.08,
+            "stability": 0.08
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.7,
+            "capacity": 0.0,
+            "strain": 0.04,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "library",
+        "name": "Library",
+        "category": "cultural",
+        "base_throughput": 0.8,
+        "construction_cost": 30.0,
+        "construction_work": 50.0,
+        "construction_materials": {
+            "materials": 18.0
+        },
+        "output": {
+            "attractiveness": 0.15,
+            "stability": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.025
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 0.0,
+            "strain": 0.02,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0001,
+            "neglect_threshold": 0.18
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "theater",
+        "name": "Theater",
+        "category": "cultural",
+        "base_throughput": 1.0,
+        "construction_cost": 40.0,
+        "construction_work": 60.0,
+        "construction_materials": {
+            "materials": 25.0
+        },
+        "output": {
+            "attractiveness": 0.2,
+            "stability": 0.12
+        },
+        "upkeep": {
+            "maintenance": 0.04
+        },
+        "population": {
+            "attraction": 1.0,
+            "capacity": 0.0,
+            "strain": 0.05,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.2
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "shrine",
+        "name": "Shrine",
+        "category": "cultural",
+        "base_throughput": 0.7,
+        "construction_cost": 8.0,
+        "construction_work": 15.0,
+        "construction_materials": {
+            "materials": 4.0
+        },
+        "output": {
+            "attractiveness": 0.05,
+            "stability": 0.08
+        },
+        "upkeep": {
+            "maintenance": 0.005
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 0.0,
+            "strain": 0.01,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "monument",
+        "name": "Monument",
+        "category": "cultural",
+        "base_throughput": 0.5,
+        "construction_cost": 50.0,
+        "construction_work": 80.0,
+        "construction_materials": {
+            "materials": 35.0
+        },
+        "output": {
+            "attractiveness": 0.25,
+            "stability": 0.2
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 1.2,
+            "capacity": 0.0,
+            "strain": 0.0,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0001,
+            "neglect_threshold": 0.25
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "fountain",
+        "name": "Fountain",
+        "category": "cultural",
+        "base_throughput": 0.6,
+        "construction_cost": 15.0,
+        "construction_work": 25.0,
+        "construction_materials": {
+            "materials": 10.0
+        },
+        "output": {
+            "attractiveness": 0.1,
+            "stability": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.015
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 0.0,
+            "strain": 0.01,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "gardens",
+        "name": "Gardens",
+        "category": "cultural",
+        "base_throughput": 0.8,
+        "construction_cost": 12.0,
+        "construction_work": 20.0,
+        "construction_materials": {
+            "materials": 5.0
+        },
+        "output": {
+            "attractiveness": 0.12,
+            "stability": 0.03
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 0.0,
+            "strain": 0.02,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        }
+    },
+    {
+        "id": "granary",
+        "name": "Granary",
+        "category": "utility",
+        "base_throughput": 1.2,
+        "construction_cost": 18.0,
+        "construction_work": 35.0,
+        "construction_materials": {
+            "materials": 10.0
+        },
+        "output": {
+            "stability": 0.15,
+            "materials": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        }
+    },
+    {
+        "id": "warehouse",
+        "name": "Warehouse",
+        "category": "utility",
+        "base_throughput": 1.0,
+        "construction_cost": 22.0,
+        "construction_work": 40.0,
+        "construction_materials": {
+            "materials": 14.0
+        },
+        "output": {
+            "stability": 0.1,
+            "maintenance": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.025
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.04,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "watchtower",
+        "name": "Watchtower",
+        "category": "utility",
+        "base_throughput": 0.8,
+        "construction_cost": 15.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 10.0
+        },
+        "output": {
+            "stability": 0.12,
+            "attractiveness": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.015
+        },
+        "population": {
+            "attraction": 0.2,
+            "capacity": 0.0,
+            "strain": 0.02,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "hospital",
+        "name": "Hospital",
+        "category": "utility",
+        "base_throughput": 1.0,
+        "construction_cost": 35.0,
+        "construction_work": 55.0,
+        "construction_materials": {
+            "materials": 20.0
+        },
+        "output": {
+            "stability": 0.2,
+            "attractiveness": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.05
+        },
+        "population": {
+            "attraction": 0.8,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.18
+        },
+        "locked_by_tech": "architecture"
+    },
+    {
+        "id": "bathhouse",
+        "name": "Bathhouse",
+        "category": "utility",
+        "base_throughput": 0.9,
+        "construction_cost": 25.0,
+        "construction_work": 40.0,
+        "construction_materials": {
+            "materials": 15.0
+        },
+        "output": {
+            "attractiveness": 0.1,
+            "stability": 0.08
+        },
+        "upkeep": {
+            "maintenance": 0.03
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0003,
+            "neglect_threshold": 0.12
+        },
+        "locked_by_tech": "stonework"
+    },
+    {
+        "id": "ice_hut",
+        "name": "Ice Hut",
+        "category": "residential",
+        "base_throughput": 0.7,
+        "construction_cost": 4.0,
+        "construction_work": 10.0,
+        "output": {
+            "stability": 0.02
+        },
+        "upkeep": {
+            "maintenance": 0.003
+        },
+        "population": {
+            "attraction": 0.3,
+            "capacity": 4.0,
+            "strain": 0.02,
+            "decay": 0.005
+        },
+        "decay": {
+            "natural_rate": 0.001,
+            "neglect_threshold": 0.08
+        },
+        "biome_required": "Tundra"
+    },
+    {
+        "id": "fur_trading_post",
+        "name": "Fur Trading Post",
+        "category": "market",
+        "base_throughput": 1.5,
+        "construction_cost": 15.0,
+        "construction_work": 30.0,
+        "construction_materials": {
+            "materials": 8.0
+        },
+        "output": {
+            "materials": 0.3,
+            "attractiveness": 0.05
+        },
+        "upkeep": {
+            "maintenance": 0.02
+        },
+        "population": {
+            "attraction": 0.4,
+            "capacity": 0.0,
+            "strain": 0.04,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0004,
+            "neglect_threshold": 0.1
+        },
+        "biome_required": "Tundra"
+    },
+    {
+        "id": "stilt_house",
+        "name": "Stilt House",
+        "category": "residential",
+        "base_throughput": 0.9,
+        "construction_cost": 8.0,
+        "construction_work": 18.0,
+        "construction_materials": {
+            "materials": 5.0
+        },
+        "output": {
+            "stability": 0.03
+        },
+        "upkeep": {
+            "maintenance": 0.008
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 6.0,
+            "strain": 0.03,
+            "decay": 0.004
+        },
+        "decay": {
+            "natural_rate": 0.0006,
+            "neglect_threshold": 0.1
+        },
+        "biome_required": "Swamp"
+    },
+    {
+        "id": "reed_farm",
+        "name": "Reed Farm",
+        "category": "infrastructure",
+        "base_throughput": 1.2,
+        "construction_cost": 6.0,
+        "construction_work": 15.0,
+        "output": {
+            "materials": 0.25
+        },
+        "upkeep": {
+            "maintenance": 0.01
+        },
+        "population": {
+            "attraction": 0.1,
+            "capacity": 0.0,
+            "strain": 0.03,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0005,
+            "neglect_threshold": 0.1
+        },
+        "biome_required": "Swamp"
+    },
+    {
+        "id": "oasis",
+        "name": "Oasis",
+        "category": "utility",
+        "base_throughput": 1.3,
+        "construction_cost": 5.0,
+        "construction_work": 12.0,
+        "output": {
+            "attractiveness": 0.1,
+            "stability": 0.1,
+            "materials": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.005
+        },
+        "population": {
+            "attraction": 0.6,
+            "capacity": 0.0,
+            "strain": 0.02,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0001,
+            "neglect_threshold": 0.15
+        },
+        "biome_required": "Desert"
+    },
+    {
+        "id": "lighthouse",
+        "name": "Lighthouse",
+        "category": "utility",
+        "base_throughput": 1.0,
+        "construction_cost": 30.0,
+        "construction_work": 50.0,
+        "construction_materials": {
+            "materials": 20.0
+        },
+        "output": {
+            "attractiveness": 0.15,
+            "stability": 0.1
+        },
+        "upkeep": {
+            "maintenance": 0.025
+        },
+        "population": {
+            "attraction": 0.5,
+            "capacity": 0.0,
+            "strain": 0.02,
+            "decay": 0.0
+        },
+        "decay": {
+            "natural_rate": 0.0002,
+            "neglect_threshold": 0.15
+        },
+        "locked_by_tech": "stonework",
+        "biome_required": "Coast"
     }
 ]

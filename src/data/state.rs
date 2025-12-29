@@ -68,6 +68,8 @@ pub struct GameState {
     #[serde(skip)]
     pub show_build_menu: bool,
     #[serde(skip)]
+    pub show_chronicle: bool,
+    #[serde(skip)]
     pub zones_scroll_offset: f32,
     
     /// Milestones that have been achieved (by ID)
@@ -79,7 +81,13 @@ pub struct GameState {
     
     /// Town history chronicle
     #[serde(default)]
-    pub chronicle: crate::narrative::Chronicle,
+    pub town_chronicle: crate::narrative::TownChronicle,
+
+    // === Phase 4: Legacy & Dynasty ===
+    
+    /// Global dynasty record
+    #[serde(default)]
+    pub dynasty: crate::narrative::Dynasty,
     
     // === Phase 3: Regional Expansion ===
     
@@ -102,6 +110,26 @@ pub struct GameState {
     /// Floating text notifications
     #[serde(skip)]
     pub floating_texts: crate::ui::floating_text::FloatingTextManager,
+
+    // === Phase 5: Visuals ===
+    
+    /// Particle System (Weather, Smoke, FX)
+    #[serde(skip)]
+    pub particle_system: crate::ui::particles::ParticleSystem,
+    
+    // === Phase 5: Narrative ===
+    #[serde(default)]
+    pub tutorial: crate::narrative::tutorial::TutorialManager,
+    
+    // === Phase 6: Achievements & Stats ===
+    
+    /// Achievement tracking
+    #[serde(default)]
+    pub achievements: super::achievements::AchievementManager,
+    
+    /// Lifetime game statistics
+    #[serde(default)]
+    pub stats: super::achievements::GameStats,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -150,16 +178,22 @@ impl GameState {
             season_state: crate::simulation::seasons::SeasonState::default(),
             show_tech_tree: false,
             show_build_menu: false,
+            show_chronicle: false,
             zones_scroll_offset: 0.0,
             achieved_milestones: Vec::new(),
             selection: Selection::None,
-            chronicle: crate::narrative::Chronicle::new(200),
+            town_chronicle: crate::narrative::TownChronicle::new(200),
+            dynasty: crate::narrative::Dynasty::new(),
             // Phase 3 - Use procedural generation (uses generate_region from generation.rs)
             scene_manager: crate::scene::SceneManager::new(),
             region_map: crate::region::RegionMap::generate_procedural(12345, 6),
             town_proxies: crate::region::TownProxyManager::new(),
             trade_manager: crate::region::TradeManager::new(),
             floating_texts: crate::ui::floating_text::FloatingTextManager::new(),
+            particle_system: crate::ui::particles::ParticleSystem::new(2000),
+            tutorial: crate::narrative::tutorial::TutorialManager::new(),
+            achievements: super::achievements::AchievementManager::new(),
+            stats: super::achievements::GameStats::new(),
         }
     }
 
@@ -237,6 +271,23 @@ impl GameState {
             );
             
             self.town_proxies.set(proxy);
+            
+            // Record in Dynasty
+            let town_name = self.region_map.get_node(town_id).map(|n| n.name.clone()).unwrap_or("Unknown".to_string());
+            let record = crate::narrative::TownRecord {
+                name: town_name,
+                timestamp: self.game_time_hours,
+                population: self.agents.len() as u32,
+                outcome: "Archived".to_string(),
+                chronicle: self.town_chronicle.clone(),
+            };
+            self.dynasty.add_town_record(record);
+            
+            // Award Legacy Points (simplified for now)
+            self.dynasty.add_legacy_points(10 + (self.agents.len() as u32 / 10));
+            
+            // Clear current chronicle for next town
+            self.town_chronicle = crate::narrative::TownChronicle::new(200);
         }
     }
     
@@ -270,7 +321,7 @@ impl GameState {
                 );
                 
                 // Record in chronicle
-                self.chronicle.record(
+                self.town_chronicle.record(
                     self.game_time_hours,
                     crate::narrative::ChronicleEventType::MilestoneAchieved { 
                         milestone_name: format!("Settled {}", node.name) 

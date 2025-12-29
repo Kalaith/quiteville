@@ -147,6 +147,14 @@ pub enum PlayerAction {
     Research(String), // Tech ID
     SpeedUp,             // Temporary speed boost for testing
     SlowDown,
+    ToggleChronicle,
+    DismissDialog,
+    SkipTutorial,
+    ImmortalizeHero(u64),  // Agent ID to immortalize
+    // Phase 4: Wonders & Ancestors
+    StartWonder(u32, narrative::Wonder),  // Node ID and Wonder type
+    ContributeToWonder(u32, f32),  // Node ID and amount
+    RetireHero(String),  // Hero name to retire as ancestor
 }
 
 #[macroquad::main(window_conf)]
@@ -289,6 +297,9 @@ fn handle_input(state: &GameState, time_scale: &mut f32, paused: &mut bool) -> O
     }
     if is_key_pressed(KeyCode::M) {
         return Some(PlayerAction::ToggleRegionView);
+    }
+    if is_key_pressed(KeyCode::C) {
+        return Some(PlayerAction::ToggleChronicle);
     }
     
     // Number keys to restore specific zones
@@ -437,6 +448,12 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
         PlayerAction::SetZoneScroll(val) => {
             state.zones_scroll_offset = val;
         }
+        PlayerAction::ToggleChronicle => {
+            state.show_chronicle = !state.show_chronicle;
+        }
+        PlayerAction::DismissDialog => {
+            state.tutorial.dismiss_dialog();
+        }
         PlayerAction::Research(id) => {
             // Find index
             if let Some(pos) = state.tech_tree.iter().position(|t| t.id == id) {
@@ -456,6 +473,31 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
         PlayerAction::SpeedUp | PlayerAction::SlowDown => {
             // Time scale changes are handled in input, no state change needed
         }
+        PlayerAction::SkipTutorial => {
+            state.tutorial.skip_tutorial();
+        }
+        PlayerAction::ImmortalizeHero(agent_id) => {
+            // Find the agent and create a VillagerRecord
+            if let Some(agent) = state.agents.iter().find(|a| a.id == agent_id) {
+                let record = crate::narrative::VillagerRecord {
+                    name: agent.name.clone(),
+                    description: format!("{} - A {} of Quiteville", agent.name, agent.job.name()),
+                    feats: agent.feats.to_strings(),
+                    timestamp_added: state.game_time_hours,
+                };
+                state.dynasty.add_hero(record);
+                
+                // Award legacy points based on feats
+                let points = 5 + agent.feats.buildings_helped + agent.feats.social_events / 2;
+                state.dynasty.add_legacy_points(points);
+                
+                state.log.add(
+                    state.game_time_hours,
+                    format!("{} has been immortalized in the Hall of Heroes! (+{} Legacy Points)", agent.name, points),
+                    LogCategory::Event,
+                );
+            }
+        }
         PlayerAction::ToggleRegionView => {
             if state.scene_manager.in_town_view() {
                 // Archive current town when leaving town view
@@ -467,6 +509,103 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
                 }
             }
             state.scene_manager.toggle_region_view();
+        }
+        PlayerAction::StartWonder(node_id, wonder) => {
+            // Start construction of a wonder at the specified node
+            if let Some(node) = state.region_map.get_node_mut(node_id) {
+                if node.is_wonder_site && node.wonder_site.is_none() {
+                    // Check if Cloud Spire requirements are met
+                    if wonder == narrative::Wonder::CloudSpire {
+                        if !narrative::can_build_cloud_spire(
+                            &state.dynasty.completed_wonders,
+                            state.dynasty.legacy_points,
+                            state.population.value(),
+                        ) {
+                            state.log.add(
+                                state.game_time_hours,
+                                "Cannot build Cloud Spire yet. Requires 3 wonders, 1000 legacy points, and 50 population.".to_string(),
+                                LogCategory::System,
+                            );
+                            return;
+                        }
+                    }
+                    
+                    node.wonder_site = Some(narrative::WonderSite::new(wonder, state.game_time_hours));
+                    state.log.add(
+                        state.game_time_hours,
+                        format!("Construction of {} has begun at {}!", wonder.name(), node.name),
+                        LogCategory::Event,
+                    );
+                }
+            }
+        }
+        PlayerAction::ContributeToWonder(node_id, amount) => {
+            // Contribute resources to a wonder under construction
+            if state.resources.materials < amount {
+                state.log.add(
+                    state.game_time_hours,
+                    "Not enough materials to contribute!".to_string(),
+                    LogCategory::System,
+                );
+                return;
+            }
+            
+            if let Some(node) = state.region_map.get_node_mut(node_id) {
+                if let Some(ref mut wonder_site) = node.wonder_site {
+                    let (used, stage_done, wonder_done) = wonder_site.contribute(amount, state.game_time_hours);
+                    
+                    if used > 0.0 {
+                        state.resources.materials -= used;
+                        
+                        if stage_done {
+                            let stage_name = if wonder_site.current_stage > 0 {
+                                wonder_site.wonder.stages().get(wonder_site.current_stage - 1)
+                                    .map(|s| s.name.clone())
+                                    .unwrap_or("Stage".to_string())
+                            } else {
+                                "Stage".to_string()
+                            };
+                            state.log.add(
+                                state.game_time_hours,
+                                format!("{}: {} completed!", wonder_site.wonder.name(), stage_name),
+                                LogCategory::Event,
+                            );
+                        }
+                        
+                        if wonder_done {
+                            let wonder = wonder_site.wonder;
+                            state.dynasty.add_wonder(wonder);
+                            state.dynasty.add_legacy_points(100);
+                            
+                            state.log.add(
+                                state.game_time_hours,
+                                format!("🏛️ {} has been completed! (+100 Legacy Points)", wonder.name()),
+                                LogCategory::Milestone,
+                            );
+                            
+                            // Check if this triggers ending
+                            if wonder.is_endgame() {
+                                state.log.add(
+                                    state.game_time_hours,
+                                    "The Cloud Spire reaches into the heavens. Your legacy is complete.".to_string(),
+                                    LogCategory::Milestone,
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        PlayerAction::RetireHero(hero_name) => {
+            // Retire a hero from Hall of Heroes to become an ancestor
+            if let Some(buff) = state.dynasty.retire_hero(&hero_name, state.game_time_hours) {
+                state.log.add(
+                    state.game_time_hours,
+                    format!("{} has joined the ancestors, granting {}!", hero_name, buff.name()),
+                    LogCategory::Event,
+                );
+                state.dynasty.add_legacy_points(20);
+            }
         }
     }
 }

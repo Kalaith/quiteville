@@ -1,0 +1,897 @@
+[
+    {
+        "id": "spring_rains",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "Spring rains bring new growth to the land.",
+        "effect": {
+            "attractiveness": 0.05
+        }
+    },
+    {
+        "id": "spring_bloom",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "Wildflowers bloom across the meadows.",
+        "effect": {
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "spring_thaw",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "The winter ice begins to thaw.",
+        "effect": {
+            "stability": 0.02
+        }
+    },
+    {
+        "id": "bird_migration",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "Birds return from their winter migration.",
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "planting_begins",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "Farmers begin the spring planting.",
+        "effect": {
+            "materials": 0.1
+        }
+    },
+    {
+        "id": "summer_heat",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "The summer sun beats down upon the town.",
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "summer_festival",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "A summer festival brings joy to the villagers.",
+        "effect": {
+            "attractiveness": 0.08,
+            "stability": 0.05
+        }
+    },
+    {
+        "id": "long_days",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "Long summer days allow for extra work.",
+        "effect": {
+            "materials": 0.15
+        }
+    },
+    {
+        "id": "drought_warning",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "Wells run low in the summer heat.",
+        "effect": {
+            "stability": -0.05
+        }
+    },
+    {
+        "id": "swimming_hole",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "Children splash in the local swimming hole.",
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "harvest_begins",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "The harvest begins, bringing abundance.",
+        "effect": {
+            "materials": 0.2,
+            "stability": 0.05
+        }
+    },
+    {
+        "id": "falling_leaves",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "Leaves turn golden and fall from the trees.",
+        "effect": {
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "harvest_festival",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "The town celebrates the harvest festival.",
+        "effect": {
+            "attractiveness": 0.1,
+            "stability": 0.08
+        }
+    },
+    {
+        "id": "preparing_for_winter",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "Villagers prepare their homes for winter.",
+        "effect": {
+            "stability": 0.05
+        }
+    },
+    {
+        "id": "autumn_storms",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "Autumn storms roll in from the west.",
+        "effect": {
+            "stability": -0.03
+        }
+    },
+    {
+        "id": "first_snow",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "The first snow of winter blankets the town.",
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "harsh_winter",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "A harsh winter tests the town's resilience.",
+        "effect": {
+            "stability": -0.08,
+            "maintenance": 0.1
+        }
+    },
+    {
+        "id": "winter_solstice",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "The winter solstice brings feasting and hope.",
+        "effect": {
+            "attractiveness": 0.05,
+            "stability": 0.05
+        }
+    },
+    {
+        "id": "frozen_river",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "The river freezes solid.",
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "cabin_fever",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "Long winter nights lead to cabin fever.",
+        "effect": {
+            "stability": -0.03
+        }
+    },
+    {
+        "id": "warm_hearth",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "Families gather around warm hearths.",
+        "effect": {
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "ice_skating",
+        "category": "seasonal",
+        "season": "winter",
+        "text": "Children go ice skating on the frozen pond.",
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "spring_cleaning",
+        "category": "seasonal",
+        "season": "spring",
+        "text": "Villagers undertake spring cleaning.",
+        "effect": {
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "bountiful_catch",
+        "category": "seasonal",
+        "season": "summer",
+        "text": "Fishermen report a bountiful catch.",
+        "effect": {
+            "materials": 0.12
+        }
+    },
+    {
+        "id": "mushroom_season",
+        "category": "seasonal",
+        "season": "autumn",
+        "text": "Mushroom foragers fill their baskets.",
+        "effect": {
+            "materials": 0.08
+        }
+    },
+    {
+        "id": "first_birth",
+        "category": "milestone",
+        "text": "The first child is born in the settlement!",
+        "trigger": "first_agent",
+        "effect": {
+            "attractiveness": 0.1,
+            "stability": 0.1
+        }
+    },
+    {
+        "id": "first_building",
+        "category": "milestone",
+        "text": "The town's first building is completed.",
+        "trigger": "first_zone",
+        "effect": {
+            "stability": 0.15
+        }
+    },
+    {
+        "id": "population_10",
+        "category": "milestone",
+        "text": "The town reaches 10 inhabitants.",
+        "trigger": "population_10",
+        "effect": {
+            "attractiveness": 0.1
+        }
+    },
+    {
+        "id": "population_25",
+        "category": "milestone",
+        "text": "25 souls now call this place home.",
+        "trigger": "population_25",
+        "effect": {
+            "attractiveness": 0.15,
+            "stability": 0.1
+        }
+    },
+    {
+        "id": "population_50",
+        "category": "milestone",
+        "text": "The settlement grows to 50 residents!",
+        "trigger": "population_50",
+        "effect": {
+            "attractiveness": 0.2,
+            "stability": 0.15
+        }
+    },
+    {
+        "id": "population_100",
+        "category": "milestone",
+        "text": "A bustling town of 100 people!",
+        "trigger": "population_100",
+        "effect": {
+            "attractiveness": 0.25,
+            "stability": 0.2
+        }
+    },
+    {
+        "id": "first_market",
+        "category": "milestone",
+        "text": "The first market opens for business.",
+        "trigger": "first_market",
+        "effect": {
+            "materials": 0.2
+        }
+    },
+    {
+        "id": "first_farm",
+        "category": "milestone",
+        "text": "The first farm begins producing food.",
+        "trigger": "first_farm",
+        "effect": {
+            "stability": 0.1
+        }
+    },
+    {
+        "id": "one_year",
+        "category": "milestone",
+        "text": "One year has passed since founding.",
+        "trigger": "day_365",
+        "effect": {
+            "attractiveness": 0.1,
+            "stability": 0.1
+        }
+    },
+    {
+        "id": "five_years",
+        "category": "milestone",
+        "text": "Five years of growth and prosperity.",
+        "trigger": "day_1825",
+        "effect": {
+            "attractiveness": 0.2,
+            "stability": 0.2
+        }
+    },
+    {
+        "id": "first_death",
+        "category": "milestone",
+        "text": "The town mourns its first loss.",
+        "trigger": "first_death",
+        "effect": {
+            "stability": -0.1
+        }
+    },
+    {
+        "id": "first_wedding",
+        "category": "milestone",
+        "text": "The first wedding is celebrated!",
+        "trigger": "first_wedding",
+        "effect": {
+            "attractiveness": 0.08,
+            "stability": 0.08
+        }
+    },
+    {
+        "id": "full_tech_tree",
+        "category": "milestone",
+        "text": "All technologies have been researched.",
+        "trigger": "all_tech",
+        "effect": {
+            "attractiveness": 0.3
+        }
+    },
+    {
+        "id": "first_hero",
+        "category": "milestone",
+        "text": "A hero has been immortalized!",
+        "trigger": "first_hero",
+        "effect": {
+            "attractiveness": 0.15
+        }
+    },
+    {
+        "id": "first_wonder",
+        "category": "milestone",
+        "text": "A great wonder has been completed!",
+        "trigger": "first_wonder",
+        "effect": {
+            "attractiveness": 0.3,
+            "stability": 0.2
+        }
+    },
+    {
+        "id": "all_biomes",
+        "category": "milestone",
+        "text": "Settlements span all biome types.",
+        "trigger": "all_biomes",
+        "effect": {
+            "attractiveness": 0.2
+        }
+    },
+    {
+        "id": "ten_towns",
+        "category": "milestone",
+        "text": "Ten towns now form your dynasty.",
+        "trigger": "ten_towns",
+        "effect": {
+            "attractiveness": 0.25
+        }
+    },
+    {
+        "id": "legacy_1000",
+        "category": "milestone",
+        "text": "1000 Legacy Points accumulated!",
+        "trigger": "legacy_1000",
+        "effect": {
+            "stability": 0.2
+        }
+    },
+    {
+        "id": "first_trade",
+        "category": "milestone",
+        "text": "The first trade caravan departs.",
+        "trigger": "first_trade",
+        "effect": {
+            "materials": 0.15
+        }
+    },
+    {
+        "id": "self_sufficient",
+        "category": "milestone",
+        "text": "The town is now self-sufficient.",
+        "trigger": "positive_income",
+        "effect": {
+            "stability": 0.15
+        }
+    },
+    {
+        "id": "traveling_merchant",
+        "category": "random",
+        "text": "A traveling merchant arrives with exotic goods.",
+        "weight": 10,
+        "effect": {
+            "materials": 0.1
+        }
+    },
+    {
+        "id": "wandering_bard",
+        "category": "random",
+        "text": "A wandering bard entertains the town.",
+        "weight": 8,
+        "effect": {
+            "attractiveness": 0.05,
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "lost_traveler",
+        "category": "random",
+        "text": "A lost traveler stumbles upon the town.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "mysterious_stranger",
+        "category": "random",
+        "text": "A mysterious stranger passes through.",
+        "weight": 5,
+        "effect": {}
+    },
+    {
+        "id": "unusual_weather",
+        "category": "random",
+        "text": "Unusual weather patterns appear.",
+        "weight": 8,
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "rainbow",
+        "category": "random",
+        "text": "A beautiful rainbow arcs across the sky.",
+        "weight": 5,
+        "effect": {
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "shooting_star",
+        "category": "random",
+        "text": "A shooting star streaks across the night sky.",
+        "weight": 4,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "strange_lights",
+        "category": "random",
+        "text": "Strange lights appear in the sky.",
+        "weight": 3,
+        "effect": {
+            "stability": -0.02,
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "found_treasure",
+        "category": "random",
+        "text": "A villager discovers buried treasure!",
+        "weight": 2,
+        "effect": {
+            "materials": 0.3
+        }
+    },
+    {
+        "id": "found_artifact",
+        "category": "random",
+        "text": "An ancient artifact is unearthed.",
+        "weight": 2,
+        "effect": {
+            "attractiveness": 0.08
+        }
+    },
+    {
+        "id": "wild_animals",
+        "category": "random",
+        "text": "Wild animals are spotted near town.",
+        "weight": 7,
+        "effect": {
+            "stability": -0.03
+        }
+    },
+    {
+        "id": "wolves_howling",
+        "category": "random",
+        "text": "Wolves howl in the distance.",
+        "weight": 6,
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "bear_sighting",
+        "category": "random",
+        "text": "A bear is spotted in the woods.",
+        "weight": 4,
+        "effect": {
+            "stability": -0.04
+        }
+    },
+    {
+        "id": "deer_herd",
+        "category": "random",
+        "text": "A herd of deer grazes nearby.",
+        "weight": 8,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "fox_den",
+        "category": "random",
+        "text": "A family of foxes makes a den nearby.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.01
+        }
+    },
+    {
+        "id": "minor_illness",
+        "category": "random",
+        "text": "A minor illness spreads through town.",
+        "weight": 5,
+        "effect": {
+            "stability": -0.05
+        }
+    },
+    {
+        "id": "good_health",
+        "category": "random",
+        "text": "The town enjoys exceptional health.",
+        "weight": 5,
+        "effect": {
+            "stability": 0.03,
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "broken_fence",
+        "category": "random",
+        "text": "A fence needs mending.",
+        "weight": 8,
+        "effect": {
+            "maintenance": 0.02
+        }
+    },
+    {
+        "id": "well_repair",
+        "category": "random",
+        "text": "The well requires repairs.",
+        "weight": 6,
+        "effect": {
+            "maintenance": 0.03
+        }
+    },
+    {
+        "id": "roof_leak",
+        "category": "random",
+        "text": "A leaky roof is discovered.",
+        "weight": 7,
+        "effect": {
+            "maintenance": 0.02
+        }
+    },
+    {
+        "id": "road_damage",
+        "category": "random",
+        "text": "A section of road needs repair.",
+        "weight": 6,
+        "effect": {
+            "maintenance": 0.04
+        }
+    },
+    {
+        "id": "good_fortune",
+        "category": "random",
+        "text": "Good fortune smiles upon the town.",
+        "weight": 4,
+        "effect": {
+            "materials": 0.1,
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "bad_luck",
+        "category": "random",
+        "text": "A string of bad luck befalls the town.",
+        "weight": 4,
+        "effect": {
+            "stability": -0.05
+        }
+    },
+    {
+        "id": "neighborly_help",
+        "category": "random",
+        "text": "Neighbors help each other with chores.",
+        "weight": 10,
+        "effect": {
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "community_project",
+        "category": "random",
+        "text": "Villagers work together on a community project.",
+        "weight": 6,
+        "effect": {
+            "stability": 0.05,
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "gossip",
+        "category": "random",
+        "text": "Gossip spreads through the town.",
+        "weight": 8,
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "dispute",
+        "category": "random",
+        "text": "A dispute arises between neighbors.",
+        "weight": 6,
+        "effect": {
+            "stability": -0.04
+        }
+    },
+    {
+        "id": "reconciliation",
+        "category": "random",
+        "text": "Old friends reconcile their differences.",
+        "weight": 5,
+        "effect": {
+            "stability": 0.04
+        }
+    },
+    {
+        "id": "new_recipe",
+        "category": "random",
+        "text": "A new recipe is discovered.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "tall_tales",
+        "category": "random",
+        "text": "Elders share tall tales by the fire.",
+        "weight": 8,
+        "effect": {
+            "stability": 0.02
+        }
+    },
+    {
+        "id": "music_night",
+        "category": "random",
+        "text": "A spontaneous music night lifts spirits.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.04,
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "dance",
+        "category": "random",
+        "text": "Villagers gather for an impromptu dance.",
+        "weight": 5,
+        "effect": {
+            "attractiveness": 0.03,
+            "stability": 0.02
+        }
+    },
+    {
+        "id": "craft_fair",
+        "category": "random",
+        "text": "Craftspeople display their finest work.",
+        "weight": 4,
+        "effect": {
+            "materials": 0.08,
+            "attractiveness": 0.05
+        }
+    },
+    {
+        "id": "old_map",
+        "category": "random",
+        "text": "An old map is found in the archives.",
+        "weight": 3,
+        "effect": {
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "clear_skies",
+        "category": "random",
+        "text": "Clear skies and gentle breezes today.",
+        "weight": 10,
+        "effect": {
+            "attractiveness": 0.01
+        }
+    },
+    {
+        "id": "thunderstorm",
+        "category": "random",
+        "text": "A thunderstorm passes through.",
+        "weight": 6,
+        "effect": {
+            "stability": -0.02
+        }
+    },
+    {
+        "id": "fog",
+        "category": "random",
+        "text": "Thick fog rolls in from the hills.",
+        "weight": 5,
+        "effect": {
+            "stability": -0.01
+        }
+    },
+    {
+        "id": "windy_day",
+        "category": "random",
+        "text": "Strong winds blow through town.",
+        "weight": 7,
+        "effect": {
+            "stability": -0.01
+        }
+    },
+    {
+        "id": "perfect_day",
+        "category": "random",
+        "text": "A perfect day dawns over the town.",
+        "weight": 5,
+        "effect": {
+            "attractiveness": 0.02,
+            "stability": 0.02
+        }
+    },
+    {
+        "id": "volunteer_work",
+        "category": "random",
+        "text": "Volunteers help maintain the town.",
+        "weight": 7,
+        "effect": {
+            "maintenance": -0.02
+        }
+    },
+    {
+        "id": "surplus_food",
+        "category": "random",
+        "text": "Extra food is stored for winter.",
+        "weight": 5,
+        "effect": {
+            "stability": 0.05
+        }
+    },
+    {
+        "id": "trade_opportunity",
+        "category": "random",
+        "text": "A trade opportunity presents itself.",
+        "weight": 4,
+        "effect": {
+            "materials": 0.12
+        }
+    },
+    {
+        "id": "skilled_worker",
+        "category": "random",
+        "text": "A skilled worker settles in town.",
+        "weight": 3,
+        "effect": {
+            "materials": 0.05,
+            "attractiveness": 0.03
+        }
+    },
+    {
+        "id": "apprentice",
+        "category": "random",
+        "text": "A young apprentice shows promise.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "elder_advice",
+        "category": "random",
+        "text": "An elder shares valuable wisdom.",
+        "weight": 7,
+        "effect": {
+            "stability": 0.03
+        }
+    },
+    {
+        "id": "children_play",
+        "category": "random",
+        "text": "Children's laughter fills the streets.",
+        "weight": 9,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "harvest_contest",
+        "category": "random",
+        "text": "Farmers compete in a friendly harvest contest.",
+        "weight": 4,
+        "effect": {
+            "materials": 0.05,
+            "stability": 0.02
+        }
+    },
+    {
+        "id": "moonlit_night",
+        "category": "random",
+        "text": "A beautiful moonlit night enchants the town.",
+        "weight": 6,
+        "effect": {
+            "attractiveness": 0.02
+        }
+    },
+    {
+        "id": "sunrise",
+        "category": "random",
+        "text": "A spectacular sunrise greets the day.",
+        "weight": 8,
+        "effect": {
+            "attractiveness": 0.01
+        }
+    },
+    {
+        "id": "sunset",
+        "category": "random",
+        "text": "Villagers pause to admire the sunset.",
+        "weight": 8,
+        "effect": {
+            "attractiveness": 0.01
+        }
+    },
+    {
+        "id": "quiet_evening",
+        "category": "random",
+        "text": "A quiet evening settles over the town.",
+        "weight": 10,
+        "effect": {
+            "stability": 0.01
+        }
+    },
+    {
+        "id": "busy_morning",
+        "category": "random",
+        "text": "The town bustles with morning activity.",
+        "weight": 10,
+        "effect": {
+            "materials": 0.02
+        }
+    }
+]

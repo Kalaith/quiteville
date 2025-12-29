@@ -3,6 +3,7 @@ use crate::data::GameState;
 use crate::PlayerAction;
 use super::zones;
 use super::colors;
+use super::theme;
 
 /// Draw the main content layout
 pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
@@ -52,39 +53,27 @@ pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
     let btn_y = screen_h - btn_h - 20.0;
     
     // 1. Research Button (Left)
-    let research_btn_x = start_x;
-    let research_btn_y = btn_y;
-    
-    draw_rectangle(research_btn_x, research_btn_y, btn_w, btn_h, colors::ACCENT);
-    draw_rectangle_lines(research_btn_x, research_btn_y, btn_w, btn_h, 2.0, WHITE);
-    draw_text("Research (R)", research_btn_x + 10.0, research_btn_y + 25.0, 18.0, BLACK); // Added (R) hint
-    
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let mouse_pos = mouse_position();
-        if mouse_pos.0 >= research_btn_x && mouse_pos.0 <= research_btn_x + btn_w && 
-           mouse_pos.1 >= research_btn_y && mouse_pos.1 <= research_btn_y + btn_h {
-               if action.is_none() {
-                   action = Some(PlayerAction::ToggleTechTree);
-               }
-           }
+    if theme::draw_button(start_x, btn_y, btn_w, btn_h, "Research (R)") {
+        if action.is_none() {
+            action = Some(PlayerAction::ToggleTechTree);
+        }
     }
     
-    // 2. Projects (Build) Button (Right)
-    let projects_btn_x = start_x + btn_w + spacing;
-    let projects_btn_y = btn_y;
+    // 2. Chronicle Button (Center)
+    let chronicle_btn_x = start_x + btn_w + spacing;
+    if theme::draw_button(chronicle_btn_x, btn_y, btn_w, btn_h, "Dynasty (C)") {
+         action = Some(PlayerAction::ToggleChronicle);
+    }
+
+    // 3. Projects (Build) Button (Right)
+    let projects_btn_x = start_x + (btn_w + spacing) * 2.0;
+    // Highlight if active
+    if state.show_build_menu {
+        draw_rectangle(projects_btn_x - 2.0, btn_y - 2.0, btn_w + 4.0, btn_h + 4.0, GREEN);
+    }
     
-    let projects_color = if state.show_build_menu { GREEN } else { colors::ACCENT };
-    
-    draw_rectangle(projects_btn_x, projects_btn_y, btn_w, btn_h, projects_color);
-    draw_rectangle_lines(projects_btn_x, projects_btn_y, btn_w, btn_h, 2.0, WHITE);
-    draw_text("Projects (B)", projects_btn_x + 10.0, projects_btn_y + 25.0, 18.0, BLACK); // Added (B) hint
-    
-    if is_mouse_button_pressed(MouseButton::Left) {
-        let mouse_pos = mouse_position();
-        if mouse_pos.0 >= projects_btn_x && mouse_pos.0 <= projects_btn_x + btn_w && 
-           mouse_pos.1 >= projects_btn_y && mouse_pos.1 <= projects_btn_y + btn_h {
-               action = Some(PlayerAction::ToggleBuildMenu);
-        }
+    if theme::draw_button(projects_btn_x, btn_y, btn_w, btn_h, "Projects (B)") {
+        action = Some(PlayerAction::ToggleBuildMenu);
     }
     
     // Selection Panel (Floating, Bottom Center) - REMOVED per user request
@@ -95,8 +84,7 @@ pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
 }
 
 fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Option<PlayerAction> {
-    draw_rectangle(x, y, w, h, colors::PANEL_BG);
-    draw_rectangle_lines(x, y, w, h, 1.0, colors::ACCENT);
+    theme::draw_panel(x, y, w, h);
     
     let mut action = None;
     
@@ -129,26 +117,15 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                          draw_text(&format!("BUILDING: {:.0}%", progress * 100.0), x + 10.0, status_y + 20.0, 20.0, colors::WARN);
                      } else if zone.condition < 1.0 {
                          // Restore/Repair Button - use ERROR color for dormant, WARN for damaged
+                         // Restore/Repair Button
                          let btn_h = 30.0;
                          let btn_w = 120.0;
                          let btn_x = x + 10.0;
                          let btn_y = status_y;
                          
-                         let btn_color = if zone.dormant { colors::ERROR } else { colors::WARN };
-                         draw_rectangle(btn_x, btn_y, btn_w, btn_h, btn_color);
-                         draw_rectangle_lines(btn_x, btn_y, btn_w, btn_h, 2.0, WHITE);
                          let label = if zone.dormant { "Restore" } else { "Repair" };
-                         draw_text(label, btn_x + 20.0, btn_y + 20.0, 20.0, WHITE);
-                         
-                         // Show cost next to it
-                         draw_text(&format!("Cost: {:.0}", template.construction_cost), btn_x + btn_w + 10.0, btn_y + 20.0, 20.0, LIGHTGRAY);
-                         
-                         if is_mouse_button_pressed(MouseButton::Left) {
-                             let mouse_pos = mouse_position();
-                             if mouse_pos.0 >= btn_x && mouse_pos.0 <= btn_x + btn_w &&
-                                mouse_pos.1 >= btn_y && mouse_pos.1 <= btn_y + btn_h {
-                                    action = Some(PlayerAction::RestoreZone(idx));
-                             }
+                         if theme::draw_button(btn_x, btn_y, btn_w, btn_h, label) {
+                             action = Some(PlayerAction::RestoreZone(idx));
                          }
                      } else {
                          draw_text("STATUS: FULLY RESTORED", x + 10.0, status_y + 20.0, 20.0, GREEN);
@@ -158,13 +135,17 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
         },
         crate::data::Selection::Agent(id) => {
              if let Some(agent) = state.agents.iter().find(|a| a.id == id) {
-                 draw_text(&format!("Villager #{}", id % 1000), x + 10.0, y + 30.0, 30.0, WHITE);
-                 draw_text(&format!("Job: {}", agent.job.name()), x + 10.0, y + 55.0, 18.0, colors::ACCENT);
-                 draw_text(&format!("Energy: {:.0}%", agent.energy * 100.0), x + 10.0, y + 80.0, 20.0, get_bar_color(agent.energy));
-                 draw_text(&format!("Hunger: {:.0}%", agent.hunger * 100.0), x + 10.0, y + 105.0, 20.0, get_bar_color(agent.hunger));
-                 draw_text(&format!("Social: {:.0}%", agent.social * 100.0), x + 10.0, y + 130.0, 20.0, get_bar_color(agent.social));
-                 draw_text(&format!("Spirit: {:.0}%", agent.spirit * 100.0), x + 10.0, y + 155.0, 20.0, get_bar_color(agent.spirit));
+                 // Agent name header
+                 draw_text(&agent.name, x + 10.0, y + 30.0, 28.0, WHITE);
+                 draw_text(&format!("{}", agent.job.name()), x + 10.0, y + 52.0, 18.0, colors::ACCENT);
                  
+                 // Stats section
+                 draw_text(&format!("Energy: {:.0}%", agent.energy * 100.0), x + 10.0, y + 80.0, 18.0, get_bar_color(agent.energy));
+                 draw_text(&format!("Hunger: {:.0}%", agent.hunger * 100.0), x + 10.0, y + 100.0, 18.0, get_bar_color(agent.hunger));
+                 draw_text(&format!("Social: {:.0}%", agent.social * 100.0), x + 10.0, y + 120.0, 18.0, get_bar_color(agent.social));
+                 draw_text(&format!("Spirit: {:.0}%", agent.spirit * 100.0), x + 10.0, y + 140.0, 18.0, get_bar_color(agent.spirit));
+                 
+                 // Current activity
                  let state_text = match agent.state {
                      crate::simulation::agents::AgentState::Idle => "Idle".to_string(),
                      crate::simulation::agents::AgentState::Wandering { .. } => "Walking".to_string(),
@@ -176,7 +157,29 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      crate::simulation::agents::AgentState::Building { .. } => "Building".to_string(),
                      crate::simulation::agents::AgentState::Hauling { .. } => "Hauling".to_string(),
                  };
-                 draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 185.0, 20.0, YELLOW);
+                 draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 165.0, 18.0, YELLOW);
+                 
+                 // Feats section
+                 let feats = agent.feats.to_strings();
+                 if !feats.is_empty() {
+                     let mut feat_y = y + 190.0;
+                     draw_text("Feats:", x + 10.0, feat_y, 16.0, GOLD);
+                     feat_y += 18.0;
+                     for feat in feats.iter().take(2) {
+                         draw_text(&format!("• {}", feat), x + 15.0, feat_y, 14.0, LIGHTGRAY);
+                         feat_y += 16.0;
+                     }
+                 }
+                 
+                 // Immortalize button (bottom of panel)
+                 let btn_x = x + 10.0;
+                 let btn_y = y + h - 45.0;
+                 let btn_w = 130.0;
+                 let btn_h = 30.0;
+                 
+                 if theme::draw_button(btn_x, btn_y, btn_w, btn_h, "★ Immortalize") {
+                     action = Some(PlayerAction::ImmortalizeHero(agent.id));
+                 }
              }
         },
         _ => {}
@@ -190,16 +193,13 @@ fn get_bar_color(val: f32) -> Color {
 }
 
 fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
-    // Use BACKGROUND for the content area behind text
-    draw_rectangle(x + 5.0, y + 40.0, w - 10.0, h - 50.0, colors::BACKGROUND);
-    draw_rectangle(x, y, w, h, colors::PANEL_BG);
-    draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
+    theme::draw_panel(x, y, w, h);
     
-    draw_text("Town Chronicles", x + 10.0, y + 25.0, 24.0, colors::ACCENT);
+    theme::draw_header("Town Chronicles", x + 10.0, y + 25.0);
     
     // Draw header with Chronicle stats (uses len, is_empty, events)
-    let history_count = state.chronicle.len();
-    let history_label = if state.chronicle.is_empty() {
+    let history_count = state.town_chronicle.len();
+    let history_label = if state.town_chronicle.is_empty() {
         "History: Beginning".to_string()
     } else {
         format!("History: {} Events", history_count)
@@ -207,8 +207,8 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     draw_text(&history_label, x + w - 150.0, y + 25.0, 16.0, LIGHTGRAY);
     
     // Just to use the methods: get all events and events on day 0
-    let _all_events = state.chronicle.events();
-    let _day_zero = state.chronicle.events_on_day(0);
+    let _all_events = state.town_chronicle.events();
+    let _day_zero = state.town_chronicle.events_on_day(0);
 
     let start_y = y + 50.0;
     let max_y = y + h - 10.0;
@@ -220,10 +220,10 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     
     // Show recent Chronicle events mixed in or at top? 
     // Let's just show recent Log entries for now, but also check recent chronicle to use method
-    let _recent_history = state.chronicle.recent(5);
+    let _recent_history = state.town_chronicle.recent(5);
     // Use display_text on them
     for event in _recent_history {
-        let _text = event.display_text();
+        let _text: String = event.display_text();
     }
     
     // Get all entries and iterate REVERSE (newest first)

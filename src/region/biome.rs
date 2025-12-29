@@ -15,6 +15,10 @@ pub enum Biome {
     Desert,
     /// Seaside - bonus trade and fish
     Coast,
+    /// Frozen terrain - furs and harsh winters
+    Tundra,
+    /// Wetlands - high food, disease risk
+    Swamp,
 }
 
 impl Default for Biome {
@@ -32,6 +36,8 @@ impl Biome {
             Biome::Mountains => "Mountains",
             Biome::Desert => "Desert",
             Biome::Coast => "Coast",
+            Biome::Tundra => "Tundra",
+            Biome::Swamp => "Swamp",
         }
     }
     
@@ -43,6 +49,8 @@ impl Biome {
             Biome::Mountains => "Rocky terrain rich in stone and ore",
             Biome::Desert => "Arid region with little vegetation",
             Biome::Coast => "Seaside location ideal for trade",
+            Biome::Tundra => "Frozen terrain with valuable furs",
+            Biome::Swamp => "Wetlands rich in food but prone to disease",
         }
     }
     
@@ -54,6 +62,8 @@ impl Biome {
             Biome::Mountains => [0.6, 0.5, 0.4, 1.0], // Brown/gray
             Biome::Desert => [0.9, 0.8, 0.5, 1.0],   // Sand yellow
             Biome::Coast => [0.3, 0.5, 0.8, 1.0],    // Blue
+            Biome::Tundra => [0.8, 0.9, 0.95, 1.0],  // Ice white/blue
+            Biome::Swamp => [0.3, 0.4, 0.3, 1.0],    // Murky green
         }
     }
     
@@ -65,6 +75,8 @@ impl Biome {
             Biome::Mountains => 0.5,
             Biome::Desert => 0.2,
             Biome::Coast => 0.3,
+            Biome::Tundra => 0.3,
+            Biome::Swamp => 0.8,
         }
     }
     
@@ -76,6 +88,8 @@ impl Biome {
             Biome::Mountains => 2.5,
             Biome::Desert => 1.5,
             Biome::Coast => 0.5,
+            Biome::Tundra => 0.8,
+            Biome::Swamp => 0.2,
         }
     }
     
@@ -87,6 +101,8 @@ impl Biome {
             Biome::Mountains => 0.3,
             Biome::Desert => 0.4,
             Biome::Coast => 1.5, // Fishing
+            Biome::Tundra => 0.3,
+            Biome::Swamp => 1.5, // Abundant hunting/fishing
         }
     }
     
@@ -98,6 +114,8 @@ impl Biome {
             Biome::Mountains => 0.5,
             Biome::Desert => 0.8,
             Biome::Coast => 2.0,
+            Biome::Tundra => 1.5, // Valuable furs
+            Biome::Swamp => 0.4,
         }
     }
     
@@ -109,6 +127,9 @@ impl Biome {
             Biome::Mountains => -0.3, // Cold
             Biome::Desert => 0.4, // Hot
             Biome::Coast => 0.0, // Moderate
+            Biome::Tundra => -0.5, // Very cold
+            Biome::Swamp => 0.1, // Humid and warm
         }
     }
 }
+

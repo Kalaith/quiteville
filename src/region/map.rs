@@ -20,6 +20,10 @@ pub struct TownNode {
     pub is_capital: bool,
     /// Resource potentials for this location
     pub resource_potentials: ResourcePotentials,
+    /// Whether this is a wonder construction site
+    pub is_wonder_site: bool,
+    /// Active wonder construction (if any)
+    pub wonder_site: Option<crate::narrative::WonderSite>,
 }
 
 impl TownNode {
@@ -32,6 +36,8 @@ impl TownNode {
             settled: false,
             is_capital: false,
             resource_potentials: ResourcePotentials::default(),
+            is_wonder_site: false,
+            wonder_site: None,
         }
     }
     
@@ -158,6 +164,42 @@ impl RegionMap {
             n
         });
         
+        // Wonder Sites (special locations for mega-projects)
+        map.nodes.push({
+            let mut n = TownNode::new(5, "Mystic Ruins", 0.15, 0.2, Biome::Forest);
+            n.is_wonder_site = true;
+            n.resource_potentials = ResourcePotentials::new(0.5, 0.5, 0.5, 0.5);
+            n
+        });
+        
+        map.nodes.push({
+            let mut n = TownNode::new(6, "Ironpeak", 0.85, 0.25, Biome::Mountains);
+            n.is_wonder_site = true;
+            n.resource_potentials = ResourcePotentials::new(0.3, 2.0, 0.2, 0.3);
+            n
+        });
+        
+        map.nodes.push({
+            let mut n = TownNode::new(7, "Celestial Summit", 0.5, 0.1, Biome::Mountains);
+            n.is_wonder_site = true;
+            n.resource_potentials = ResourcePotentials::new(0.1, 0.1, 0.1, 0.1);
+            n
+        });
+        
+        // Tundra biome town
+        map.nodes.push({
+            let mut n = TownNode::new(8, "Frostholm", 0.1, 0.15, Biome::Tundra);
+            n.resource_potentials = ResourcePotentials::new(0.3, 0.8, 0.3, 1.5);
+            n
+        });
+        
+        // Swamp biome town
+        map.nodes.push({
+            let mut n = TownNode::new(9, "Marshwood", 0.8, 0.8, Biome::Swamp);
+            n.resource_potentials = ResourcePotentials::new(0.8, 0.2, 1.5, 0.4);
+            n
+        });
+        
         // Routes (all initially undiscovered except to first neighbor)
         let mut route_start = Route::new(0, 1);
         route_start.discovered = true;
@@ -167,6 +209,15 @@ impl RegionMap {
         map.routes.push(Route::new(0, 3));
         map.routes.push(Route::new(1, 4));
         map.routes.push(Route::new(2, 3));
+        
+        // Routes to wonder sites
+        map.routes.push(Route::new(1, 5)); // Pine Ridge to Mystic Ruins
+        map.routes.push(Route::new(2, 6)); // Stone's End to Ironpeak
+        map.routes.push(Route::new(0, 7)); // Quiteville to Celestial Summit
+        
+        // Routes to new biome towns
+        map.routes.push(Route::new(5, 8)); // Mystic Ruins to Frostholm
+        map.routes.push(Route::new(3, 9)); // Harbor Town to Marshwood
         
         map.active_town_id = Some(0);
         

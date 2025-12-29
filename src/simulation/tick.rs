@@ -194,7 +194,7 @@ pub fn simulate_ticks(
             crate::narrative::LogCategory::Event,
         );
         // Record in chronicle
-        state.chronicle.record(
+        state.town_chronicle.record(
             state.game_time_hours,
             crate::narrative::ChronicleEventType::SeasonChanged { season: season_name },
         );
@@ -466,7 +466,216 @@ pub fn simulate_ticks(
         }
     }
     
+    // PARTICLE SYSTEM UPDATE
+    state.particle_system.update(game_minutes * 60.0 * agent_delta); // Approximate sync with frame time
+
+    // TUTORIAL UPDATE
+    // Build context for tutorial triggers
+    let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
+    let tutorial_ctx = crate::narrative::tutorial::TutorialContext {
+        zones_active: active_zones,
+        agent_count: state.agents.len(),
+        materials: state.resources.materials,
+        game_hour: state.game_hour,
+        day: (state.game_time_hours / 24.0) as u32 + 1,
+    };
+    state.tutorial.update(tutorial_ctx, game_minutes);
+
+    // Weather particles
+    let weather = state.season_state.weather;
+    let particle_count = match weather {
+        crate::simulation::seasons::Weather::Rain => 2,
+        crate::simulation::seasons::Weather::Storm => 5,
+        crate::simulation::seasons::Weather::Snow => 2,
+        _ => 0,
+    };
+
+    if particle_count > 0 {
+        use crate::ui::particles::ParticleType;
+        let screen_w = macroquad::window::screen_width();
+        let screen_h = macroquad::window::screen_height();
+        
+        // Spawn weather particles in "world" space relative to camera?
+        // Actually weather usually falls across the screen.
+        // But our particle system is world-space.
+        // We should spawn them around the camera view.
+        let cam_center = state.camera.target;
+        let spawn_w = screen_w / state.camera.zoom;
+        let spawn_h = screen_h / state.camera.zoom;
+        
+        for _ in 0..particle_count {
+             let x = cam_center.x - spawn_w/2.0 + rand::gen_range(0.0, spawn_w);
+             let y = cam_center.y - spawn_h/2.0 + rand::gen_range(0.0, spawn_h);
+             let pos = macroquad::prelude::vec2(x, y);
+             
+             let (vel, color, life, p_type) = match weather {
+                 crate::simulation::seasons::Weather::Snow => (
+                     macroquad::prelude::vec2(rand::gen_range(-10.0, 10.0), 30.0),
+                     macroquad::prelude::WHITE,
+                     4.0,
+                     ParticleType::Snow
+                 ),
+                 _ => ( // Rain/Storm
+                     macroquad::prelude::vec2(-5.0, 200.0),
+                     macroquad::prelude::Color::new(0.6, 0.6, 1.0, 0.6),
+                     1.5,
+                     ParticleType::Rain
+                 ),
+             };
+             
+             state.particle_system.spawn(pos, vel, life, 3.0, color, p_type);
+        }
+    }
+
+    // Chimney Smoke (only in winter)
+    // Only spawn occasionally
+    if state.season_state.season == crate::simulation::seasons::Season::Winter && rand::gen_range(0.0, 1.0) < 0.1 {
+        use crate::ui::particles::ParticleType;
+        // Find active houses
+         for zone in &state.zones {
+             if !zone.dormant && zone.activity > 0.0 {
+                 if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+                     if template.category == crate::data::ZoneCategory::Residential {
+                         if let Some(rect) = template.map_rect {
+                             let tile_size = crate::ui::map_renderer::TILE_SIZE;
+                             // Randomly pick a spot on roof properly
+                             let center_x = (rect.x as f32 + rect.w as f32 * 0.5) * tile_size;
+                             let center_y = (rect.y as f32 + rect.h as f32 * 0.2) * tile_size; // Top of building
+                             
+                             state.particle_system.spawn(
+                                 macroquad::prelude::vec2(center_x, center_y),
+                                 macroquad::prelude::vec2(rand::gen_range(-5.0, 5.0), rand::gen_range(-20.0, -10.0)),
+                                 rand::gen_range(2.0, 4.0),
+                                 rand::gen_range(4.0, 8.0),
+                                 macroquad::prelude::Color::new(0.8, 0.8, 0.8, 0.4),
+                                 ParticleType::Smoke
+                             );
+                         }
+                     }
+                 }
+             }
+         }
+    }
+
+    // Update stats and check achievements
+    update_stats_and_achievements(state, net_delta.materials.max(0.0));
+    
     state.resources.apply_delta(&net_delta);
+}
+
+/// Update game stats and check for achievement unlocks
+fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_gained: f32) {
+    use crate::data::{Achievement, ZoneCategory};
+    use crate::simulation::seasons::Season;
+    
+    // Update stats
+    state.stats.add_resources(resources_gained);
+    state.stats.total_play_hours = state.game_time_hours;
+    state.stats.update_peaks(state.resources.materials, state.population.value() as u32);
+    
+    // Check population achievements
+    let pop = state.population.value() as u32;
+    if pop >= 50 {
+        state.achievements.unlock(Achievement::GrowingCommunity);
+    }
+    if pop >= 100 {
+        state.achievements.unlock(Achievement::FirstHundred);
+    }
+    if pop >= 500 {
+        state.achievements.unlock(Achievement::TownProper);
+    }
+    
+    // Check resource achievements
+    let mats = state.resources.materials;
+    if mats >= 1000.0 {
+        state.achievements.unlock(Achievement::Hoarder);
+    }
+    if mats >= 10000.0 {
+        state.achievements.unlock(Achievement::Wealthy);
+    }
+    if mats >= 100000.0 {
+        state.achievements.unlock(Achievement::Millionaire);
+    }
+    
+    // Check zone-based achievements
+    let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
+    if active_zones >= 1 {
+        // Check if any is residential for FirstHouse
+        for zone in &state.zones {
+            if !zone.dormant {
+                if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+                    if template.category == ZoneCategory::Residential {
+                        state.achievements.unlock(Achievement::FirstHouse);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if active_zones >= 10 {
+        state.achievements.unlock(Achievement::SettlerSpirit);
+    }
+    if active_zones >= 25 {
+        state.achievements.unlock(Achievement::Builder);
+    }
+    if active_zones >= 50 {
+        state.achievements.unlock(Achievement::MasterBuilder);
+    }
+    
+    // Check utopia (stability + attractiveness > 0.8 each)
+    if state.resources.stability > 0.8 && state.resources.attractiveness > 0.8 {
+        state.achievements.unlock(Achievement::Utopia);
+    }
+    
+    // Check play time achievements
+    let days = state.game_time_hours / 24.0;
+    if days >= 10.0 {
+        state.achievements.unlock(Achievement::Dedicated);
+    }
+    if days >= 100.0 {
+        state.achievements.unlock(Achievement::Veteran);
+    }
+    
+    // Check winter survivor (when season changes FROM winter)
+    if state.season_state.season == Season::Spring && state.season_state.day_in_season < 1.0 {
+        // Just transitioned from winter
+        if state.stats.winters_survived == 0 {
+            state.stats.winters_survived = 1;
+            state.achievements.unlock(Achievement::WinterSurvivor);
+        }
+    }
+    
+    // Check dynasty achievements
+    if state.dynasty.hall_of_heroes.len() >= 1 {
+        state.achievements.unlock(Achievement::Remembered);
+    }
+    if state.dynasty.ancestors.len() >= 10 {
+        state.achievements.unlock(Achievement::AncestorWorship);
+    }
+    if state.dynasty.completed_wonders.len() >= 1 {
+        state.achievements.unlock(Achievement::LegacyFounder);
+    }
+    if state.dynasty.completed_wonders.len() >= 3 {
+        state.achievements.unlock(Achievement::WonderWorker);
+    }
+    if state.dynasty.past_towns.len() + 1 >= 5 {
+        state.achievements.unlock(Achievement::DynastyRuler);
+    }
+    
+    // Check scholar (all tech unlocked)
+    let all_researched = state.tech_tree.iter().all(|t| t.unlocked);
+    if all_researched && !state.tech_tree.is_empty() {
+        state.achievements.unlock(Achievement::Scholar);
+    }
+    
+    // Log newly unlocked achievements
+    while let Some(achievement) = state.achievements.pop_notification() {
+        state.log.add(
+            state.game_time_hours,
+            format!("{} Achievement Unlocked: {}!", achievement.icon(), achievement.name()),
+            crate::narrative::LogCategory::Milestone,
+        );
+    }
 }
 
 #[cfg(test)]

@@ -69,9 +69,58 @@ pub enum AgentState {
     Hauling { source: Vec2, destination: Vec2, carrying: bool },
 }
 
+/// Track agent accomplishments for Hall of Heroes
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentFeats {
+    pub buildings_helped: u32,
+    pub resources_hauled: u32,
+    pub days_lived: u32,
+    pub social_events: u32,
+}
+
+impl AgentFeats {
+    pub fn to_strings(&self) -> Vec<String> {
+        let mut feats = Vec::new();
+        if self.buildings_helped > 0 {
+            feats.push(format!("Helped build {} structures", self.buildings_helped));
+        }
+        if self.resources_hauled > 0 {
+            feats.push(format!("Hauled {} resources", self.resources_hauled));
+        }
+        if self.days_lived >= 30 {
+            feats.push(format!("Lived {} days in town", self.days_lived));
+        }
+        if self.social_events >= 10 {
+            feats.push(format!("Attended {} social gatherings", self.social_events));
+        }
+        feats
+    }
+}
+
+/// Random name pool for villagers
+const FIRST_NAMES: &[&str] = &[
+    "Ada", "Ben", "Clara", "Dex", "Ella", "Finn", "Grace", "Hugo",
+    "Ivy", "Jack", "Kate", "Leo", "Mia", "Nate", "Olive", "Pete",
+    "Quinn", "Rose", "Sam", "Tess", "Uma", "Vic", "Wren", "Xander",
+    "Yuki", "Zoe", "Abel", "Beth", "Cora", "Dale", "Erin", "Garth"
+];
+
+const LAST_NAMES: &[&str] = &[
+    "Miller", "Smith", "Baker", "Cooper", "Fisher", "Carter", "Mason",
+    "Potter", "Weaver", "Hunter", "Thorne", "Brook", "Stone", "Wood",
+    "Field", "Hill", "Lake", "Marsh", "Vale", "Glen", "Frost", "Bloom"
+];
+
+fn generate_random_name() -> String {
+    let first = FIRST_NAMES[rand::gen_range(0, FIRST_NAMES.len())];
+    let last = LAST_NAMES[rand::gen_range(0, LAST_NAMES.len())];
+    format!("{} {}", first, last)
+}
+
 #[derive(Debug, Clone)]
 pub struct Agent {
     pub id: u64,
+    pub name: String,
     pub pos: Vec2,
     pub state: AgentState,
     
@@ -90,12 +139,16 @@ pub struct Agent {
     pub speed: f32,
     pub color: [f32; 4], // RGBA
     pub traits: Vec<crate::simulation::traits::Trait>,
+    
+    // Accomplishments for Hall of Heroes
+    pub feats: AgentFeats,
 }
 
 impl Agent {
     pub fn new(id: u64, pos: Vec2) -> Self {
         Self {
             id,
+            name: generate_random_name(),
             pos,
             state: AgentState::Idle,
             energy: 1.0,
@@ -113,6 +166,7 @@ impl Agent {
                 1.0
             ],
             traits: crate::simulation::traits::generate_random_traits(),
+            feats: AgentFeats::default(),
         }
     }
     
@@ -232,6 +286,7 @@ impl Agent {
                 if *duration <= 0.0 {
                     self.social = 1.0;
                     self.spirit = (self.spirit + 0.2).min(1.0);
+                    self.feats.social_events += 1; // Track social feat
                     self.state = AgentState::Idle;
                 }
             },
@@ -281,7 +336,8 @@ impl Agent {
                 
                 if self.pos.distance(target) < 5.0 {
                     if carrying {
-                        // Delivered - go back to idle
+                        // Delivered - track feat and go back to idle
+                        self.feats.resources_hauled += 1;
                         self.state = AgentState::Idle;
                     } else {
                         // Picked up - now go to destination

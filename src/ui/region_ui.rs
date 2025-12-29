@@ -73,10 +73,22 @@ pub fn draw_region_map(
         // Biome background circle
         let biome_color = node.biome.map_color();
         let bg_color = Color::new(biome_color[0], biome_color[1], biome_color[2], 0.5);
-        draw_circle(pos.x, pos.y, 35.0, bg_color);
         
-        // Node circle
-        let node_color = if node.settled {
+        if node.is_wonder_site {
+            // Wonder sites are diamond shaped
+            draw_poly(pos.x, pos.y, 4, 35.0, 45.0, bg_color);
+        } else {
+            draw_circle(pos.x, pos.y, 35.0, bg_color);
+        }
+        
+        // Node circle or diamond
+        let node_color = if node.is_wonder_site {
+            if node.wonder_site.is_some() {
+                PURPLE // Active construction
+            } else {
+                MAGENTA // Available wonder site
+            }
+        } else if node.settled {
             if node.is_capital {
                 GOLD
             } else {
@@ -86,11 +98,32 @@ pub fn draw_region_map(
             GRAY
         };
         
-        draw_circle(pos.x, pos.y, 20.0, node_color);
+        if node.is_wonder_site {
+            draw_poly(pos.x, pos.y, 4, 20.0, 45.0, node_color);
+            
+            // Show construction progress ring if building
+            if let Some(ref wonder_site) = node.wonder_site {
+                let progress = wonder_site.overall_progress();
+                if !wonder_site.completed {
+                    // Draw progress arc (simple circle for now)
+                    let progress_color = Color::new(0.2, 0.8, 0.2, progress);
+                    draw_circle_lines(pos.x, pos.y, 28.0, 3.0 * progress, progress_color);
+                } else {
+                    // Completed wonder glow
+                    draw_circle_lines(pos.x, pos.y, 30.0, 3.0, GOLD);
+                }
+            }
+        } else {
+            draw_circle(pos.x, pos.y, 20.0, node_color);
+        }
         
         // Selection ring
         if is_selected {
-            draw_circle_lines(pos.x, pos.y, 28.0, 3.0, WHITE);
+            if node.is_wonder_site {
+                draw_poly_lines(pos.x, pos.y, 4, 28.0, 45.0, 3.0, WHITE);
+            } else {
+                draw_circle_lines(pos.x, pos.y, 28.0, 3.0, WHITE);
+            }
         }
         
         // Active indicator
@@ -98,19 +131,40 @@ pub fn draw_region_map(
             draw_circle_lines(pos.x, pos.y, 24.0, 2.0, YELLOW);
         }
         
-        // Capital star
+        // Capital star or Wonder icon
         if node.is_capital {
             draw_text("★", pos.x - 8.0, pos.y + 6.0, 24.0, GOLD);
+        } else if node.is_wonder_site {
+            if let Some(ref ws) = node.wonder_site {
+                if ws.completed {
+                    draw_text("🏛️", pos.x - 10.0, pos.y + 6.0, 20.0, GOLD);
+                } else {
+                    draw_text("⚒️", pos.x - 8.0, pos.y + 6.0, 16.0, WHITE);
+                }
+            } else {
+                draw_text("◆", pos.x - 6.0, pos.y + 6.0, 18.0, MAGENTA);
+            }
         }
         
         // Name label
         let name_x = pos.x - measure_text(&node.name, None, 16, 1.0).width / 2.0;
         draw_text(&node.name, name_x, pos.y + 40.0, 16.0, WHITE);
         
-        // Biome label
-        let biome_text = node.biome.name();
-        let biome_x = pos.x - measure_text(biome_text, None, 12, 1.0).width / 2.0;
-        draw_text(biome_text, biome_x, pos.y + 55.0, 12.0, LIGHTGRAY);
+        // Biome or Wonder label
+        let label: String = if let Some(ref ws) = node.wonder_site {
+            if ws.completed {
+                ws.wonder.name().to_string()
+            } else {
+                let progress = (ws.overall_progress() * 100.0) as i32;
+                format!("{}: {}%", ws.wonder.name(), progress)
+            }
+        } else if node.is_wonder_site {
+            "Wonder Site".to_string()
+        } else {
+            node.biome.name().to_string()
+        };
+        let label_x = pos.x - measure_text(&label, None, 12, 1.0).width / 2.0;
+        draw_text(&label, label_x, pos.y + 55.0, 12.0, LIGHTGRAY);
     }
     
     // Draw title
