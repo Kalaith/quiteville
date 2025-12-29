@@ -47,8 +47,8 @@ pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
     let btn_h = 40.0;
     let spacing = 10.0;
     
-    // Calculate centered position for 2 buttons
-    let total_w = btn_w * 2.0 + spacing;
+    // Calculate centered position for 3 buttons
+    let total_w = btn_w * 3.0 + spacing * 2.0;
     let start_x = (screen_w - total_w) / 2.0;
     let btn_y = screen_h - btn_h - 20.0;
     
@@ -195,13 +195,21 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                  }
                  
                  // Immortalize button (bottom of panel)
-                 let btn_x = x + 10.0;
-                 let btn_y = y + h - 45.0;
-                 let btn_w = 130.0;
-                 let btn_h = 30.0;
-                 
-                 if theme::draw_button(btn_x, btn_y, btn_w, btn_h, "★ Immortalize") {
-                     action = Some(PlayerAction::ImmortalizeHero(agent.id));
+                 // Only show if agent has accomplished something
+                 let has_feats = agent.feats.days_lived >= 30 
+                     || agent.feats.buildings_helped > 0 
+                     || agent.feats.resources_hauled > 0 
+                     || agent.feats.social_events > 0;
+                     
+                 if has_feats {
+                     let btn_x = x + 10.0;
+                     let btn_y = y + h - 45.0;
+                     let btn_w = 130.0;
+                     let btn_h = 30.0;
+                     
+                     if theme::draw_button(btn_x, btn_y, btn_w, btn_h, "★ Immortalize") {
+                         action = Some(PlayerAction::ImmortalizeHero(agent.id));
+                     }
                  }
              }
         },

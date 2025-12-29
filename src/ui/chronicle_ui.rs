@@ -16,7 +16,7 @@ pub fn draw_chronicle_ui(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> O
     // Achievement count badge
     let ach_count = state.achievements.count();
     let ach_total = state.achievements.total();
-    draw_text(&format!("🏆 {}/{}", ach_count, ach_total), x + w - 350.0, y + 40.0, 20.0, YELLOW);
+    draw_text(&format!("Ach: {}/{}", ach_count, ach_total), x + w - 350.0, y + 40.0, 20.0, YELLOW);
     
     // Tab-like sections
     let content_y = y + 60.0;
@@ -53,7 +53,7 @@ fn draw_dynasty_section(state: &GameState, x: f32, y: f32, w: f32, h: f32, actio
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
     
     // Section header
-    draw_text("📜 Dynasty", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
+    draw_text("Dynasty", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
     
     let mut sy = y + 45.0;
     let line_h = 22.0;
@@ -63,7 +63,7 @@ fn draw_dynasty_section(state: &GameState, x: f32, y: f32, w: f32, h: f32, actio
     sy += line_h;
     
     // Hall of Heroes (recent)
-    draw_text("🏆 Hall of Heroes:", x + 10.0, sy, 15.0, GOLD);
+    draw_text("Hall of Heroes:", x + 10.0, sy, 15.0, GOLD);
     sy += line_h;
     
     for hero in state.dynasty.hall_of_heroes.iter().take(5) {
@@ -79,7 +79,7 @@ fn draw_dynasty_section(state: &GameState, x: f32, y: f32, w: f32, h: f32, actio
     sy += 10.0;
     
     // Ancestors
-    draw_text("👻 Active Ancestors:", x + 10.0, sy, 15.0, colors::SECONDARY);
+    draw_text("Active Ancestors:", x + 10.0, sy, 15.0, colors::SECONDARY);
     sy += line_h;
     
     for ancestor in state.dynasty.ancestors.iter().take(4) {
@@ -101,7 +101,7 @@ fn draw_dynasty_section(state: &GameState, x: f32, y: f32, w: f32, h: f32, actio
     sy += 15.0;
     
     // Wonders completed
-    draw_text("🏛️ Completed Wonders:", x + 10.0, sy, 15.0, YELLOW);
+    draw_text("Completed Wonders:", x + 10.0, sy, 15.0, YELLOW);
     sy += line_h;
     
     for wonder in state.dynasty.completed_wonders.iter().take(3) {
@@ -130,7 +130,7 @@ fn draw_achievements_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) 
     draw_rectangle(x, y, w, h, Color::new(0.1, 0.1, 0.15, 0.8));
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
     
-    draw_text("🏆 Achievements", x + 10.0, y + 20.0, 18.0, YELLOW);
+    draw_text("Achievements", x + 10.0, y + 20.0, 18.0, YELLOW);
     
     let unlocked = state.achievements.unlocked_list();
     let mut ax = x + 10.0;
@@ -144,7 +144,7 @@ fn draw_achievements_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) 
             // Draw achievement badge (wider to fit description)
             let badge_w = 150.0;
             draw_rectangle(ax, ay, badge_w - 5.0, 45.0, Color::new(0.2, 0.3, 0.2, 0.8));
-            draw_text(&achievement.icon, ax + 5.0, ay + 20.0, 18.0, WHITE);
+            // draw_text(&achievement.icon, ax + 5.0, ay + 20.0, 18.0, WHITE);
             
             // Name
             draw_text(&achievement.name, ax + 28.0, ay + 15.0, 12.0, WHITE);
@@ -168,7 +168,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     draw_rectangle(x, y, w, h, Color::new(0.1, 0.12, 0.1, 0.8));
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
     
-    draw_text("📊 Lifetime Stats", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
+    draw_text("Lifetime Stats", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
     
     let stats = &state.stats;
     let col1_x = x + 10.0;

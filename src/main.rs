@@ -369,7 +369,14 @@ fn is_mouse_over_ui(state: &GameState) -> bool {
         return true;
     }
     
-    // 4. Build Menu (Right Panel)
+    // 4. Left Panel (Log & Details)
+    // Width matched from layout.rs
+    let left_panel_w = 360.0; // 350 + margin
+    if mouse_pos.0 <= left_panel_w {
+        return true;
+    }
+
+    // 5. Build Menu (Right Panel)
     if state.show_build_menu {
         let panel_w = 350.0;
         if mouse_pos.0 > screen_w - panel_w {
@@ -382,7 +389,7 @@ fn is_mouse_over_ui(state: &GameState) -> bool {
     let btn_w = 120.0;
     let btn_h = 40.0;
     let spacing = 10.0;
-    let total_w = btn_w * 2.0 + spacing;
+    let total_w = btn_w * 3.0 + spacing * 2.0;
     let start_x = (screen_w - total_w) / 2.0;
     let btn_y = screen_h - btn_h - 20.0;
     

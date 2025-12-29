@@ -93,6 +93,11 @@ impl TutorialManager {
         self.skipped || self.state == TutorialState::Completed
     }
 
+    /// Check if a dialog is currently interfering with input
+    pub fn has_active_dialog(&self) -> bool {
+        self.active_dialog.is_some()
+    }
+
     /// Main update - check triggers and show dialogs
     pub fn update(&mut self, ctx: TutorialContext, delta: f32) {
         if self.is_complete() {

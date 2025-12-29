@@ -206,9 +206,11 @@ pub fn simulate_ticks(
     
     // Add rates to accumulator
     total_output.materials += base_rate_per_min + pop_rate_per_min;
-    total_output.attractiveness += bonuses.attractiveness_flat * 0.001; // Small trickle or flat boost?
-    // Actually flat bonus should probably be permanent stat, but here we deal with deltas.
-    // Let's just say Tech gives +Attractiveness RATE.
+    
+    // REFACTORED: Attractiveness and Stability are now FLAT values, not accumulated resources.
+    // We calculate them from scratch each tick based on active sources.
+    let mut calculated_attractiveness = bonuses.attractiveness_flat; 
+    let mut calculated_stability = 0.0; // Base stability
     
     for zone in &state.zones {
         if zone.dormant {
@@ -219,18 +221,25 @@ pub fn simulate_ticks(
             let throughput = zone.calculate_throughput(template);
             let multiplier = crate::economy::calculate_output(throughput, &state.resources);
             
-            // Accumulate scaled outputs (Applied Production Multiplier)
+            // Active Production (Requires activity/throughput)
+            // Materials and Maintenance (Service) require active work to produce
             total_output.materials += template.output.materials * multiplier * bonuses.production_multi;
-            total_output.maintenance += template.output.maintenance * multiplier; // Maintenance output usually 0
-            total_output.attractiveness += template.output.attractiveness * multiplier;
-            total_output.stability += template.output.stability * multiplier;
+            total_output.maintenance += template.output.maintenance * multiplier; 
+            
+            // Passive Stats (Attractiveness, Stability) depend primarily on Condition
+            // A restored building improves the town even if no one is using it right this second
+            let passive_mult = zone.condition;
+            calculated_attractiveness += template.output.attractiveness * passive_mult;
+            calculated_stability += template.output.stability * passive_mult;
             
             // Accumulate upkeep (these are costs, will be subtracted)
             // Apply Efficiency Multiplier to upkeep
             total_upkeep.materials += template.upkeep.materials * bonuses.maintenance_factor;
             total_upkeep.maintenance += template.upkeep.maintenance * bonuses.maintenance_factor;
-            total_upkeep.attractiveness += template.upkeep.attractiveness * bonuses.maintenance_factor;
-            total_upkeep.stability += template.upkeep.stability * bonuses.maintenance_factor;
+            
+            // For Attr/Stab, upkeep reduces the flat value
+            calculated_attractiveness -= template.upkeep.attractiveness * bonuses.maintenance_factor;
+            calculated_stability -= template.upkeep.stability * bonuses.maintenance_factor;
         }
     }
     
@@ -238,16 +247,14 @@ pub fn simulate_ticks(
     let mut net_delta = crate::data::ResourceDelta {
         materials: (total_output.materials - total_upkeep.materials) * game_minutes,
         maintenance: (total_output.maintenance - total_upkeep.maintenance) * game_minutes,
-        attractiveness: (total_output.attractiveness - total_upkeep.attractiveness) * game_minutes,
-        stability: (total_output.stability - total_upkeep.stability) * game_minutes,
+        attractiveness: 0.0, // Calculated directly below
+        stability: 0.0,      // Calculated directly below
     };
     
-    // GLOBAL RESOURCE DECAY (Soft Cap)
-    // Prevent Attractiveness/Stability from spiraling to infinity.
-    // Lose 0.1% of current stockpile per game minute.
-    let decay_rate = 0.001 * game_minutes;
-    net_delta.attractiveness -= state.resources.attractiveness * decay_rate;
-    net_delta.stability -= state.resources.stability * decay_rate;
+    // Update flat stats directly
+    // Soft Cap / Decay is removed as requested - they are just flat values now.
+    state.resources.attractiveness = calculated_attractiveness.max(0.0);
+    state.resources.stability = calculated_stability.max(0.0);
     
     // --- AGENT SIMULATION ---
     // Target agent count based on population (capped for performance/visual clutter)

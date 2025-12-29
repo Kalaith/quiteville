@@ -218,6 +218,9 @@ impl Agent {
                             self.state = AgentState::Wandering { target };
                         } else if self.energy < 0.3 {
                             self.state = AgentState::Sleeping;
+                        } else if rand::gen_range(0, 100) < 2 {
+                            let target = self.pick_random_target();
+                            self.state = AgentState::Wandering { target };
                         }
                     },
                     TimeOfDay::Work => {
@@ -234,6 +237,9 @@ impl Agent {
                             // Builders go to construction sites
                             let (target, zone_idx) = world.construction_sites[0];
                             self.state = AgentState::Building { target, zone_idx };
+                        } else if rand::gen_range(0, 100) < 3 {
+                            let target = self.pick_random_target();
+                            self.state = AgentState::Wandering { target };
                         }
                     },
                     TimeOfDay::Evening => {
