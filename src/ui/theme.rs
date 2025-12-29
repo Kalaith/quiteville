@@ -2,15 +2,12 @@ use macroquad::prelude::*;
 
 pub mod colors {
     use macroquad::prelude::*;
-    pub const BACKGROUND: Color = Color::new(0.1, 0.1, 0.12, 1.0);
     pub const PANEL_BG: Color = Color::new(0.15, 0.15, 0.18, 0.95);
     pub const PANEL_BORDER: Color = Color::new(0.3, 0.3, 0.35, 1.0);
     pub const TEXT: Color = Color::new(0.9, 0.9, 0.9, 1.0);
-    pub const TEXT_DIM: Color = Color::new(0.6, 0.6, 0.65, 1.0);
-    pub const ACCENT: Color = Color::new(0.4, 0.8, 0.4, 1.0); // Greenish
-    pub const ACCENT_HOVER: Color = Color::new(0.5, 0.9, 0.5, 1.0);
+    pub const ACCENT: Color = Color::new(0.4, 0.8, 0.4, 1.0);
+    pub const SECONDARY: Color = Color::new(0.6, 0.5, 0.8, 1.0);  // Purple for ancestors
     pub const WARN: Color = Color::new(0.9, 0.6, 0.2, 1.0);
-    pub const ERROR: Color = Color::new(0.9, 0.3, 0.3, 1.0);
     pub const BUTTON_BG: Color = Color::new(0.25, 0.25, 0.3, 1.0);
     pub const BUTTON_HOVER: Color = Color::new(0.35, 0.35, 0.4, 1.0);
 }
@@ -71,14 +68,4 @@ pub fn draw_button(x: f32, y: f32, w: f32, h: f32, text: &str) -> bool {
 pub fn draw_header(text: &str, x: f32, y: f32) {
     draw_text(text, x + 2.0, y + 2.0, 30.0, Color::new(0.0, 0.0, 0.0, 0.5)); // Shadow
     draw_text(text, x, y, 30.0, colors::ACCENT);
-}
-
-/// Helper to draw a subheader
-pub fn draw_subheader(text: &str, x: f32, y: f32) {
-     draw_text(text, x, y, 20.0, colors::TEXT);
-}
-
-/// Helper to draw a divider line
-pub fn draw_divider(x: f32, y: f32, w: f32) {
-    draw_line(x, y, x + w, y, 2.0, colors::PANEL_BORDER);
 }

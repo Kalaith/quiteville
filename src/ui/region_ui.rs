@@ -155,8 +155,14 @@ pub fn draw_region_map(
             if ws.completed {
                 ws.wonder.name().to_string()
             } else {
-                let progress = (ws.overall_progress() * 100.0) as i32;
-                format!("{}: {}%", ws.wonder.name(), progress)
+                // Show current stage name and stage progress
+                if let Some(stage) = ws.current_stage_info() {
+                    let stage_pct = (ws.stage_progress_percent() * 100.0) as i32;
+                    format!("{}: {} ({}%)", ws.wonder.name(), stage.name, stage_pct)
+                } else {
+                    let progress = (ws.overall_progress() * 100.0) as i32;
+                    format!("{}: {}%", ws.wonder.name(), progress)
+                }
             }
         } else if node.is_wonder_site {
             "Wonder Site".to_string()

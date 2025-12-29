@@ -182,11 +182,6 @@ impl SeasonState {
     /// Days per season (configurable)
     pub const DAYS_PER_SEASON: f32 = 12.0;
     
-    /// Create new season state starting in spring
-    pub fn new() -> Self {
-        Self::default()
-    }
-    
     /// Update season state with elapsed game hours
     /// Returns true if season changed
     pub fn update(&mut self, game_hours: f32) -> bool {
@@ -253,10 +248,5 @@ impl SeasonState {
             self.day_in_season + 1.0,
             self.weather.name()
         )
-    }
-    
-    /// Get combined movement multiplier (season + weather)
-    pub fn movement_multiplier(&self) -> f32 {
-        self.season.movement_multiplier() * self.weather.movement_penalty()
     }
 }

@@ -91,11 +91,11 @@ impl ParticleSystem {
                     p.velocity.x += macroquad::rand::gen_range(-10.0, 10.0) * delta;
                 },
                 ParticleType::Dust => {
-                    p.color.a = (p.lifetime / p.max_lifetime);
+                    p.color.a = p.lifetime / p.max_lifetime;
                 },
                 ParticleType::Heart => {
                     p.velocity.y -= 20.0 * delta; // Float up
-                    p.color.a = (p.lifetime / p.max_lifetime);
+                    p.color.a = p.lifetime / p.max_lifetime;
                 },
             }
 
@@ -127,10 +127,5 @@ impl ParticleSystem {
                 }
             }
         }
-    }
-    
-    // Helper to clear particles (e.g. on scene switch)
-    pub fn clear(&mut self) {
-        self.particles.clear();
     }
 }

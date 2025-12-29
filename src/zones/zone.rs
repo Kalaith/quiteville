@@ -61,62 +61,9 @@ impl Zone {
         }
     }
 
-    /// Create a zone that starts active
-    pub fn new_active(template_id: &str) -> Self {
-        Self {
-            template_id: template_id.to_string(),
-            condition: 1.0,
-            activity: 0.5,
-            dormant: false,
-            reawakening_stage: 1,
-            construction_state: ConstructionState::Complete,
-        }
-    }
-
-    /// Create a new zone under construction
-    pub fn new_under_construction(template_id: &str) -> Self {
-        Self {
-            template_id: template_id.to_string(),
-            condition: 0.0,
-            activity: 0.0,
-            dormant: true,
-            reawakening_stage: 0,
-            construction_state: ConstructionState::UnderConstruction {
-                work_done: 0.0,
-                materials_deposited: false,
-            },
-        }
-    }
-
     /// Check if zone is under construction
     pub fn is_under_construction(&self) -> bool {
         matches!(self.construction_state, ConstructionState::UnderConstruction { .. })
-    }
-
-    /// Apply construction work to a zone under construction
-    /// Returns true if construction completed
-    pub fn apply_construction_work(&mut self, work_amount: f32, required_work: f32) -> bool {
-        if let ConstructionState::UnderConstruction { ref mut work_done, materials_deposited } = self.construction_state {
-            if !materials_deposited {
-                return false; // Can't work without materials
-            }
-            *work_done += work_amount;
-            if *work_done >= required_work {
-                self.construction_state = ConstructionState::Complete;
-                self.condition = 1.0;
-                self.dormant = false;
-                self.reawakening_stage = 1;
-                return true;
-            }
-        }
-        false
-    }
-
-    /// Deposit materials for construction
-    pub fn deposit_construction_materials(&mut self) {
-        if let ConstructionState::UnderConstruction { ref mut materials_deposited, .. } = self.construction_state {
-            *materials_deposited = true;
-        }
     }
 
     /// Get construction progress as 0.0 - 1.0
@@ -144,34 +91,12 @@ impl Zone {
         template.base_throughput * self.condition * saturation
     }
 
-    /// Check if zone should become dormant
-    pub fn should_go_dormant(&self, template: &ZoneTemplate) -> bool {
-        self.condition < template.decay.neglect_threshold
-    }
-
-    /// Apply condition decay
-    pub fn apply_decay(&mut self, template: &ZoneTemplate, delta_time: f32) {
-        if !self.dormant && !self.is_under_construction() {
-            self.condition -= template.decay.natural_rate * delta_time;
-            self.condition = self.condition.max(0.0);
-        }
-    }
-
     /// Restore some condition (player action)
     pub fn restore(&mut self, amount: f32) {
         self.condition = (self.condition + amount).min(1.0);
         if self.dormant && self.condition > 0.1 {
             self.dormant = false;
         }
-    }
-
-    /// Update activity based on population pressure
-    pub fn update_activity(&mut self, effective_population: f32) {
-        // Activity slowly moves toward effective population
-        let target = effective_population;
-        let lerp_speed = 0.1;
-        self.activity += (target - self.activity) * lerp_speed;
-        self.activity = self.activity.clamp(0.0, 1.0);
     }
 }
 

@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 use crate::data::GameState;
 use crate::PlayerAction;
-use super::colors;
+use crate::ui::theme::colors;
 
 /// Draw the tech tree window
 pub fn draw_tech_tree_window(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Option<PlayerAction> {

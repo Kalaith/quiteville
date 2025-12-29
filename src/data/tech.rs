@@ -65,11 +65,6 @@ impl TechNode {
             y,
         }
     }
-    
-    pub fn with_unlock_condition(mut self, condition: UnlockCondition) -> Self {
-        self.unlock_condition = Some(condition);
-        self
-    }
 }
 
 pub fn default_tech_tree() -> Vec<TechNode> {

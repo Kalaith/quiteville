@@ -1,39 +1,6 @@
 //! Building upgrade system
 
-use serde::{Deserialize, Serialize};
-use crate::data::{GameState, ResourceDelta};
-
-/// Defines an upgrade path from one building type to another
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UpgradePath {
-    /// Source building template ID
-    pub from_id: String,
-    /// Target building template ID  
-    pub to_id: String,
-    /// Resource cost for the upgrade
-    pub cost: ResourceDelta,
-    /// Work units required
-    pub work_required: f32,
-    /// Tech ID required (if any)
-    pub requires_tech: Option<String>,
-}
-
-impl UpgradePath {
-    pub fn new(from: &str, to: &str, cost: ResourceDelta, work: f32) -> Self {
-        Self {
-            from_id: from.to_string(),
-            to_id: to.to_string(),
-            cost,
-            work_required: work,
-            requires_tech: None,
-        }
-    }
-    
-    pub fn with_tech(mut self, tech_id: &str) -> Self {
-        self.requires_tech = Some(tech_id.to_string());
-        self
-    }
-}
+use crate::data::GameState;
 
 /// Check if a zone can be upgraded
 pub fn can_upgrade(state: &GameState, zone_idx: usize) -> Option<&str> {
@@ -125,17 +92,4 @@ pub fn apply_upgrade(state: &mut GameState, zone_idx: usize) -> Option<String> {
     );
     
     Some(old_id)
-}
-
-/// Get predefined upgrade paths
-pub fn default_upgrade_paths() -> Vec<UpgradePath> {
-    vec![
-        // Housing progression
-        UpgradePath::new("tent", "shack", ResourceDelta { materials: 3.0, ..Default::default() }, 10.0),
-        UpgradePath::new("shack", "cottage", ResourceDelta { materials: 8.0, ..Default::default() }, 25.0)
-            .with_tech("stonework"),
-            
-        // Market progression
-        UpgradePath::new("market_stall", "community_market", ResourceDelta { materials: 10.0, ..Default::default() }, 30.0),
-    ]
 }

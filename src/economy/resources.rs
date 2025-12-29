@@ -68,74 +68,6 @@ impl Resources {
         self.attractiveness = self.attractiveness.max(0.0);
         self.stability = self.stability.max(0.0);
     }
-    
-    /// Apply a raw/processed resource delta
-    pub fn apply_resource_change(&mut self, resource: ResourceType, amount: f32) {
-        match resource {
-            ResourceType::Materials => self.materials = (self.materials + amount).max(0.0),
-            ResourceType::Logs => self.logs = (self.logs + amount).max(0.0),
-            ResourceType::StoneChunks => self.stone_chunks = (self.stone_chunks + amount).max(0.0),
-            ResourceType::Grain => self.grain = (self.grain + amount).max(0.0),
-            ResourceType::Lumber => self.lumber = (self.lumber + amount).max(0.0),
-            ResourceType::CutStone => self.cut_stone = (self.cut_stone + amount).max(0.0),
-            ResourceType::Flour => self.flour = (self.flour + amount).max(0.0),
-        }
-    }
-    
-    /// Check if we have enough of a resource
-    pub fn has(&self, resource: ResourceType, amount: f32) -> bool {
-        self.get(resource) >= amount
-    }
-    
-    /// Get amount of a specific resource
-    pub fn get(&self, resource: ResourceType) -> f32 {
-        match resource {
-            ResourceType::Materials => self.materials,
-            ResourceType::Logs => self.logs,
-            ResourceType::StoneChunks => self.stone_chunks,
-            ResourceType::Grain => self.grain,
-            ResourceType::Lumber => self.lumber,
-            ResourceType::CutStone => self.cut_stone,
-            ResourceType::Flour => self.flour,
-        }
-    }
-}
-
-/// Types of resources for the resource chain system
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ResourceType {
-    Materials,
-    Logs,
-    StoneChunks,
-    Grain,
-    Lumber,
-    CutStone,
-    Flour,
-}
-
-impl ResourceType {
-    pub fn name(&self) -> &'static str {
-        match self {
-            ResourceType::Materials => "Materials",
-            ResourceType::Logs => "Logs",
-            ResourceType::StoneChunks => "Stone Chunks",
-            ResourceType::Grain => "Grain",
-            ResourceType::Lumber => "Lumber",
-            ResourceType::CutStone => "Cut Stone",
-            ResourceType::Flour => "Flour",
-        }
-    }
-    
-    /// Is this a raw material?
-    pub fn is_raw(&self) -> bool {
-        matches!(self, ResourceType::Logs | ResourceType::StoneChunks | ResourceType::Grain)
-    }
-    
-    /// Is this a processed material?
-    pub fn is_processed(&self) -> bool {
-        matches!(self, ResourceType::Lumber | ResourceType::CutStone | ResourceType::Flour)
-    }
 }
 
 // ============================================================================
@@ -200,13 +132,6 @@ pub fn calculate_output(base: f32, resources: &Resources) -> f32 {
 /// The squared term ensures growth pressure always pushes back.
 pub fn maintenance_cost(effective_pop: f32, coefficient: f32) -> f32 {
     coefficient * effective_pop * effective_pop
-}
-
-/// Calculate offline gain.
-/// Formula: Output × log(TimeAway + 1)
-/// Logarithmic scaling prevents AFK abuse.
-pub fn offline_gain(output: f32, hours_away: f32) -> f32 {
-    output * (hours_away + 1.0).ln()
 }
 
 #[cfg(test)]

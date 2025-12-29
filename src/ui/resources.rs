@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use crate::data::GameState;
-use super::colors;
+use crate::ui::theme::colors;
 
 /// Draw the top bar with resources and time
 pub fn draw_top_bar(state: &GameState, time_scale: f32, paused: bool) {

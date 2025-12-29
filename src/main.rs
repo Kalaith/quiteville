@@ -43,16 +43,19 @@ async fn initialize_game() -> GameState {
         Vec::new()
     });
     
-    // Load milestones
-    let milestones = assets::load_milestones().unwrap_or_else(|e| {
-        eprintln!("Failed to load milestones: {}", e);
+    // Load achievement definitions
+    let achievement_defs = assets::load_achievements().unwrap_or_else(|e| {
+        eprintln!("Failed to load achievements: {}", e);
         Vec::new()
     });
     
     // Load Assets (Textures)
     let assets = assets::load_textures().await;
     
-    let mut state = GameState::new(config, zone_templates, milestones, assets);
+    let mut state = GameState::new(config, zone_templates, assets);
+    
+    // Initialize achievements with loaded definitions
+    state.achievements.set_definitions(achievement_defs);
     
     // Set initial camera target so map (0,0) is at top-left of screen
     state.camera.target = vec2(screen_width() / 2.0, screen_height() / 2.0);
@@ -139,6 +142,7 @@ async fn initialize_game() -> GameState {
 #[derive(Debug, Clone)]
 pub enum PlayerAction {
     RestoreZone(usize),  // Index into zones vec
+    UpgradeZone(usize),  // Upgrade zone at index
     Select(data::Selection),
     ToggleTechTree,
     ToggleBuildMenu,
@@ -355,7 +359,17 @@ fn is_mouse_over_ui(state: &GameState) -> bool {
         return true;
     }
     
-    // 2. Build Menu (Right Panel)
+    // 2. Chronicle Modal (full overlay)
+    if state.show_chronicle {
+        return true;
+    }
+    
+    // 3. Tutorial Dialog (blocks all input when active)
+    if state.tutorial.has_active_dialog() {
+        return true;
+    }
+    
+    // 4. Build Menu (Right Panel)
     if state.show_build_menu {
         let panel_w = 350.0;
         if mouse_pos.0 > screen_w - panel_w {
@@ -363,7 +377,7 @@ fn is_mouse_over_ui(state: &GameState) -> bool {
         }
     }
     
-    // 3. Bottom Center Buttons
+    // 5. Bottom Center Buttons
     // Metrics from layout.rs
     let btn_w = 120.0;
     let btn_h = 40.0;
@@ -433,6 +447,22 @@ fn apply_action(state: &mut GameState, action: PlayerAction) {
                         zone.condition * 100.0
                     ),
                     LogCategory::Zone,
+                );
+            }
+        }
+        PlayerAction::UpgradeZone(index) => {
+            if let Some(_old_id) = zones::upgrades::apply_upgrade(state, index) {
+                // Statistics tracking
+                state.stats.zones_restored += 1;
+                
+                // Log is handled inside apply_upgrade
+                // Clear selection to avoid stale UI
+                state.selection = data::Selection::None;
+            } else {
+                state.log.add(
+                    state.game_time_hours,
+                    "Cannot upgrade zone - check materials or requirements.".to_string(),
+                    LogCategory::System,
                 );
             }
         }

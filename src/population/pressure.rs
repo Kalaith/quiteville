@@ -31,14 +31,6 @@ impl Default for PopulationPressure {
 }
 
 impl PopulationPressure {
-    /// Create with initial pressure
-    pub fn new(initial: f32) -> Self {
-        Self {
-            pressure: initial,
-            ..Default::default()
-        }
-    }
-
     /// Get current pressure value
     pub fn value(&self) -> f32 {
         self.pressure
@@ -68,20 +60,5 @@ impl PopulationPressure {
         
         self.pressure += growth - decay;
         self.pressure = self.pressure.max(0.0);
-    }
-
-    /// Apply external pressure change (from events, milestones, etc.)
-    pub fn apply_delta(&mut self, delta: f32) {
-        self.pressure = (self.pressure + delta).max(0.0);
-    }
-
-    /// Set growth rate (modified by zones, milestones)
-    pub fn set_growth_rate(&mut self, rate: f32) {
-        self.growth_rate = rate.max(0.0);
-    }
-
-    /// Set decay rate
-    pub fn set_decay_rate(&mut self, rate: f32) {
-        self.decay_rate = rate.max(0.0);
     }
 }

@@ -1,141 +1,34 @@
 //! Achievement system for tracking player accomplishments
+//! 
+//! Achievement definitions are loaded from assets/achievements.json
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-/// Game achievements
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Achievement {
-    /// Build first residential zone
-    FirstHouse,
-    /// Restore 10 zones
-    SettlerSpirit,
-    /// Reach 50 population
-    GrowingCommunity,
-    /// Reach 100 population
-    FirstHundred,
-    /// Reach 500 population  
-    TownProper,
-    /// Accumulate 1000 materials
-    Hoarder,
-    /// Accumulate 10000 materials
-    Wealthy,
-    /// Accumulate 100000 materials
-    Millionaire,
-    /// Stability + attractiveness both > 0.8
-    Utopia,
-    /// Build 25 zones
-    Builder,
-    /// Build 50 zones
-    MasterBuilder,
-    /// Research all technologies
-    Scholar,
-    /// Complete first wonder
-    LegacyFounder,
-    /// Complete 3 wonders
-    WonderWorker,
-    /// Settle 5 different towns
-    DynastyRuler,
-    /// Immortalize first hero
-    Remembered,
-    /// Retire 10 heroes as ancestors
-    AncestorWorship,
-    /// Play for 10 in-game days
-    Dedicated,
-    /// Play for 100 in-game days
-    Veteran,
-    /// Survive first winter
-    WinterSurvivor,
-}
-
-impl Achievement {
+/// Achievement definition loaded from JSON
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AchievementDef {
+    /// Unique identifier (snake_case)
+    pub id: String,
     /// Display name for UI
-    pub fn name(&self) -> &'static str {
-        match self {
-            Achievement::FirstHouse => "First House",
-            Achievement::SettlerSpirit => "Settler Spirit",
-            Achievement::GrowingCommunity => "Growing Community",
-            Achievement::FirstHundred => "First Hundred",
-            Achievement::TownProper => "Town Proper",
-            Achievement::Hoarder => "Hoarder",
-            Achievement::Wealthy => "Wealthy",
-            Achievement::Millionaire => "Millionaire",
-            Achievement::Utopia => "Utopia",
-            Achievement::Builder => "Builder",
-            Achievement::MasterBuilder => "Master Builder",
-            Achievement::Scholar => "Scholar",
-            Achievement::LegacyFounder => "Legacy Founder",
-            Achievement::WonderWorker => "Wonder Worker",
-            Achievement::DynastyRuler => "Dynasty Ruler",
-            Achievement::Remembered => "Remembered",
-            Achievement::AncestorWorship => "Ancestor Worship",
-            Achievement::Dedicated => "Dedicated",
-            Achievement::Veteran => "Veteran",
-            Achievement::WinterSurvivor => "Winter Survivor",
-        }
-    }
-    
-    /// Description for UI
-    pub fn description(&self) -> &'static str {
-        match self {
-            Achievement::FirstHouse => "Build your first residential zone",
-            Achievement::SettlerSpirit => "Restore 10 zones",
-            Achievement::GrowingCommunity => "Reach 50 population",
-            Achievement::FirstHundred => "Reach 100 population",
-            Achievement::TownProper => "Reach 500 population",
-            Achievement::Hoarder => "Accumulate 1,000 materials",
-            Achievement::Wealthy => "Accumulate 10,000 materials",
-            Achievement::Millionaire => "Accumulate 100,000 materials",
-            Achievement::Utopia => "Achieve stability and attractiveness above 0.8",
-            Achievement::Builder => "Build 25 zones",
-            Achievement::MasterBuilder => "Build 50 zones",
-            Achievement::Scholar => "Research all technologies",
-            Achievement::LegacyFounder => "Complete your first wonder",
-            Achievement::WonderWorker => "Complete 3 wonders",
-            Achievement::DynastyRuler => "Settle 5 different towns",
-            Achievement::Remembered => "Immortalize your first hero",
-            Achievement::AncestorWorship => "Retire 10 heroes as ancestors",
-            Achievement::Dedicated => "Play for 10 in-game days",
-            Achievement::Veteran => "Play for 100 in-game days",
-            Achievement::WinterSurvivor => "Survive your first winter",
-        }
-    }
-    
-    /// Icon/emoji for display
-    pub fn icon(&self) -> &'static str {
-        match self {
-            Achievement::FirstHouse => "🏠",
-            Achievement::SettlerSpirit => "⛺",
-            Achievement::GrowingCommunity => "👥",
-            Achievement::FirstHundred => "💯",
-            Achievement::TownProper => "🏘️",
-            Achievement::Hoarder => "📦",
-            Achievement::Wealthy => "💰",
-            Achievement::Millionaire => "💎",
-            Achievement::Utopia => "🌟",
-            Achievement::Builder => "🔨",
-            Achievement::MasterBuilder => "🏗️",
-            Achievement::Scholar => "📚",
-            Achievement::LegacyFounder => "🏛️",
-            Achievement::WonderWorker => "✨",
-            Achievement::DynastyRuler => "👑",
-            Achievement::Remembered => "⭐",
-            Achievement::AncestorWorship => "🕯️",
-            Achievement::Dedicated => "⏰",
-            Achievement::Veteran => "🎖️",
-            Achievement::WinterSurvivor => "❄️",
-        }
-    }
+    pub name: String,
+    /// Description/requirements
+    pub description: String,
+    /// Emoji icon for display
+    pub icon: String,
 }
 
 /// Manages unlocked achievements
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AchievementManager {
-    /// Set of unlocked achievements
-    pub unlocked: HashSet<Achievement>,
-    /// Newly unlocked achievements (for notification display)
+    /// Set of unlocked achievement IDs
+    pub unlocked: HashSet<String>,
+    /// Newly unlocked achievement IDs (for notification display)
     #[serde(skip)]
-    pub newly_unlocked: Vec<Achievement>,
+    pub newly_unlocked: Vec<String>,
+    /// Loaded achievement definitions (not serialized - reloaded at startup)
+    #[serde(skip)]
+    pub definitions: Vec<AchievementDef>,
 }
 
 impl AchievementManager {
@@ -143,20 +36,33 @@ impl AchievementManager {
         Self::default()
     }
     
-    /// Unlock an achievement if not already unlocked
+    /// Initialize with loaded definitions
+    pub fn with_definitions(definitions: Vec<AchievementDef>) -> Self {
+        Self {
+            definitions,
+            ..Default::default()
+        }
+    }
+    
+    /// Set definitions (called after loading from JSON)
+    pub fn set_definitions(&mut self, definitions: Vec<AchievementDef>) {
+        self.definitions = definitions;
+    }
+    
+    /// Unlock an achievement by ID if not already unlocked
     /// Returns true if newly unlocked
-    pub fn unlock(&mut self, achievement: Achievement) -> bool {
-        if self.unlocked.insert(achievement) {
-            self.newly_unlocked.push(achievement);
+    pub fn unlock(&mut self, achievement_id: &str) -> bool {
+        if self.unlocked.insert(achievement_id.to_string()) {
+            self.newly_unlocked.push(achievement_id.to_string());
             true
         } else {
             false
         }
     }
     
-    /// Check if an achievement is unlocked
-    pub fn is_unlocked(&self, achievement: Achievement) -> bool {
-        self.unlocked.contains(&achievement)
+    /// Get achievement definition by ID
+    pub fn get_def(&self, id: &str) -> Option<&AchievementDef> {
+        self.definitions.iter().find(|d| d.id == id)
     }
     
     /// Get count of unlocked achievements
@@ -165,20 +71,28 @@ impl AchievementManager {
     }
     
     /// Get total number of achievements
-    pub fn total() -> usize {
-        20 // Update when adding new achievements
+    pub fn total(&self) -> usize {
+        self.definitions.len()
     }
     
     /// Pop a newly unlocked achievement for display
-    pub fn pop_notification(&mut self) -> Option<Achievement> {
-        self.newly_unlocked.pop()
+    pub fn pop_notification(&mut self) -> Option<AchievementDef> {
+        let id = self.newly_unlocked.pop()?;
+        self.get_def(&id).cloned()
     }
     
-    /// Get all unlocked achievements as a sorted vec
-    pub fn unlocked_list(&self) -> Vec<Achievement> {
-        let mut list: Vec<_> = self.unlocked.iter().copied().collect();
-        list.sort_by_key(|a| a.name());
+    /// Get all unlocked achievements as sorted definitions
+    pub fn unlocked_list(&self) -> Vec<&AchievementDef> {
+        let mut list: Vec<_> = self.definitions.iter()
+            .filter(|d| self.unlocked.contains(&d.id))
+            .collect();
+        list.sort_by_key(|a| &a.name);
         list
+    }
+    
+    /// Check if specific achievement is unlocked
+    pub fn is_unlocked(&self, id: &str) -> bool {
+        self.unlocked.contains(id)
     }
 }
 

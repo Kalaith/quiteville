@@ -208,9 +208,9 @@ pub fn can_build_cloud_spire(
 /// Buffs provided by completed wonders
 #[derive(Debug, Clone, Default)]
 pub struct WonderBuffs {
-    pub research_speed: f32,  // Multiplier
-    pub population_growth: f32,  // Multiplier
-    pub production: f32,  // Multiplier
+    pub research_speed: f32,
+    pub population_growth: f32,
+    pub production: f32,
 }
 
 impl WonderBuffs {

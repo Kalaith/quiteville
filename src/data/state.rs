@@ -1,7 +1,7 @@
 //! Game state - The root state struct containing all game data
 
 use serde::{Deserialize, Serialize};
-use crate::data::{GameConfig, ZoneTemplate, Milestone};
+use crate::data::{GameConfig, ZoneTemplate};
 use crate::economy::Resources;
 use crate::zones::Zone;
 use crate::population::PopulationPressure;
@@ -17,10 +17,6 @@ pub struct GameState {
     /// Zone templates (loaded from JSON)
     #[serde(skip)]
     pub zone_templates: Vec<ZoneTemplate>,
-    
-    /// Milestone definitions (loaded from JSON) 
-    #[serde(skip)]
-    pub milestones: Vec<Milestone>,
     
     /// Loaded Game Assets (Textures)
     #[serde(skip)]
@@ -150,7 +146,6 @@ impl GameState {
     pub fn new(
         config: GameConfig, 
         zone_templates: Vec<ZoneTemplate>, 
-        milestones: Vec<Milestone>,
         assets: crate::assets::GameAssets
     ) -> Self {
         let resources = Resources::new(
@@ -163,7 +158,6 @@ impl GameState {
         Self {
             config,
             zone_templates,
-            milestones,
             assets,
             tech_tree: crate::data::default_tech_tree(),
             resources,
@@ -218,19 +212,6 @@ impl GameState {
             self.population.value(),
             self.config.population_k,
         )
-    }
-
-    /// Calculate total output from all zones
-    pub fn calculate_total_output(&self) -> f32 {
-        let mut total = 0.0;
-        for zone in &self.zones {
-            if let Some(template) = self.get_template(&zone.template_id) {
-                let throughput = zone.calculate_throughput(template);
-                let output = crate::economy::calculate_output(throughput, &self.resources);
-                total += output;
-            }
-        }
-        total
     }
 
     /// Calculate total maintenance cost
@@ -343,7 +324,6 @@ impl Default for GameState {
     fn default() -> Self {
         Self::new(
             GameConfig::default(),
-            Vec::new(),
             Vec::new(),
             crate::assets::GameAssets::default(),
         )

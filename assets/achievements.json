@@ -1,0 +1,122 @@
+[
+    {
+        "id": "first_house",
+        "name": "First House",
+        "description": "Build your first residential zone",
+        "icon": "🏠"
+    },
+    {
+        "id": "settler_spirit",
+        "name": "Settler Spirit",
+        "description": "Restore 10 zones",
+        "icon": "⛺"
+    },
+    {
+        "id": "growing_community",
+        "name": "Growing Community",
+        "description": "Reach 50 population",
+        "icon": "👥"
+    },
+    {
+        "id": "first_hundred",
+        "name": "First Hundred",
+        "description": "Reach 100 population",
+        "icon": "💯"
+    },
+    {
+        "id": "town_proper",
+        "name": "Town Proper",
+        "description": "Reach 500 population",
+        "icon": "🏘️"
+    },
+    {
+        "id": "hoarder",
+        "name": "Hoarder",
+        "description": "Accumulate 1,000 materials",
+        "icon": "📦"
+    },
+    {
+        "id": "wealthy",
+        "name": "Wealthy",
+        "description": "Accumulate 10,000 materials",
+        "icon": "💰"
+    },
+    {
+        "id": "millionaire",
+        "name": "Millionaire",
+        "description": "Accumulate 100,000 materials",
+        "icon": "💎"
+    },
+    {
+        "id": "utopia",
+        "name": "Utopia",
+        "description": "Achieve stability and attractiveness above 0.8",
+        "icon": "🌟"
+    },
+    {
+        "id": "builder",
+        "name": "Builder",
+        "description": "Build 25 zones",
+        "icon": "🔨"
+    },
+    {
+        "id": "master_builder",
+        "name": "Master Builder",
+        "description": "Build 50 zones",
+        "icon": "🏗️"
+    },
+    {
+        "id": "scholar",
+        "name": "Scholar",
+        "description": "Research all technologies",
+        "icon": "📚"
+    },
+    {
+        "id": "legacy_founder",
+        "name": "Legacy Founder",
+        "description": "Complete your first wonder",
+        "icon": "🏛️"
+    },
+    {
+        "id": "wonder_worker",
+        "name": "Wonder Worker",
+        "description": "Complete 3 wonders",
+        "icon": "✨"
+    },
+    {
+        "id": "dynasty_ruler",
+        "name": "Dynasty Ruler",
+        "description": "Settle 5 different towns",
+        "icon": "👑"
+    },
+    {
+        "id": "remembered",
+        "name": "Remembered",
+        "description": "Immortalize your first hero",
+        "icon": "⭐"
+    },
+    {
+        "id": "ancestor_worship",
+        "name": "Ancestor Worship",
+        "description": "Retire 10 heroes as ancestors",
+        "icon": "🕯️"
+    },
+    {
+        "id": "dedicated",
+        "name": "Dedicated",
+        "description": "Play for 10 in-game days",
+        "icon": "⏰"
+    },
+    {
+        "id": "veteran",
+        "name": "Veteran",
+        "description": "Play for 100 in-game days",
+        "icon": "🎖️"
+    },
+    {
+        "id": "winter_survivor",
+        "name": "Winter Survivor",
+        "description": "Survive your first winter",
+        "icon": "❄️"
+    }
+]

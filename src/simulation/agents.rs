@@ -66,7 +66,6 @@ pub enum AgentState {
     GoingHome,
     Sleeping,
     Building { target: Vec2, zone_idx: usize },
-    Hauling { source: Vec2, destination: Vec2, carrying: bool },
 }
 
 /// Track agent accomplishments for Hall of Heroes
@@ -132,7 +131,6 @@ pub struct Agent {
     
     // Job and workplace
     pub job: Job,
-    pub workplace_id: Option<String>, // Zone template_id this agent works at
     pub home_pos: Vec2,
     
     // Personality / Stats
@@ -156,7 +154,6 @@ impl Agent {
             social: 1.0,
             spirit: 1.0,
             job: Job::default(),
-            workplace_id: None,
             home_pos: pos, // Default home is spawn position
             speed: 60.0 + rand::gen_range(-15.0, 15.0),
             color: [
@@ -330,28 +327,6 @@ impl Agent {
                     }
                 }
             },
-            AgentState::Hauling { source, destination, carrying } => {
-                // Move towards source if not carrying, destination if carrying
-                let target = if carrying { destination } else { source };
-                
-                if self.pos.distance(target) < 5.0 {
-                    if carrying {
-                        // Delivered - track feat and go back to idle
-                        self.feats.resources_hauled += 1;
-                        self.state = AgentState::Idle;
-                    } else {
-                        // Picked up - now go to destination
-                        self.state = AgentState::Hauling { 
-                            source, 
-                            destination, 
-                            carrying: true 
-                        };
-                    }
-                } else {
-                    let dir = (target - self.pos).normalize();
-                    self.pos += dir * self.speed * 0.8 * delta; // Slightly slower when hauling
-                }
-            }
         }
         
         // Bounds

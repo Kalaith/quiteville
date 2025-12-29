@@ -50,9 +50,4 @@ impl GameLog {
     pub fn entries(&self) -> &[LogEntry] {
         &self.entries
     }
-
-    pub fn recent(&self, count: usize) -> &[LogEntry] {
-        let start = self.entries.len().saturating_sub(count);
-        &self.entries[start..]
-    }
 }

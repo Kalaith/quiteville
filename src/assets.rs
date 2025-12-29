@@ -8,8 +8,8 @@ pub const CONFIG_JSON: &str = include_str!("../assets/config.json");
 /// Zone definitions
 pub const ZONES_JSON: &str = include_str!("../assets/zones.json");
 
-/// Milestone definitions
-pub const MILESTONES_JSON: &str = include_str!("../assets/milestones.json");
+/// Achievement definitions
+pub const ACHIEVEMENTS_JSON: &str = include_str!("../assets/achievements.json");
 
 /// Load and parse the game configuration
 pub fn load_config() -> Result<crate::data::GameConfig, serde_json::Error> {
@@ -21,10 +21,11 @@ pub fn load_zones() -> Result<Vec<crate::data::ZoneTemplate>, serde_json::Error>
     serde_json::from_str(ZONES_JSON)
 }
 
-/// Load and parse milestones
-pub fn load_milestones() -> Result<Vec<crate::data::Milestone>, serde_json::Error> {
-    serde_json::from_str(MILESTONES_JSON)
+/// Load and parse achievement definitions
+pub fn load_achievements() -> Result<Vec<crate::data::AchievementDef>, serde_json::Error> {
+    serde_json::from_str(ACHIEVEMENTS_JSON)
 }
+
 use std::collections::HashMap;
 use macroquad::prelude::*;
 

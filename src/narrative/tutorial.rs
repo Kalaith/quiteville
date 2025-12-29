@@ -204,31 +204,4 @@ impl TutorialManager {
             self.state = TutorialState::WaitingFirstZone;
         }
     }
-    
-    /// Trigger a specific hint if not shown yet
-    pub fn trigger_hint(&mut self, trigger: HintTrigger) {
-        if self.is_complete() || self.shown_hints.contains(&trigger) {
-            return;
-        }
-        
-        self.shown_hints.insert(trigger.clone());
-        
-        match trigger {
-            HintTrigger::TechTreeOpened => {
-                self.show_dialog(
-                    "Uncle Artie",
-                    "The tech tree shows all the improvements we can make. Each one costs materials but makes the town stronger.",
-                    false
-                );
-            }
-            HintTrigger::ChronicleOpened => {
-                self.show_dialog(
-                    "Uncle Artie",
-                    "The Chronicle records our history. When a villager does something remarkable, you can immortalize them here for all time.",
-                    false
-                );
-            }
-            _ => {} // Other triggers handled in update()
-        }
-    }
 }

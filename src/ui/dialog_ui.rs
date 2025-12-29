@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use crate::data::GameState;
 use crate::PlayerAction;
 use crate::ui::theme;
-use crate::ui::colors;
+use crate::ui::theme::colors;
 
 /// Draw the active guide dialog if any
 pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
@@ -50,7 +50,6 @@ pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
         // Content Area (Right)
         let content_x = portrait_x + portrait_size + 20.0;
         let content_y = y + 20.0;
-        let content_w = w - content_x - 20.0 + x; // Width remaining
         
         // Speaker Name
         theme::draw_header(&dialog.speaker, content_x, content_y);
@@ -70,7 +69,6 @@ pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
         // Buttons row
         let btn_w = 100.0;
         let btn_h = 40.0;
-        let btn_spacing = 10.0;
         let btn_y = y + h - btn_h - 20.0;
         
         // Skip Tutorial button (left)

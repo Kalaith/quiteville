@@ -4,7 +4,6 @@ use macroquad::prelude::*;
 pub struct Camera2D {
     pub target: Vec2,
     pub zoom: f32,
-    pub offset: Vec2,
     
     // Drag state
     pub drag_start: Option<Vec2>,
@@ -16,7 +15,6 @@ impl Default for Camera2D {
         Self {
             target: vec2(0.0, 0.0),
             zoom: 1.0,
-            offset: vec2(0.0, 0.0),
             drag_start: None,
             cam_start: vec2(0.0, 0.0),
         }

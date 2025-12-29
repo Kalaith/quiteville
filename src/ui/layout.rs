@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use crate::data::GameState;
 use crate::PlayerAction;
 use super::zones;
-use super::colors;
+use crate::ui::theme::colors;
 use super::theme;
 
 /// Draw the main content layout
@@ -105,7 +105,6 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      
                      if template.output.materials > 0.0 {
                          draw_text(&format!("Production: +{:.3} Material", template.output.materials), x + 10.0, y + output_y, 20.0, WHITE);
-                         output_y += 25.0;
                      }
                      
                      // Status line at bottom (adjusted Y dynamically)
@@ -129,6 +128,31 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                          }
                      } else {
                          draw_text("STATUS: FULLY RESTORED", x + 10.0, status_y + 20.0, 20.0, GREEN);
+                         
+                         // Check if zone can be upgraded
+                         if let Some(upgrade_to) = crate::zones::upgrades::can_upgrade(state, idx) {
+                             let can_afford = crate::zones::upgrades::can_afford_upgrade(state, idx);
+                             let btn_x = x + 10.0;
+                             let btn_y = status_y - 35.0;
+                             let btn_w = 120.0;
+                             let btn_h = 30.0;
+                             
+                             // Show upgrade info
+                             if let Some(target_template) = state.zone_templates.iter().find(|t| t.id == upgrade_to) {
+                                 draw_text(&format!("→ {}: {} mat", target_template.name, target_template.construction_cost), 
+                                     x + 10.0, status_y - 45.0, 14.0, if can_afford { colors::ACCENT } else { GRAY });
+                             }
+                             
+                             if can_afford {
+                                 if theme::draw_button(btn_x, btn_y, btn_w, btn_h, "Upgrade") {
+                                     action = Some(PlayerAction::UpgradeZone(idx));
+                                 }
+                             } else {
+                                 // Draw disabled button (just visual)
+                                 draw_rectangle(btn_x, btn_y, btn_w, btn_h, DARKGRAY);
+                                 draw_text("Upgrade", btn_x + 20.0, btn_y + 20.0, 16.0, GRAY);
+                             }
+                         }
                      }
                 }
             }
@@ -155,7 +179,6 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                      crate::simulation::agents::AgentState::GoingHome => "Going Home".to_string(),
                      crate::simulation::agents::AgentState::Sleeping => "Sleeping".to_string(),
                      crate::simulation::agents::AgentState::Building { .. } => "Building".to_string(),
-                     crate::simulation::agents::AgentState::Hauling { .. } => "Hauling".to_string(),
                  };
                  draw_text(&format!("Doing: {}", state_text), x + 10.0, y + 165.0, 18.0, YELLOW);
                  

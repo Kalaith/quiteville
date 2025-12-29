@@ -71,7 +71,6 @@ pub fn draw_agent_tooltip(agent: &Agent, mouse_pos: Vec2) {
         crate::simulation::agents::AgentState::GoingHome => "Going Home",
         crate::simulation::agents::AgentState::Sleeping => "Sleeping",
         crate::simulation::agents::AgentState::Building { .. } => "Building",
-        crate::simulation::agents::AgentState::Hauling { .. } => "Hauling",
     };
     
     let mut trait_summary = String::new();
