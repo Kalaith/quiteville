@@ -24,7 +24,8 @@ fn window_conf() -> Conf {
         window_title: "Quiteville".to_owned(),
         window_width: 1280,
         window_height: 720,
-        high_dpi: true,
+        high_dpi: false,
+        sample_count: 0,
         ..Default::default()
     }
 }
@@ -131,7 +132,9 @@ async fn initialize_game() -> GameState {
     
     // Demonstrate use_static_map is available (uses generate_starter)
     // Use an always-false condition that compiler can't verify easily at compile time to keep it alive
-    if std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() == 0 {
+    // Demonstrate use_static_map is available (uses generate_starter)
+    // Use an always-false condition that compiler can't verify easily at compile time to keep it alive
+    if get_time() < 0.0 {
         state.use_static_map(12345);
     }
     

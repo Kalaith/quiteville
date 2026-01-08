@@ -24,6 +24,7 @@ pub fn draw_button(x: f32, y: f32, w: f32, h: f32, text: &str) -> bool {
         pressed: colors::BUTTON_BG,
         border: colors::PANEL_BORDER,
         text_color: colors::TEXT,
+        disabled: Color::new(0.1, 0.1, 0.1, 1.0),
     };
 
     // Quiteville uses on_release behavior
