@@ -1,6 +1,6 @@
 //! Zones module - Zone state and behavior
 
-mod zone;
 pub mod upgrades;
+mod zone;
 
 pub use zone::*;

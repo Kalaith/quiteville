@@ -1,33 +1,33 @@
 //! Agent traits for personality and emergent storytelling
 
-use serde::{Deserialize, Serialize};
 use macroquad::rand;
+use serde::{Deserialize, Serialize};
 
 /// Personality traits that affect agent behavior
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Trait {
     // Work-related
-    Hardworking,    // +20% work speed
-    Lazy,           // -15% work speed
-    NightOwl,       // Works better at night
-    EarlyBird,      // Works better in morning
-    
+    Hardworking, // +20% work speed
+    Lazy,        // -15% work speed
+    NightOwl,    // Works better at night
+    EarlyBird,   // Works better in morning
+
     // Social
-    Charismatic,    // +Opinion gain from interactions
-    Loner,          // Needs less social, dislikes crowds
-    Gossip,         // Spreads memories faster
-    
+    Charismatic, // +Opinion gain from interactions
+    Loner,       // Needs less social, dislikes crowds
+    Gossip,      // Spreads memories faster
+
     // Needs
-    Glutton,        // Eats 2x as much
-    Frugal,         // Eats 0.5x as much
-    Energetic,      // Needs less sleep
-    Sleepyhead,     // Needs more sleep
-    
+    Glutton,    // Eats 2x as much
+    Frugal,     // Eats 0.5x as much
+    Energetic,  // Needs less sleep
+    Sleepyhead, // Needs more sleep
+
     // Special
-    Optimist,       // Spirit decays slower
-    Pessimist,      // Spirit decays faster
-    Tough,          // Less affected by bad events
-    Sensitive,      // More affected by all events
+    Optimist,  // Spirit decays slower
+    Pessimist, // Spirit decays faster
+    Tough,     // Less affected by bad events
+    Sensitive, // More affected by all events
 }
 
 impl Trait {
@@ -51,7 +51,7 @@ impl Trait {
             Trait::Sensitive => "Sensitive",
         }
     }
-    
+
     /// Description for tooltips
     pub fn description(&self) -> &'static str {
         match self {
@@ -72,7 +72,7 @@ impl Trait {
             Trait::Sensitive => "Strongly affected by all events",
         }
     }
-    
+
     /// Work speed multiplier
     pub fn work_speed_modifier(&self) -> f32 {
         match self {
@@ -81,7 +81,7 @@ impl Trait {
             _ => 1.0,
         }
     }
-    
+
     /// Hunger decay multiplier
     pub fn hunger_decay_modifier(&self) -> f32 {
         match self {
@@ -90,7 +90,7 @@ impl Trait {
             _ => 1.0,
         }
     }
-    
+
     /// Energy decay multiplier
     pub fn energy_decay_modifier(&self) -> f32 {
         match self {
@@ -99,7 +99,7 @@ impl Trait {
             _ => 1.0,
         }
     }
-    
+
     /// Spirit decay multiplier
     pub fn spirit_decay_modifier(&self) -> f32 {
         match self {
@@ -108,7 +108,7 @@ impl Trait {
             _ => 1.0,
         }
     }
-    
+
     /// Social need decay multiplier
     pub fn social_decay_modifier(&self) -> f32 {
         match self {
@@ -121,15 +121,26 @@ impl Trait {
 /// Generate random traits for a new agent (1-3 traits)
 pub fn generate_random_traits() -> Vec<Trait> {
     let all_traits = [
-        Trait::Hardworking, Trait::Lazy, Trait::NightOwl, Trait::EarlyBird,
-        Trait::Charismatic, Trait::Loner, Trait::Gossip,
-        Trait::Glutton, Trait::Frugal, Trait::Energetic, Trait::Sleepyhead,
-        Trait::Optimist, Trait::Pessimist, Trait::Tough, Trait::Sensitive,
+        Trait::Hardworking,
+        Trait::Lazy,
+        Trait::NightOwl,
+        Trait::EarlyBird,
+        Trait::Charismatic,
+        Trait::Loner,
+        Trait::Gossip,
+        Trait::Glutton,
+        Trait::Frugal,
+        Trait::Energetic,
+        Trait::Sleepyhead,
+        Trait::Optimist,
+        Trait::Pessimist,
+        Trait::Tough,
+        Trait::Sensitive,
     ];
-    
+
     let count = rand::gen_range(1u32, 4) as usize;
     let mut traits = Vec::with_capacity(count);
-    
+
     for _ in 0..count {
         let idx = rand::gen_range(0, all_traits.len());
         let t = all_traits[idx];
@@ -138,7 +149,7 @@ pub fn generate_random_traits() -> Vec<Trait> {
             traits.push(t);
         }
     }
-    
+
     traits
 }
 
@@ -154,7 +165,9 @@ fn conflicts_with(existing: &[Trait], new: Trait) -> bool {
             (Trait::Tough, Trait::Sensitive) | (Trait::Sensitive, Trait::Tough) => true,
             _ => false,
         };
-        if conflict { return true; }
+        if conflict {
+            return true;
+        }
     }
     false
 }

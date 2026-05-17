@@ -45,37 +45,35 @@ impl ChronicleEvent {
             event_type,
         }
     }
-    
+
     /// Get a display string for this event
     pub fn display_text(&self) -> String {
         match &self.event_type {
             ChronicleEventType::VillagerArrived { name } => {
                 format!("{} joined the town", name)
-            },
+            }
             ChronicleEventType::VillagerLost { name, reason } => {
                 format!("{} left: {}", name, reason)
-            },
+            }
             ChronicleEventType::BuildingConstructed { building_name } => {
                 format!("{} was built", building_name)
-            },
+            }
             ChronicleEventType::BuildingUpgraded { from, to } => {
                 format!("{} upgraded to {}", from, to)
-            },
+            }
             ChronicleEventType::TechResearched { tech_name } => {
                 format!("Discovered: {}", tech_name)
-            },
+            }
             ChronicleEventType::MilestoneAchieved { milestone_name } => {
                 format!("⭐ {}", milestone_name)
-            },
+            }
             ChronicleEventType::SeasonChanged { season } => {
                 format!("{} has begun", season)
-            },
+            }
             ChronicleEventType::Disaster { description } => {
                 format!("⚠ {}", description)
-            },
-            ChronicleEventType::Special { description } => {
-                description.clone()
-            },
+            }
+            ChronicleEventType::Special { description } => description.clone(),
         }
     }
 }
@@ -97,37 +95,37 @@ impl TownChronicle {
             max_events,
         }
     }
-    
+
     /// Record a new event
     pub fn record(&mut self, timestamp: f32, event_type: ChronicleEventType) {
         self.events.push(ChronicleEvent::new(timestamp, event_type));
-        
+
         // Trim if too many
         if self.events.len() > self.max_events {
             self.events.remove(0);
         }
     }
-    
+
     /// Get all events
     pub fn events(&self) -> &[ChronicleEvent] {
         &self.events
     }
-    
+
     /// Get events from a specific day
     pub fn events_on_day(&self, day: u32) -> Vec<&ChronicleEvent> {
         self.events.iter().filter(|e| e.day == day).collect()
     }
-    
+
     /// Get the most recent N events
     pub fn recent(&self, count: usize) -> Vec<&ChronicleEvent> {
         self.events.iter().rev().take(count).collect()
     }
-    
+
     /// Get total number of events
     pub fn len(&self) -> usize {
         self.events.len()
     }
-    
+
     /// Check if empty
     pub fn is_empty(&self) -> bool {
         self.events.is_empty()
@@ -180,7 +178,7 @@ impl AncestorBuff {
             AncestorBuff::GrowthBoost => "Blessing of Fertility",
         }
     }
-    
+
     pub fn description(&self) -> &'static str {
         match self {
             AncestorBuff::ProductionBoost => "+10% resource production",
@@ -231,25 +229,28 @@ impl Dynasty {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     pub fn add_legacy_points(&mut self, amount: u32) {
         self.legacy_points += amount;
     }
-    
+
     pub fn add_town_record(&mut self, record: TownRecord) {
         self.past_towns.push(record);
     }
-    
+
     pub fn add_hero(&mut self, hero: VillagerRecord) {
         self.hall_of_heroes.push(hero);
     }
-    
+
     /// Retire a hero from the Hall of Heroes to become an ancestor
     pub fn retire_hero(&mut self, hero_name: &str, game_time: f32) -> Option<AncestorBuff> {
         // Find and remove from hall of heroes
-        let pos = self.hall_of_heroes.iter().position(|h| h.name == hero_name)?;
+        let pos = self
+            .hall_of_heroes
+            .iter()
+            .position(|h| h.name == hero_name)?;
         let hero = self.hall_of_heroes.remove(pos);
-        
+
         // Determine buff based on hero's feats
         let buff = if hero.feats.iter().any(|f| f.contains("build")) {
             AncestorBuff::ProductionBoost
@@ -260,24 +261,24 @@ impl Dynasty {
         } else {
             AncestorBuff::LuckBoost
         };
-        
+
         let spirit = AncestorSpirit::new(hero, buff, game_time);
         self.ancestors.push(spirit);
-        
+
         Some(buff)
     }
-    
+
     /// Add a completed wonder
     pub fn add_wonder(&mut self, wonder: super::wonders::Wonder) {
         if !self.completed_wonders.contains(&wonder) {
             self.completed_wonders.push(wonder);
         }
     }
-    
+
     /// Calculate total ancestor buffs
     pub fn ancestor_buffs(&self) -> AncestorBuffTotals {
         let mut totals = AncestorBuffTotals::default();
-        
+
         for ancestor in &self.ancestors {
             match ancestor.buff {
                 AncestorBuff::ProductionBoost => totals.production += 0.10,
@@ -286,7 +287,7 @@ impl Dynasty {
                 AncestorBuff::GrowthBoost => totals.growth += 0.05,
             }
         }
-        
+
         totals
     }
 }

@@ -9,7 +9,7 @@ pub mod colors {
     pub const PANEL_BORDER: Color = Color::new(0.3, 0.3, 0.35, 1.0);
     pub const TEXT: Color = Color::new(0.9, 0.9, 0.9, 1.0);
     pub const ACCENT: Color = Color::new(0.4, 0.8, 0.4, 1.0);
-    pub const SECONDARY: Color = Color::new(0.6, 0.5, 0.8, 1.0);  // Purple for ancestors
+    pub const SECONDARY: Color = Color::new(0.6, 0.5, 0.8, 1.0); // Purple for ancestors
     pub const WARN: Color = Color::new(0.9, 0.6, 0.2, 1.0);
     pub const BUTTON_BG: Color = Color::new(0.25, 0.25, 0.3, 1.0);
     pub const BUTTON_HOVER: Color = Color::new(0.35, 0.35, 0.4, 1.0);

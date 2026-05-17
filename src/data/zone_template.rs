@@ -8,45 +8,45 @@ pub struct ZoneTemplate {
     pub id: String,
     pub name: String,
     pub category: ZoneCategory,
-    
+
     /// Base throughput before condition/activity multipliers
     pub base_throughput: f32,
-    
+
     /// Cost to build/restore (material units)
     #[serde(default)]
     pub construction_cost: f32,
-    
+
     /// Work units required to complete construction
     #[serde(default = "default_construction_work")]
     pub construction_work: f32,
-    
+
     /// Materials required for construction
     #[serde(default)]
     pub construction_materials: ResourceDelta,
-    
+
     /// How fast diminishing returns kick in (higher = faster plateau)
     pub saturation_bias: f32,
-    
+
     /// Resource effects when zone is active
     pub output: ResourceDelta,
-    
+
     /// Resource costs to maintain the zone
     pub upkeep: ResourceDelta,
-    
+
     /// Population effects
     pub population: PopulationEffect,
-    
+
     /// Decay behavior
     pub decay: DecayModel,
-    
+
     /// Map coordinates for this zone (Phase 4.2)
     #[serde(default)]
     pub map_rect: Option<MapRect>,
-    
+
     /// Tech ID required to unlock this zone (if any)
     #[serde(default)]
     pub locked_by_tech: Option<String>,
-    
+
     /// Template ID this zone can upgrade to (if any)
     #[serde(default)]
     pub upgrade_to: Option<String>,

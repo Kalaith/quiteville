@@ -1,5 +1,5 @@
 //! Achievement system for tracking player accomplishments
-//! 
+//!
 //! Achievement definitions are loaded from assets/achievements.json
 
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ impl AchievementManager {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     /// Initialize with loaded definitions
     pub fn with_definitions(definitions: Vec<AchievementDef>) -> Self {
         Self {
@@ -43,12 +43,12 @@ impl AchievementManager {
             ..Default::default()
         }
     }
-    
+
     /// Set definitions (called after loading from JSON)
     pub fn set_definitions(&mut self, definitions: Vec<AchievementDef>) {
         self.definitions = definitions;
     }
-    
+
     /// Unlock an achievement by ID if not already unlocked
     /// Returns true if newly unlocked
     pub fn unlock(&mut self, achievement_id: &str) -> bool {
@@ -59,37 +59,39 @@ impl AchievementManager {
             false
         }
     }
-    
+
     /// Get achievement definition by ID
     pub fn get_def(&self, id: &str) -> Option<&AchievementDef> {
         self.definitions.iter().find(|d| d.id == id)
     }
-    
+
     /// Get count of unlocked achievements
     pub fn count(&self) -> usize {
         self.unlocked.len()
     }
-    
+
     /// Get total number of achievements
     pub fn total(&self) -> usize {
         self.definitions.len()
     }
-    
+
     /// Pop a newly unlocked achievement for display
     pub fn pop_notification(&mut self) -> Option<AchievementDef> {
         let id = self.newly_unlocked.pop()?;
         self.get_def(&id).cloned()
     }
-    
+
     /// Get all unlocked achievements as sorted definitions
     pub fn unlocked_list(&self) -> Vec<&AchievementDef> {
-        let mut list: Vec<_> = self.definitions.iter()
+        let mut list: Vec<_> = self
+            .definitions
+            .iter()
             .filter(|d| self.unlocked.contains(&d.id))
             .collect();
         list.sort_by_key(|a| &a.name);
         list
     }
-    
+
     /// Check if specific achievement is unlocked
     pub fn is_unlocked(&self, id: &str) -> bool {
         self.unlocked.contains(id)
@@ -131,12 +133,12 @@ impl GameStats {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     /// Record resource collection
     pub fn add_resources(&mut self, amount: f32) {
         self.resources_collected += amount;
     }
-    
+
     /// Update peak tracking
     pub fn update_peaks(&mut self, current_resources: f32, current_population: u32) {
         if current_resources > self.peak_resources {

@@ -24,7 +24,7 @@ impl Wonder {
             Wonder::CloudSpire => "The Cloud Spire",
         }
     }
-    
+
     pub fn description(&self) -> &'static str {
         match self {
             Wonder::GreatLibrary => "A monument to knowledge. Boosts research speed by 50%.",
@@ -33,7 +33,7 @@ impl Wonder {
             Wonder::CloudSpire => "The ultimate achievement. Unlocks the ending.",
         }
     }
-    
+
     /// Get the stages required to build this wonder
     pub fn stages(&self) -> Vec<WonderStage> {
         match self {
@@ -64,12 +64,12 @@ impl Wonder {
             ],
         }
     }
-    
+
     /// Total resources needed to complete
     pub fn total_cost(&self) -> f32 {
         self.stages().iter().map(|s| s.cost).sum()
     }
-    
+
     /// Is this the endgame wonder?
     pub fn is_endgame(&self) -> bool {
         matches!(self, Wonder::CloudSpire)
@@ -122,13 +122,13 @@ impl WonderSite {
             completed_at: None,
         }
     }
-    
+
     /// Get current stage info
     pub fn current_stage_info(&self) -> Option<WonderStage> {
         let stages = self.wonder.stages();
         stages.get(self.current_stage).cloned()
     }
-    
+
     /// Get progress percentage for current stage (0.0 - 1.0)
     pub fn stage_progress_percent(&self) -> f32 {
         if let Some(stage) = self.current_stage_info() {
@@ -137,48 +137,45 @@ impl WonderSite {
             1.0
         }
     }
-    
+
     /// Get overall progress percentage (0.0 - 1.0)
     pub fn overall_progress(&self) -> f32 {
         let stages = self.wonder.stages();
         let total_cost = self.wonder.total_cost();
-        
-        let mut completed_cost: f32 = stages.iter()
-            .take(self.current_stage)
-            .map(|s| s.cost)
-            .sum();
+
+        let mut completed_cost: f32 = stages.iter().take(self.current_stage).map(|s| s.cost).sum();
         completed_cost += self.stage_progress;
-        
+
         completed_cost / total_cost
     }
-    
+
     /// Contribute resources to the wonder
     /// Returns (resources used, stage completed, wonder completed)
     pub fn contribute(&mut self, materials: f32, game_time: f32) -> (f32, bool, bool) {
         if self.completed {
             return (0.0, false, false);
         }
-        
+
         let stages = self.wonder.stages();
         if self.current_stage >= stages.len() {
             return (0.0, false, false);
         }
-        
+
         let stage = &stages[self.current_stage];
         let needed = stage.cost - self.stage_progress;
         let used = materials.min(needed);
-        
+
         self.stage_progress += used;
-        
+
         let mut stage_completed = false;
         let mut wonder_completed = false;
-        
+
         // Check if stage is complete
         if self.stage_progress >= stage.cost {
             stage_completed = true;
             self.current_stage += 1;
             self.stage_progress = 0.0;
-            
+
             // Check if wonder is complete
             if self.current_stage >= stages.len() {
                 self.completed = true;
@@ -186,7 +183,7 @@ impl WonderSite {
                 wonder_completed = true;
             }
         }
-        
+
         (used, stage_completed, wonder_completed)
     }
 }
@@ -198,10 +195,8 @@ pub fn can_build_cloud_spire(
     population: f32,
 ) -> bool {
     // Requires at least 3 other wonders
-    let other_wonders = completed_wonders.iter()
-        .filter(|w| !w.is_endgame())
-        .count();
-    
+    let other_wonders = completed_wonders.iter().filter(|w| !w.is_endgame()).count();
+
     other_wonders >= 3 && legacy_points >= 1000 && population >= 50.0
 }
 
@@ -220,7 +215,7 @@ impl WonderBuffs {
             population_growth: 1.0,
             production: 1.0,
         };
-        
+
         for wonder in wonders {
             match wonder {
                 Wonder::GreatLibrary => buffs.research_speed *= 1.5,
@@ -234,7 +229,7 @@ impl WonderBuffs {
                 }
             }
         }
-        
+
         buffs
     }
 }

@@ -14,7 +14,7 @@ pub struct Resources {
     pub attractiveness: f32,
     /// How predictable the city is
     pub stability: f32,
-    
+
     // === Raw Materials (Phase 2) ===
     /// Raw logs from woodcutters
     #[serde(default)]
@@ -25,7 +25,7 @@ pub struct Resources {
     /// Raw grain from farms
     #[serde(default)]
     pub grain: f32,
-    
+
     // === Processed Materials (Phase 2) ===
     /// Processed lumber (from logs)
     #[serde(default)]
@@ -61,7 +61,7 @@ impl Resources {
         self.maintenance += delta.maintenance;
         self.attractiveness += delta.attractiveness;
         self.stability += delta.stability;
-        
+
         // Soft floor at 0 (resources can't go negative)
         self.materials = self.materials.max(0.0);
         self.maintenance = self.maintenance.max(0.0);
@@ -134,6 +134,15 @@ pub fn maintenance_cost(effective_pop: f32, coefficient: f32) -> f32 {
     coefficient * effective_pop * effective_pop
 }
 
+/// Calculate capped offline production using logarithmic time scaling.
+pub fn offline_gain(output_per_hour: f32, hours: f32) -> f32 {
+    if output_per_hour <= 0.0 || hours <= 0.0 {
+        return 0.0;
+    }
+
+    output_per_hour * (hours.ln_1p() / 2.0_f32.ln())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,11 +152,11 @@ mod tests {
         // Early game: P=5, K=10 -> 0.33
         let result = effective_population(5.0, 10.0);
         assert!((result - 0.333).abs() < 0.01);
-        
+
         // Late game: P=1000, K=10 -> ~0.99
         let result = effective_population(1000.0, 10.0);
         assert!(result > 0.98 && result < 1.0);
-        
+
         // Never reaches 1.0
         let result = effective_population(1_000_000.0, 10.0);
         assert!(result < 1.0);
@@ -157,7 +166,7 @@ mod tests {
     fn test_material_factor_diminishing_returns() {
         // Low materials: M=1 -> 0.5
         assert!((material_factor(1.0) - 0.5).abs() < 0.01);
-        
+
         // High materials: M=50 -> ~0.98
         let result = material_factor(50.0);
         assert!(result > 0.95 && result < 1.0);
@@ -168,7 +177,7 @@ mod tests {
         // Cost scales with population squared
         let cost_low = maintenance_cost(0.33, 0.02);
         let cost_high = maintenance_cost(0.99, 0.02);
-        
+
         // High population costs ~9x more
         assert!(cost_high / cost_low > 8.0);
     }
@@ -176,13 +185,13 @@ mod tests {
     #[test]
     fn test_offline_gain_logarithmic() {
         let output = 8.0;
-        
+
         // 1 hour away
         let gain_1h = offline_gain(output, 1.0);
-        
+
         // 72 hours away
         let gain_72h = offline_gain(output, 72.0);
-        
+
         // 72x time should NOT give 72x gain (log scaling)
         assert!(gain_72h < gain_1h * 10.0);
     }

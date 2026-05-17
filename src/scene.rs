@@ -43,7 +43,7 @@ impl SceneManager {
             is_transitioning: false,
         }
     }
-    
+
     /// Request a scene change
     pub fn transition_to(&mut self, scene: Scene) {
         if scene != self.current && !self.is_transitioning {
@@ -52,7 +52,7 @@ impl SceneManager {
             self.transition_progress = 0.0;
         }
     }
-    
+
     /// Toggle between town and region view
     pub fn toggle_region_view(&mut self) {
         match self.current {
@@ -61,17 +61,17 @@ impl SceneManager {
             _ => {}
         }
     }
-    
+
     /// Update transition progress
     /// Returns true when transition completes
     pub fn update(&mut self, delta: f32) -> bool {
         if !self.is_transitioning {
             return false;
         }
-        
+
         // Fade speed
         self.transition_progress += delta * 2.0; // 0.5 seconds fade
-        
+
         if self.transition_progress >= 1.0 {
             // Complete the transition
             if let Some(next) = self.pending_transition.take() {
@@ -81,16 +81,16 @@ impl SceneManager {
             self.transition_progress = 0.0;
             return true;
         }
-        
+
         false
     }
-    
+
     /// Get the fade alpha for transition effects (0.0 = visible, 1.0 = black)
     pub fn fade_alpha(&self) -> f32 {
         if !self.is_transitioning {
             return 0.0;
         }
-        
+
         // Fade out then fade in
         if self.transition_progress < 0.5 {
             self.transition_progress * 2.0 // 0 -> 1
@@ -98,12 +98,12 @@ impl SceneManager {
             (1.0 - self.transition_progress) * 2.0 // 1 -> 0
         }
     }
-    
+
     /// Check if we're in town view
     pub fn in_town_view(&self) -> bool {
         self.current == Scene::TownView
     }
-    
+
     /// Check if we're in region view
     pub fn in_region_view(&self) -> bool {
         self.current == Scene::RegionView

@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Population pressure state
-/// 
+///
 /// Population is NOT a count of people. It's a pressure value that:
 /// - Generates needs
 /// - Creates momentum
@@ -12,10 +12,10 @@ use serde::{Deserialize, Serialize};
 pub struct PopulationPressure {
     /// Current pressure value (0 to infinity, but saturates via formulas)
     pressure: f32,
-    
+
     /// Growth rate per tick (affected by attractiveness)
     growth_rate: f32,
-    
+
     /// Decay rate per tick (base decay when no attractiveness)
     decay_rate: f32,
 }
@@ -45,9 +45,9 @@ impl PopulationPressure {
         } else {
             0.0 // No space = no growth
         };
-        
+
         let growth = self.growth_rate * attractiveness * space_factor * delta_time;
-        
+
         // Decay is always present
         // If over capacity (pressure > capacity), add extra decay to simulate overcrowding
         let overcrowding_factor = if self.pressure > capacity {
@@ -55,9 +55,9 @@ impl PopulationPressure {
         } else {
             1.0
         };
-        
+
         let decay = self.decay_rate * overcrowding_factor * delta_time;
-        
+
         self.pressure += growth - decay;
         self.pressure = self.pressure.max(0.0);
     }

@@ -23,7 +23,7 @@ impl TechBonuses {
 }
 
 /// Manages game tick timing
-/// 
+///
 /// Separates frame time (fast, visual updates) from game ticks (slow, logic updates).
 /// This allows the simulation to run at a consistent rate regardless of framerate.
 pub struct TickTimer {
@@ -42,7 +42,7 @@ impl TickTimer {
     }
 
     /// Update timer with frame delta, returns number of game ticks to process
-    /// 
+    ///
     /// Call this every frame with get_frame_time(). It accumulates time and
     /// returns how many full ticks should be processed this frame.
     pub fn update(&mut self, delta_time: f32) -> u32 {
@@ -53,33 +53,45 @@ impl TickTimer {
     }
 }
 
+/// Tracks saved-time information for offline progress calculations.
+pub struct TimeTracker {
+    pub total_hours: f32,
+    pub last_save_time: u64,
+    pub session_start_time: u64,
+}
+
+impl TimeTracker {
+    /// Calculate offline hours from a unix timestamp, capped to avoid runaway gains.
+    pub fn calculate_offline_hours(&self, current_time: u64, cap_hours: f32) -> f32 {
+        let elapsed_seconds = current_time.saturating_sub(self.last_save_time);
+        let elapsed_hours = elapsed_seconds as f32 / 3600.0;
+        elapsed_hours.min(cap_hours.max(0.0))
+    }
+}
+
 /// Simulate multiple ticks at once (for catching up or fast-forward)
-/// 
+///
 /// More efficient than calling game_tick() many times - batches calculations.
 /// Time scale: 1 real second = 1 game minute at 1x speed
-pub fn simulate_ticks(
-    state: &mut crate::data::GameState,
-    num_ticks: u32,
-    tick_seconds: f32,
-) {
+pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_seconds: f32) {
     if num_ticks == 0 {
         return;
     }
 
     // For efficiency, we batch similar operations
     let total_seconds = num_ticks as f32 * tick_seconds;
-    
+
     // Time scale: 1 real second = 1 game minute
     // ALL calculations now use game_minutes for consistency
     let game_minutes = total_seconds; // 1:1 real seconds to game minutes
     let total_hours = game_minutes / 60.0;
-    
+
     // Track population before update for milestone checking
     let _pop_before = state.population.value();
-    
+
     // Update game time
     state.game_time_hours += total_hours;
-    
+
     // Update season and weather
     let season_changed = state.season_state.update(total_hours);
     if season_changed {
@@ -92,16 +104,18 @@ pub fn simulate_ticks(
         // Record in chronicle
         state.town_chronicle.record(
             state.game_time_hours,
-            crate::narrative::ChronicleEventType::SeasonChanged { season: season_name },
+            crate::narrative::ChronicleEventType::SeasonChanged {
+                season: season_name,
+            },
         );
     }
-    
+
     // Apply seasonal morale bonus to agents
     let morale_change = state.season_state.season.morale_bonus() * total_hours / 24.0;
     for agent in &mut state.agents {
         agent.spirit = (agent.spirit + morale_change).clamp(0.0, 1.0);
     }
-    
+
     // Update caravans (uses Caravan::update)
     let days_elapsed = total_hours / 24.0;
     for caravan in &mut state.trade_manager.caravans {
@@ -114,10 +128,10 @@ pub fn simulate_ticks(
             // Caravan returned home - could respawn it
         }
     }
-    
+
     // Update town proxies (uses TownProxyManager methods)
     state.town_proxies.update_all(days_elapsed);
-    
+
     // Check for proxy crises (uses crisis_count, all, get)
     let crisis_count = state.town_proxies.crisis_count();
     if crisis_count > 0 {
@@ -129,10 +143,10 @@ pub fn simulate_ticks(
             }
         }
     }
-    
+
     // Count active zones for population growth
     let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
-    
+
     // --- TECH BONUSES ---
     let mut bonuses = TechBonuses::default();
     for tech in &state.tech_tree {
@@ -145,31 +159,32 @@ pub fn simulate_ticks(
             }
         }
     }
-    
+
     // --- WONDER BUFFS ---
-    let wonder_buffs = crate::narrative::WonderBuffs::from_completed(&state.dynasty.completed_wonders);
+    let wonder_buffs =
+        crate::narrative::WonderBuffs::from_completed(&state.dynasty.completed_wonders);
     bonuses.production_multi *= wonder_buffs.production;
-    
+
     // --- ANCESTOR BUFFS ---
     let ancestor_buffs = state.dynasty.ancestor_buffs();
     bonuses.production_multi *= 1.0 + ancestor_buffs.production;
-    
+
     // Calculate total housing capacity (Base + Tech)
     // Add base capacity of 2.0 for "Campsite" so players aren't soft-locked if they restore non-housing first.
     let housing_capacity = state.calculate_housing_capacity() + bonuses.housing_flat + 2.0;
-    
+
     // Population grows based on attractiveness and capacity
     // Boost growth based on active zones and attractiveness
     // Tech bonus to attractiveness applied here? Or to resource?
     // Let's apply to resource delta actually, so it persists.
-    
+
     let growth_bonus = active_zones as f32 * 0.5;
     state.population.tick(
-        state.resources.attractiveness * (1.0 + growth_bonus), 
+        state.resources.attractiveness * (1.0 + growth_bonus),
         housing_capacity,
-        game_minutes  // Use game time, not real time
+        game_minutes, // Use game time, not real time
     );
-    
+
     // Get seasonal and weather modifiers (uses Season and Weather methods)
     let season = state.season_state.season;
     let weather = state.season_state.weather;
@@ -178,7 +193,7 @@ pub fn simulate_ticks(
     let _weather_visibility = weather.visibility_reduction();
     let _waters_crops = weather.waters_crops();
     let building_damage = weather.building_damage_chance();
-    
+
     // Apply random building damage during storms
     if building_damage > 0.0 && rand::gen_range(0.0, 1.0) < building_damage * game_minutes / 60.0 {
         for zone in &mut state.zones {
@@ -187,62 +202,69 @@ pub fn simulate_ticks(
             }
         }
     }
-    
+
     // Calculate and apply resource changes (batched)
     let mut total_output = crate::data::ResourceDelta::default();
     let mut total_upkeep = crate::data::ResourceDelta::default();
-    
+
     // PASSIVE GATHERING:
     // 1. Base passive gain = 10.0 per game day (Buffed to prevent sticking)
     // 2. Population gain = 0.2 * sqrt(pop) per day (Diminishing returns)
     // Apply seasonal farm multiplier to production
-    
+
     // We need RATE per minute. Day = 1440 minutes.
     let base_rate_per_min = (10.0 / 1440.0) * bonuses.production_multi * farm_mult;
-    
+
     // Population gain: Diminishing returns using SQRT
     // Movement multiplier affects gathering efficiency
-    let pop_rate_per_min = ((0.2 * state.population.value().sqrt()) / 1440.0) * bonuses.production_multi * move_mult;
-    
+    let pop_rate_per_min =
+        ((0.2 * state.population.value().sqrt()) / 1440.0) * bonuses.production_multi * move_mult;
+
     // Add rates to accumulator
     total_output.materials += base_rate_per_min + pop_rate_per_min;
-    
+
     // REFACTORED: Attractiveness and Stability are now FLAT values, not accumulated resources.
     // We calculate them from scratch each tick based on active sources.
-    let mut calculated_attractiveness = bonuses.attractiveness_flat; 
+    let mut calculated_attractiveness = bonuses.attractiveness_flat;
     let mut calculated_stability = 0.0; // Base stability
-    
+
     for zone in &state.zones {
         if zone.dormant {
             continue;
         }
-        
-        if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+
+        if let Some(template) = state
+            .zone_templates
+            .iter()
+            .find(|t| t.id == zone.template_id)
+        {
             let throughput = zone.calculate_throughput(template);
             let multiplier = crate::economy::calculate_output(throughput, &state.resources);
-            
+
             // Active Production (Requires activity/throughput)
             // Materials and Maintenance (Service) require active work to produce
-            total_output.materials += template.output.materials * multiplier * bonuses.production_multi;
-            total_output.maintenance += template.output.maintenance * multiplier; 
-            
+            total_output.materials +=
+                template.output.materials * multiplier * bonuses.production_multi;
+            total_output.maintenance += template.output.maintenance * multiplier;
+
             // Passive Stats (Attractiveness, Stability) depend primarily on Condition
             // A restored building improves the town even if no one is using it right this second
             let passive_mult = zone.condition;
             calculated_attractiveness += template.output.attractiveness * passive_mult;
             calculated_stability += template.output.stability * passive_mult;
-            
+
             // Accumulate upkeep (these are costs, will be subtracted)
             // Apply Efficiency Multiplier to upkeep
             total_upkeep.materials += template.upkeep.materials * bonuses.maintenance_factor;
             total_upkeep.maintenance += template.upkeep.maintenance * bonuses.maintenance_factor;
-            
+
             // For Attr/Stab, upkeep reduces the flat value
-            calculated_attractiveness -= template.upkeep.attractiveness * bonuses.maintenance_factor;
+            calculated_attractiveness -=
+                template.upkeep.attractiveness * bonuses.maintenance_factor;
             calculated_stability -= template.upkeep.stability * bonuses.maintenance_factor;
         }
     }
-    
+
     // Apply net resource changes (output - upkeep) × game time
     let mut net_delta = crate::data::ResourceDelta {
         materials: (total_output.materials - total_upkeep.materials) * game_minutes,
@@ -250,41 +272,44 @@ pub fn simulate_ticks(
         attractiveness: 0.0, // Calculated directly below
         stability: 0.0,      // Calculated directly below
     };
-    
+
     // Update flat stats directly
     // Soft Cap / Decay is removed as requested - they are just flat values now.
     state.resources.attractiveness = calculated_attractiveness.max(0.0);
     state.resources.stability = calculated_stability.max(0.0);
-    
+
     // --- AGENT SIMULATION ---
     // Target agent count based on population (capped for performance/visual clutter)
     // Use round() to avoid flickering at integer boundaries
     let target_agents = (state.population.value().round() as usize).min(50);
-    
+
     // Spawn (uses Agent::with_job and with_home builder methods)
     while state.agents.len() < target_agents {
         // Spawn at a random location (ideally at a house, but random for now)
         let id = rand::rand() as u64;
         let x = rand::gen_range(500.0, 800.0);
         let y = rand::gen_range(500.0, 800.0);
-        let home_pos = macroquad::prelude::vec2(x + rand::gen_range(-50.0, 50.0), y + rand::gen_range(-50.0, 50.0));
+        let home_pos = macroquad::prelude::vec2(
+            x + rand::gen_range(-50.0, 50.0),
+            y + rand::gen_range(-50.0, 50.0),
+        );
         let job = crate::simulation::agents::Job::Laborer;
-        
+
         let agent = crate::simulation::agents::Agent::new(id, macroquad::prelude::vec2(x, y))
             .with_job(job)
             .with_home(home_pos);
         state.agents.push(agent);
     }
-    
+
     // Despawn (if population drops)
     while state.agents.len() > target_agents {
         state.agents.pop();
     }
-    
+
     // Update game hour (24-hour cycle, 1 game minute = 1 real second)
     // So 1 real minute = 1 game hour, 24 real minutes = 1 game day
     state.game_hour = (state.game_hour + game_minutes / 60.0) % 24.0;
-    
+
     // Update Agents
     // We update agents in real-time delta (approx), not batched game_minutes
     // Because movement is visual.
@@ -297,44 +322,48 @@ pub fn simulate_ticks(
     // Let's assume 1 tick = 1 update step for agents.
     // Movement speed should be scaled appropriately.
     let agent_delta = 0.016; // Approx 60fps step
-    
+
     // Populate World Info for Agents
     let mut markets = Vec::new();
     let mut workshops = Vec::new();
     let mut parks = Vec::new();
     let mut construction_sites = Vec::new();
-    
+
     for (zone_idx, zone) in state.zones.iter().enumerate() {
-        if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+        if let Some(template) = state
+            .zone_templates
+            .iter()
+            .find(|t| t.id == zone.template_id)
+        {
             // Get Center Position
             let pos = if let Some(rect) = template.map_rect {
                 macroquad::prelude::vec2(
                     (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
-                    (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
+                    (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
                 )
             } else {
                 continue; // No physical location
             };
-            
+
             // Check for construction sites
             if zone.is_under_construction() {
                 construction_sites.push((pos, zone_idx));
                 continue;
             }
-            
+
             if zone.dormant {
                 continue;
             }
-            
+
             match template.category {
                 crate::data::ZoneCategory::Market => markets.push(pos),
                 crate::data::ZoneCategory::Infrastructure => workshops.push(pos),
                 crate::data::ZoneCategory::Cultural => parks.push(pos),
-                _ => {},
+                _ => {}
             }
         }
     }
-    
+
     let world_info = crate::simulation::agents::WorldInfo {
         markets,
         workshops,
@@ -349,16 +378,20 @@ pub fn simulate_ticks(
     // Apply population-based maintenance cost
     let maint_cost = state.calculate_maintenance_cost() * game_minutes;
     net_delta.maintenance -= maint_cost;
-    
+
     // Add floating text for significant material changes (uses add_gain/add_loss)
     if net_delta.materials.abs() > 0.5 {
         // Find a zone to spawn the text near (first active zone)
         let spawn_pos = if let Some(zone) = state.zones.iter().find(|z| !z.dormant) {
-            if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+            if let Some(template) = state
+                .zone_templates
+                .iter()
+                .find(|t| t.id == zone.template_id)
+            {
                 if let Some(rect) = template.map_rect {
                     macroquad::prelude::vec2(
                         (rect.x as f32 + rect.w as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
-                        (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE
+                        (rect.y as f32 + rect.h as f32 / 2.0) * crate::ui::map_renderer::TILE_SIZE,
                     )
                 } else {
                     macroquad::prelude::vec2(500.0, 300.0)
@@ -369,16 +402,22 @@ pub fn simulate_ticks(
         } else {
             macroquad::prelude::vec2(500.0, 300.0)
         };
-        
+
         if net_delta.materials > 0.0 {
-            state.floating_texts.add_gain(net_delta.materials, "Materials", spawn_pos);
+            state
+                .floating_texts
+                .add_gain(net_delta.materials, "Materials", spawn_pos);
         } else {
-            state.floating_texts.add_loss(net_delta.materials.abs(), "Materials", spawn_pos);
+            state
+                .floating_texts
+                .add_loss(net_delta.materials.abs(), "Materials", spawn_pos);
         }
     }
-    
+
     // PARTICLE SYSTEM UPDATE
-    state.particle_system.update(game_minutes * 60.0 * agent_delta); // Approximate sync with frame time
+    state
+        .particle_system
+        .update(game_minutes * 60.0 * agent_delta); // Approximate sync with frame time
 
     // TUTORIAL UPDATE
     // Build context for tutorial triggers
@@ -405,7 +444,7 @@ pub fn simulate_ticks(
         use crate::ui::particles::ParticleType;
         let screen_w = macroquad::window::screen_width();
         let screen_h = macroquad::window::screen_height();
-        
+
         // Spawn weather particles in "world" space relative to camera?
         // Actually weather usually falls across the screen.
         // But our particle system is world-space.
@@ -413,64 +452,76 @@ pub fn simulate_ticks(
         let cam_center = state.camera.target;
         let spawn_w = screen_w / state.camera.zoom;
         let spawn_h = screen_h / state.camera.zoom;
-        
+
         for _ in 0..particle_count {
-             let x = cam_center.x - spawn_w/2.0 + rand::gen_range(0.0, spawn_w);
-             let y = cam_center.y - spawn_h/2.0 + rand::gen_range(0.0, spawn_h);
-             let pos = macroquad::prelude::vec2(x, y);
-             
-             let (vel, color, life, p_type) = match weather {
-                 crate::simulation::seasons::Weather::Snow => (
-                     macroquad::prelude::vec2(rand::gen_range(-10.0, 10.0), 30.0),
-                     macroquad::prelude::WHITE,
-                     4.0,
-                     ParticleType::Snow
-                 ),
-                 _ => ( // Rain/Storm
-                     macroquad::prelude::vec2(-5.0, 200.0),
-                     macroquad::prelude::Color::new(0.6, 0.6, 1.0, 0.6),
-                     1.5,
-                     ParticleType::Rain
-                 ),
-             };
-             
-             state.particle_system.spawn(pos, vel, life, 3.0, color, p_type);
+            let x = cam_center.x - spawn_w / 2.0 + rand::gen_range(0.0, spawn_w);
+            let y = cam_center.y - spawn_h / 2.0 + rand::gen_range(0.0, spawn_h);
+            let pos = macroquad::prelude::vec2(x, y);
+
+            let (vel, color, life, p_type) = match weather {
+                crate::simulation::seasons::Weather::Snow => (
+                    macroquad::prelude::vec2(rand::gen_range(-10.0, 10.0), 30.0),
+                    macroquad::prelude::WHITE,
+                    4.0,
+                    ParticleType::Snow,
+                ),
+                _ => (
+                    // Rain/Storm
+                    macroquad::prelude::vec2(-5.0, 200.0),
+                    macroquad::prelude::Color::new(0.6, 0.6, 1.0, 0.6),
+                    1.5,
+                    ParticleType::Rain,
+                ),
+            };
+
+            state
+                .particle_system
+                .spawn(pos, vel, life, 3.0, color, p_type);
         }
     }
 
     // Chimney Smoke (only in winter)
     // Only spawn occasionally
-    if state.season_state.season == crate::simulation::seasons::Season::Winter && rand::gen_range(0.0, 1.0) < 0.1 {
+    if state.season_state.season == crate::simulation::seasons::Season::Winter
+        && rand::gen_range(0.0, 1.0) < 0.1
+    {
         use crate::ui::particles::ParticleType;
         // Find active houses
-         for zone in &state.zones {
-             if !zone.dormant && zone.activity > 0.0 {
-                 if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
-                     if template.category == crate::data::ZoneCategory::Residential {
-                         if let Some(rect) = template.map_rect {
-                             let tile_size = crate::ui::map_renderer::TILE_SIZE;
-                             // Randomly pick a spot on roof properly
-                             let center_x = (rect.x as f32 + rect.w as f32 * 0.5) * tile_size;
-                             let center_y = (rect.y as f32 + rect.h as f32 * 0.2) * tile_size; // Top of building
-                             
-                             state.particle_system.spawn(
-                                 macroquad::prelude::vec2(center_x, center_y),
-                                 macroquad::prelude::vec2(rand::gen_range(-5.0, 5.0), rand::gen_range(-20.0, -10.0)),
-                                 rand::gen_range(2.0, 4.0),
-                                 rand::gen_range(4.0, 8.0),
-                                 macroquad::prelude::Color::new(0.8, 0.8, 0.8, 0.4),
-                                 ParticleType::Smoke
-                             );
-                         }
-                     }
-                 }
-             }
-         }
+        for zone in &state.zones {
+            if !zone.dormant && zone.activity > 0.0 {
+                if let Some(template) = state
+                    .zone_templates
+                    .iter()
+                    .find(|t| t.id == zone.template_id)
+                {
+                    if template.category == crate::data::ZoneCategory::Residential {
+                        if let Some(rect) = template.map_rect {
+                            let tile_size = crate::ui::map_renderer::TILE_SIZE;
+                            // Randomly pick a spot on roof properly
+                            let center_x = (rect.x as f32 + rect.w as f32 * 0.5) * tile_size;
+                            let center_y = (rect.y as f32 + rect.h as f32 * 0.2) * tile_size; // Top of building
+
+                            state.particle_system.spawn(
+                                macroquad::prelude::vec2(center_x, center_y),
+                                macroquad::prelude::vec2(
+                                    rand::gen_range(-5.0, 5.0),
+                                    rand::gen_range(-20.0, -10.0),
+                                ),
+                                rand::gen_range(2.0, 4.0),
+                                rand::gen_range(4.0, 8.0),
+                                macroquad::prelude::Color::new(0.8, 0.8, 0.8, 0.4),
+                                ParticleType::Smoke,
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Update stats and check achievements
     update_stats_and_achievements(state, net_delta.materials.max(0.0));
-    
+
     state.resources.apply_delta(&net_delta);
 }
 
@@ -478,12 +529,14 @@ pub fn simulate_ticks(
 fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_gained: f32) {
     use crate::data::ZoneCategory;
     use crate::simulation::seasons::Season;
-    
+
     // Update stats
     state.stats.add_resources(resources_gained);
     state.stats.total_play_hours = state.game_time_hours;
-    state.stats.update_peaks(state.resources.materials, state.population.value() as u32);
-    
+    state
+        .stats
+        .update_peaks(state.resources.materials, state.population.value() as u32);
+
     // Check population achievements
     let pop = state.population.value() as u32;
     if pop >= 50 {
@@ -495,7 +548,7 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
     if pop >= 500 {
         state.achievements.unlock("town_proper");
     }
-    
+
     // Check resource achievements
     let mats = state.resources.materials;
     if mats >= 1000.0 {
@@ -507,14 +560,18 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
     if mats >= 100000.0 {
         state.achievements.unlock("millionaire");
     }
-    
+
     // Check zone-based achievements
     let active_zones = state.zones.iter().filter(|z| !z.dormant).count();
     if active_zones >= 1 {
         // Check if any is residential for FirstHouse
         for zone in &state.zones {
             if !zone.dormant {
-                if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+                if let Some(template) = state
+                    .zone_templates
+                    .iter()
+                    .find(|t| t.id == zone.template_id)
+                {
                     if template.category == ZoneCategory::Residential {
                         state.achievements.unlock("first_house");
                         break;
@@ -532,12 +589,12 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
     if active_zones >= 50 {
         state.achievements.unlock("master_builder");
     }
-    
+
     // Check utopia (stability + attractiveness > 0.8 each)
     if state.resources.stability > 0.8 && state.resources.attractiveness > 0.8 {
         state.achievements.unlock("utopia");
     }
-    
+
     // Check play time achievements
     let days = state.game_time_hours / 24.0;
     if days >= 10.0 {
@@ -546,7 +603,7 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
     if days >= 100.0 {
         state.achievements.unlock("veteran");
     }
-    
+
     // Check winter survivor (when season changes FROM winter)
     if state.season_state.season == Season::Spring && state.season_state.day_in_season < 1.0 {
         // Just transitioned from winter
@@ -555,7 +612,7 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
             state.achievements.unlock("winter_survivor");
         }
     }
-    
+
     // Check dynasty achievements
     if state.dynasty.hall_of_heroes.len() >= 1 {
         state.achievements.unlock("remembered");
@@ -572,18 +629,21 @@ fn update_stats_and_achievements(state: &mut crate::data::GameState, resources_g
     if state.dynasty.past_towns.len() + 1 >= 5 {
         state.achievements.unlock("dynasty_ruler");
     }
-    
+
     // Check scholar (all tech unlocked)
     let all_researched = state.tech_tree.iter().all(|t| t.unlocked);
     if all_researched && !state.tech_tree.is_empty() {
         state.achievements.unlock("scholar");
     }
-    
+
     // Log newly unlocked achievements
     while let Some(achievement) = state.achievements.pop_notification() {
         state.log.add(
             state.game_time_hours,
-            format!("{} Achievement Unlocked: {}!", achievement.icon, achievement.name),
+            format!(
+                "{} Achievement Unlocked: {}!",
+                achievement.icon, achievement.name
+            ),
             crate::narrative::LogCategory::Milestone,
         );
     }
@@ -596,13 +656,13 @@ mod tests {
     #[test]
     fn test_tick_timer_accumulation() {
         let mut timer = TickTimer::new(1.0); // 1 tick per second
-        
+
         // Half a second - no tick yet
         assert_eq!(timer.update(0.5), 0);
-        
+
         // Another half - now we have 1 tick
         assert_eq!(timer.update(0.5), 1);
-        
+
         // 2.5 seconds at once - 2 ticks, 0.5 remains
         assert_eq!(timer.update(2.5), 2);
         assert_eq!(timer.update(0.5), 1);
@@ -615,11 +675,11 @@ mod tests {
             last_save_time: 1000,
             session_start_time: 0,
         };
-        
+
         // 1 hour later (3600 seconds)
         let offline = tracker.calculate_offline_hours(4600, 72.0);
         assert!((offline - 1.0).abs() < 0.01);
-        
+
         // Test cap
         let tracker2 = TimeTracker {
             total_hours: 0.0,

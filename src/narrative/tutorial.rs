@@ -80,14 +80,14 @@ impl TutorialManager {
             prev_day: 1,
         }
     }
-    
+
     /// Skip the tutorial entirely
     pub fn skip_tutorial(&mut self) {
         self.skipped = true;
         self.state = TutorialState::Completed;
         self.active_dialog = None;
     }
-    
+
     /// Check if tutorial is complete or skipped
     pub fn is_complete(&self) -> bool {
         self.skipped || self.state == TutorialState::Completed
@@ -103,12 +103,12 @@ impl TutorialManager {
         if self.is_complete() {
             return;
         }
-        
+
         // Don't trigger new dialogs if one is active
         if self.active_dialog.is_some() {
             return;
         }
-        
+
         match self.state {
             TutorialState::Intro => {
                 // Advance camera intro
@@ -125,10 +125,12 @@ impl TutorialManager {
                     }
                 }
             }
-            
+
             TutorialState::WaitingFirstZone => {
                 // Check if player restored a zone
-                if ctx.zones_active > self.prev_zones && !self.shown_hints.contains(&HintTrigger::FirstZoneRestored) {
+                if ctx.zones_active > self.prev_zones
+                    && !self.shown_hints.contains(&HintTrigger::FirstZoneRestored)
+                {
                     self.shown_hints.insert(HintTrigger::FirstZoneRestored);
                     self.show_dialog(
                         "Uncle Artie",
@@ -138,10 +140,12 @@ impl TutorialManager {
                     self.state = TutorialState::WaitingAgents;
                 }
             }
-            
+
             TutorialState::WaitingAgents => {
                 // Check if first agent spawned
-                if ctx.agent_count > 0 && !self.shown_hints.contains(&HintTrigger::FirstAgentSpawned) {
+                if ctx.agent_count > 0
+                    && !self.shown_hints.contains(&HintTrigger::FirstAgentSpawned)
+                {
                     self.shown_hints.insert(HintTrigger::FirstAgentSpawned);
                     self.show_dialog(
                         "Uncle Artie",
@@ -151,7 +155,7 @@ impl TutorialManager {
                     self.state = TutorialState::ResourceManagement;
                 }
             }
-            
+
             TutorialState::ResourceManagement => {
                 // Check for low resources warning
                 if ctx.materials < 5.0 && !self.shown_hints.contains(&HintTrigger::LowResources) {
@@ -162,7 +166,7 @@ impl TutorialManager {
                         false
                     );
                 }
-                
+
                 // Check for first night
                 if ctx.game_hour >= 20.0 && !self.shown_hints.contains(&HintTrigger::FirstNight) {
                     self.shown_hints.insert(HintTrigger::FirstNight);
@@ -174,25 +178,25 @@ impl TutorialManager {
                     self.state = TutorialState::Advanced;
                 }
             }
-            
+
             TutorialState::Advanced => {
                 // All hints shown, mark complete
                 if self.shown_hints.len() >= 4 {
                     self.state = TutorialState::Completed;
                 }
             }
-            
+
             TutorialState::Completed => {
                 // Nothing to do
             }
         }
-        
+
         // Update tracking
         self.prev_zones = ctx.zones_active;
         self.prev_agents = ctx.agent_count;
         self.prev_day = ctx.day;
     }
-    
+
     pub fn show_dialog(&mut self, speaker: &str, text: &str, modal: bool) {
         self.active_dialog = Some(DialogData {
             speaker: speaker.to_string(),
@@ -200,10 +204,10 @@ impl TutorialManager {
             is_modal: modal,
         });
     }
-    
+
     pub fn dismiss_dialog(&mut self) {
         self.active_dialog = None;
-        
+
         // Progress state after dismissing intro dialog
         if self.state == TutorialState::Intro && self.camera_intro_progress >= 1.0 {
             self.state = TutorialState::WaitingFirstZone;

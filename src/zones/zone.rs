@@ -1,7 +1,7 @@
 //! Zone runtime state
 
-use serde::{Deserialize, Serialize};
 use crate::data::ZoneTemplate;
+use serde::{Deserialize, Serialize};
 
 /// Construction state for zones being built
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -30,19 +30,19 @@ impl Default for ConstructionState {
 pub struct Zone {
     /// Reference to template ID
     pub template_id: String,
-    
+
     /// Physical integrity (0.0 - 1.0)
     pub condition: f32,
-    
+
     /// Usage and life (0.0 - 1.0), driven by population pressure
     pub activity: f32,
-    
+
     /// Whether zone is dormant (not producing)
     pub dormant: bool,
-    
+
     /// Current reawakening stage (0 = not started)
     pub reawakening_stage: u8,
-    
+
     /// Construction state for new zones
     #[serde(default)]
     pub construction_state: ConstructionState,
@@ -63,7 +63,10 @@ impl Zone {
 
     /// Check if zone is under construction
     pub fn is_under_construction(&self) -> bool {
-        matches!(self.construction_state, ConstructionState::UnderConstruction { .. })
+        matches!(
+            self.construction_state,
+            ConstructionState::UnderConstruction { .. }
+        )
     }
 
     /// Get construction progress as 0.0 - 1.0
@@ -99,4 +102,3 @@ impl Zone {
         }
     }
 }
-

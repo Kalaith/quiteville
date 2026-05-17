@@ -7,16 +7,16 @@ use serde::{Deserialize, Serialize};
 pub struct GameConfig {
     /// Population saturation constant K (higher = slower saturation)
     pub population_k: f32,
-    
+
     /// Maintenance cost coefficient (β in cost = β × EffectivePop²)
     pub maintenance_cost_coefficient: f32,
-    
+
     /// Offline gain time cap in hours
     pub offline_time_cap_hours: f32,
-    
+
     /// Starting resources
     pub starting_resources: ResourceDefaults,
-    
+
     /// Game tick rate in seconds
     pub tick_rate_seconds: f32,
 }

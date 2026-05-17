@@ -1,9 +1,9 @@
 //! Tooltip rendering for zones and agents
 
-use macroquad::prelude::*;
 use crate::data::{GameState, ZoneTemplate};
-use crate::zones::Zone;
 use crate::simulation::agents::Agent;
+use crate::zones::Zone;
+use macroquad::prelude::*;
 
 const TOOLTIP_BG: Color = Color::new(0.1, 0.1, 0.1, 0.9);
 const TOOLTIP_BORDER: Color = Color::new(0.8, 0.8, 0.8, 1.0);
@@ -13,32 +13,16 @@ const TOOLTIP_LINE_HEIGHT: f32 = 18.0;
 
 /// Draw a simple tooltip at the given position
 pub fn draw_tooltip(text: &str, pos: Vec2) {
-    let lines: Vec<&str> = text.lines().collect();
-    let max_width = lines.iter()
-        .map(|l| measure_text(l, None, 16, 1.0).width)
-        .fold(0.0_f32, f32::max);
-    
-    let width = max_width + TOOLTIP_PADDING * 2.0;
-    let height = lines.len() as f32 * TOOLTIP_LINE_HEIGHT + TOOLTIP_PADDING * 2.0;
-    
-    // Clamp to screen
-    let x = pos.x.min(screen_width() - width - 10.0);
-    let y = pos.y.min(screen_height() - height - 10.0);
-    
-    // Background
-    draw_rectangle(x, y, width, height, TOOLTIP_BG);
-    draw_rectangle_lines(x, y, width, height, 1.0, TOOLTIP_BORDER);
-    
-    // Text
-    for (i, line) in lines.iter().enumerate() {
-        draw_text(
-            line,
-            x + TOOLTIP_PADDING,
-            y + TOOLTIP_PADDING + (i as f32 + 0.8) * TOOLTIP_LINE_HEIGHT,
-            16.0,
-            TOOLTIP_TEXT,
-        );
-    }
+    let style = macroquad_toolkit::ui::TooltipStyle {
+        background: TOOLTIP_BG,
+        border: TOOLTIP_BORDER,
+        text: TOOLTIP_TEXT,
+        padding: TOOLTIP_PADDING,
+        font_size: 16.0,
+        line_gap: TOOLTIP_LINE_HEIGHT - 16.0,
+        ..Default::default()
+    };
+    macroquad_toolkit::ui::draw_tooltip_styled(text, pos, &style, None);
 }
 
 /// Draw a tooltip for a zone
@@ -47,7 +31,7 @@ pub fn draw_zone_tooltip(zone: &Zone, template: &ZoneTemplate, mouse_pos: Vec2) 
     text.push_str(&format!("Category: {:?}\n", template.category));
     text.push_str(&format!("Condition: {:.0}%\n", zone.condition * 100.0));
     text.push_str(&format!("Activity: {:.0}%\n", zone.activity * 100.0));
-    
+
     if zone.is_under_construction() {
         let progress = zone.construction_progress(template.construction_work);
         text.push_str(&format!("⚒ Building: {:.0}%", progress * 100.0));
@@ -56,7 +40,7 @@ pub fn draw_zone_tooltip(zone: &Zone, template: &ZoneTemplate, mouse_pos: Vec2) 
     } else {
         text.push_str("Status: Active");
     }
-    
+
     draw_tooltip(&text, mouse_pos + vec2(15.0, 15.0));
 }
 
@@ -72,17 +56,18 @@ pub fn draw_agent_tooltip(agent: &Agent, mouse_pos: Vec2) {
         crate::simulation::agents::AgentState::Sleeping => "Sleeping",
         crate::simulation::agents::AgentState::Building { .. } => "Building",
     };
-    
+
     let mut trait_summary = String::new();
     if !agent.traits.is_empty() {
         trait_summary.push_str("\n\nTraits:");
         for tr in &agent.traits {
-            trait_summary.push_str(&format!("\n• {} ({:+}% work)", 
-                tr.name(), 
+            trait_summary.push_str(&format!(
+                "\n• {} ({:+}% work)",
+                tr.name(),
                 ((tr.work_speed_modifier() - 1.0) * 100.0) as i32
             ));
             // Just accessing description to use the method, could display on advanced hover
-            let _desc = tr.description(); 
+            let _desc = tr.description();
         }
     }
 
@@ -97,22 +82,32 @@ pub fn draw_agent_tooltip(agent: &Agent, mouse_pos: Vec2) {
         agent.spirit * 100.0,
         trait_summary
     );
-    
+
     draw_tooltip(&text, mouse_pos + vec2(15.0, 15.0));
 }
 
 /// Check if mouse is hovering over a zone and return it
-pub fn get_hovered_zone(state: &GameState, mouse_world_pos: Vec2) -> Option<(usize, &Zone, &ZoneTemplate)> {
+pub fn get_hovered_zone(
+    state: &GameState,
+    mouse_world_pos: Vec2,
+) -> Option<(usize, &Zone, &ZoneTemplate)> {
     for (idx, zone) in state.zones.iter().enumerate() {
-        if let Some(template) = state.zone_templates.iter().find(|t| t.id == zone.template_id) {
+        if let Some(template) = state
+            .zone_templates
+            .iter()
+            .find(|t| t.id == zone.template_id)
+        {
             if let Some(rect) = template.map_rect {
                 let zone_x = rect.x as f32 * crate::ui::map_renderer::TILE_SIZE;
                 let zone_y = rect.y as f32 * crate::ui::map_renderer::TILE_SIZE;
                 let zone_w = rect.w as f32 * crate::ui::map_renderer::TILE_SIZE;
                 let zone_h = rect.h as f32 * crate::ui::map_renderer::TILE_SIZE;
-                
-                if mouse_world_pos.x >= zone_x && mouse_world_pos.x <= zone_x + zone_w &&
-                   mouse_world_pos.y >= zone_y && mouse_world_pos.y <= zone_y + zone_h {
+
+                if mouse_world_pos.x >= zone_x
+                    && mouse_world_pos.x <= zone_x + zone_w
+                    && mouse_world_pos.y >= zone_y
+                    && mouse_world_pos.y <= zone_y + zone_h
+                {
                     return Some((idx, zone, template));
                 }
             }

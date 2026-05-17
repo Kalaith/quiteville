@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 /// A single log entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LogEntry {
-    pub timestamp: f32,  // Game time in hours
+    pub timestamp: f32, // Game time in hours
     pub message: String,
     pub category: LogCategory,
 }
@@ -40,7 +40,7 @@ impl GameLog {
             message,
             category,
         });
-        
+
         // Trim old entries
         if self.entries.len() > self.max_entries {
             self.entries.remove(0);

@@ -1,7 +1,7 @@
 //! Inter-town trade system
 
-use serde::{Deserialize, Serialize};
 use macroquad::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// A resource being transported between towns
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -84,16 +84,16 @@ impl Caravan {
             cargo_amount: amount,
         }
     }
-    
+
     /// Update caravan position
     /// Returns (arrived_at_destination, returned_home)
     pub fn update(&mut self, travel_time: f32, delta_days: f32) -> (bool, bool) {
         let speed = 1.0 / travel_time; // Full trip in travel_time days
         self.progress += speed * delta_days;
-        
+
         if self.progress >= 1.0 {
             self.progress = 0.0;
-            
+
             if self.outbound {
                 // Arrived at destination
                 self.outbound = false;
@@ -105,10 +105,10 @@ impl Caravan {
                 return (false, true);
             }
         }
-        
+
         (false, false)
     }
-    
+
     /// Get visual position between two points
     pub fn get_visual_position(&self, from: Vec2, to: Vec2) -> Vec2 {
         let (start, end) = if self.outbound {
@@ -116,7 +116,7 @@ impl Caravan {
         } else {
             (to, from)
         };
-        
+
         start.lerp(end, self.progress)
     }
 }
@@ -134,43 +134,46 @@ impl TradeManager {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     /// Create a new trade route
     pub fn add_route(&mut self, from: u32, to: u32, good: TradeGood, amount: f32) -> u32 {
         let id = self.next_route_id;
         self.next_route_id += 1;
-        self.routes.push(TradeRoute::new(id, from, to, good, amount));
+        self.routes
+            .push(TradeRoute::new(id, from, to, good, amount));
         id
     }
-    
+
     /// Spawn a caravan for a route
     pub fn spawn_caravan(&mut self, route_id: u32) {
         if let Some(route) = self.routes.iter().find(|r| r.id == route_id) {
             let id = self.next_caravan_id;
             self.next_caravan_id += 1;
             self.caravans.push(Caravan::new(
-                id, 
-                route_id, 
-                route.good, 
-                route.amount_per_trip
+                id,
+                route_id,
+                route.good,
+                route.amount_per_trip,
             ));
         }
     }
-    
+
     /// Get all routes from a specific town
     pub fn routes_from(&self, town_id: u32) -> Vec<&TradeRoute> {
-        self.routes.iter()
+        self.routes
+            .iter()
             .filter(|r| r.from_town == town_id)
             .collect()
     }
-    
+
     /// Get all routes to a specific town
     pub fn routes_to(&self, town_id: u32) -> Vec<&TradeRoute> {
-        self.routes.iter()
+        self.routes
+            .iter()
             .filter(|r| r.to_town == town_id)
             .collect()
     }
-    
+
     /// Count active caravans
     pub fn active_caravan_count(&self) -> usize {
         self.caravans.len()
