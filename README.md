@@ -1,56 +1,31 @@
-# Quiteville 🏡
+# Quiteville
 
-**Quiteville** is a relaxing idle town builder where you restore a forgotten settlement, attracting new residents and watching them live their lives. Built with Rust and Macroquad.
+Quiteville is a relaxing idle town builder about restoring a forgotten settlement and watching villagers build new routines around it.
 
-![Game Screenshot](assets/iv1.png)
-![Game Screenshot](assets/iv2.png)
-![Game Screenshot](assets/iv3.png)
-![Game Screenshot](assets/iv4.png)
+You start with abandoned ruins and gradually turn them into useful community spaces. Villagers move in, work, shop, socialize, and keep the town growing even while you are away.
 
-## 🌟 Features
+## Gameplay
 
-*   **Restoration Gameplay**: Start with a map of abandoned ruins and restore them into thriving community centers like the *Old Homestead*, *Village Green*, and *Community Market*.
-*   **Living Population**: Watch villagers move in, wander your town, go to work, shop, and socialize. Each villager has their own needs (Hunger, Energy, Social).
-*   **Idle Progression**: Your town continues to grow and produce resources even while you are away. Come back to see how things have changed!
-*   **Research Tree**: Unlock new technologies to improve production, attractiveness, and housing capacity.
-*   **Dynamic Economy**: Balance resources like *Materials*, *Attractiveness*, and *Stability* to keep your town growing.
+- Restore ruins into homes, markets, wells, workshops, and gathering spaces.
+- Select zones and villagers to inspect needs.
+- Balance materials, attractiveness, stability, and growth.
+- Unlock improvements through research.
+- Let idle production carry the town forward between visits.
 
-## 🎮 Controls
+## Goal
 
-| Key / Action | Function |
-| :--- | :--- |
-| **W, A, S, D** or **Arrows** | Pan Camera |
-| **Mouse Wheel** | Zoom In / Out |
-| **Left Click** | Select Zone or Villager |
-| **B** | Toggle **Projects** (Build) Menu |
-| **R** | Toggle **Research** Tree |
-| **Space** | Pause / Resume Game |
-| **+ / -** | Adjust Game Speed |
-| **Esc** | Exit Game |
+Rebuild the forgotten settlement into a stable, attractive, living town.
 
-## 🛠️ Building & Running
+## Controls
 
-Ensure you have [Rust](https://www.rust-lang.org/tools/install) installed.
+- WASD: pan the camera.
+- Scroll: zoom in or out.
+- Click: select a zone or villager.
+- B: toggle the projects menu.
+- R: toggle the research tree.
+- Space: pause or resume.
+- + / -: adjust game speed.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/yourusername/quiteville.git
-    cd quiteville
-    ```
+## Current Scope
 
-2.  **Run the game**:
-    ```bash
-    cargo run --release
-    ```
-
-## 🏗️ Project Structure
-
-*   `src/main.rs`: Entry point and main game loop.
-*   `src/simulation/`: Core game logic (Time, Population, Agents).
-*   `src/data/`: Data structures (GameState, Config, Tech Tree).
-*   `src/ui/`: User Interface rendering and interaction.
-*   `assets/`: JSON configuration files and textures.
-
-## 📝 Credits
-
-Created by the **WebHatchery** team using the [Macroquad](https://macroquad.rs/) game engine.
+Playable idle-builder loop with restoration projects, villagers, needs, resources, research, and offline-style progression.
