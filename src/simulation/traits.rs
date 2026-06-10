@@ -1,6 +1,6 @@
 //! Agent traits for personality and emergent storytelling
 
-use macroquad::rand;
+use macroquad_toolkit::rng;
 use serde::{Deserialize, Serialize};
 
 /// Personality traits that affect agent behavior
@@ -138,11 +138,11 @@ pub fn generate_random_traits() -> Vec<Trait> {
         Trait::Sensitive,
     ];
 
-    let count = rand::gen_range(1u32, 4) as usize;
+    let count = rng::gen_range(1u32, 4) as usize;
     let mut traits = Vec::with_capacity(count);
 
     for _ in 0..count {
-        let idx = rand::gen_range(0, all_traits.len());
+        let idx = rng::gen_range(0, all_traits.len());
         let t = all_traits[idx];
         // Avoid duplicates and conflicting traits
         if !traits.contains(&t) && !conflicts_with(&traits, t) {

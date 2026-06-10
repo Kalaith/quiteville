@@ -1,6 +1,6 @@
 //! Game tick system - Time management and simulation stepping
 
-use macroquad::rand;
+use macroquad_toolkit::rng;
 
 // Helper struct for aggregating tech effects
 #[derive(Default)]
@@ -195,7 +195,7 @@ pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_s
     let building_damage = weather.building_damage_chance();
 
     // Apply random building damage during storms
-    if building_damage > 0.0 && rand::gen_range(0.0, 1.0) < building_damage * game_minutes / 60.0 {
+    if building_damage > 0.0 && rng::gen_range(0.0, 1.0) < building_damage * game_minutes / 60.0 {
         for zone in &mut state.zones {
             if !zone.dormant {
                 zone.condition = (zone.condition - 0.01).max(0.5);
@@ -286,12 +286,12 @@ pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_s
     // Spawn (uses Agent::with_job and with_home builder methods)
     while state.agents.len() < target_agents {
         // Spawn at a random location (ideally at a house, but random for now)
-        let id = rand::rand() as u64;
-        let x = rand::gen_range(500.0, 800.0);
-        let y = rand::gen_range(500.0, 800.0);
+        let id = rng::random_u64();
+        let x = rng::gen_range(500.0, 800.0);
+        let y = rng::gen_range(500.0, 800.0);
         let home_pos = macroquad::prelude::vec2(
-            x + rand::gen_range(-50.0, 50.0),
-            y + rand::gen_range(-50.0, 50.0),
+            x + rng::gen_range(-50.0, 50.0),
+            y + rng::gen_range(-50.0, 50.0),
         );
         let job = crate::simulation::agents::Job::Laborer;
 
@@ -454,13 +454,13 @@ pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_s
         let spawn_h = screen_h / state.camera.zoom;
 
         for _ in 0..particle_count {
-            let x = cam_center.x - spawn_w / 2.0 + rand::gen_range(0.0, spawn_w);
-            let y = cam_center.y - spawn_h / 2.0 + rand::gen_range(0.0, spawn_h);
+            let x = cam_center.x - spawn_w / 2.0 + rng::gen_range(0.0, spawn_w);
+            let y = cam_center.y - spawn_h / 2.0 + rng::gen_range(0.0, spawn_h);
             let pos = macroquad::prelude::vec2(x, y);
 
             let (vel, color, life, p_type) = match weather {
                 crate::simulation::seasons::Weather::Snow => (
-                    macroquad::prelude::vec2(rand::gen_range(-10.0, 10.0), 30.0),
+                    macroquad::prelude::vec2(rng::gen_range(-10.0, 10.0), 30.0),
                     macroquad::prelude::WHITE,
                     4.0,
                     ParticleType::Snow,
@@ -483,7 +483,7 @@ pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_s
     // Chimney Smoke (only in winter)
     // Only spawn occasionally
     if state.season_state.season == crate::simulation::seasons::Season::Winter
-        && rand::gen_range(0.0, 1.0) < 0.1
+        && rng::gen_range(0.0, 1.0) < 0.1
     {
         use crate::ui::particles::ParticleType;
         // Find active houses
@@ -504,11 +504,11 @@ pub fn simulate_ticks(state: &mut crate::data::GameState, num_ticks: u32, tick_s
                             state.particle_system.spawn(
                                 macroquad::prelude::vec2(center_x, center_y),
                                 macroquad::prelude::vec2(
-                                    rand::gen_range(-5.0, 5.0),
-                                    rand::gen_range(-20.0, -10.0),
+                                    rng::gen_range(-5.0, 5.0),
+                                    rng::gen_range(-20.0, -10.0),
                                 ),
-                                rand::gen_range(2.0, 4.0),
-                                rand::gen_range(4.0, 8.0),
+                                rng::gen_range(2.0, 4.0),
+                                rng::gen_range(4.0, 8.0),
                                 macroquad::prelude::Color::new(0.8, 0.8, 0.8, 0.4),
                                 ParticleType::Smoke,
                             );

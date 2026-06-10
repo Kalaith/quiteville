@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use macroquad::rand;
+use macroquad_toolkit::rng;
 use serde::{Deserialize, Serialize};
 
 /// Job roles for agents
@@ -110,8 +110,8 @@ const LAST_NAMES: &[&str] = &[
 ];
 
 fn generate_random_name() -> String {
-    let first = FIRST_NAMES[rand::gen_range(0, FIRST_NAMES.len())];
-    let last = LAST_NAMES[rand::gen_range(0, LAST_NAMES.len())];
+    let first = FIRST_NAMES[rng::gen_range(0, FIRST_NAMES.len())];
+    let last = LAST_NAMES[rng::gen_range(0, LAST_NAMES.len())];
     format!("{} {}", first, last)
 }
 
@@ -154,11 +154,11 @@ impl Agent {
             spirit: 1.0,
             job: Job::default(),
             home_pos: pos, // Default home is spawn position
-            speed: 60.0 + rand::gen_range(-15.0, 15.0),
+            speed: 60.0 + rng::gen_range(-15.0, 15.0),
             color: [
-                rand::gen_range(0.5, 1.0),
-                rand::gen_range(0.5, 1.0),
-                rand::gen_range(0.5, 1.0),
+                rng::gen_range(0.5, 1.0),
+                rng::gen_range(0.5, 1.0),
+                rng::gen_range(0.5, 1.0),
                 1.0,
             ],
             traits: crate::simulation::traits::generate_random_traits(),
@@ -217,7 +217,7 @@ impl Agent {
                             self.state = AgentState::Wandering { target };
                         } else if self.energy < 0.3 {
                             self.state = AgentState::Sleeping;
-                        } else if rand::gen_range(0, 100) < 2 {
+                        } else if rng::gen_range(0, 100) < 2 {
                             let target = self.pick_random_target();
                             self.state = AgentState::Wandering { target };
                         }
@@ -229,14 +229,14 @@ impl Agent {
                         } else if self.hunger < 0.3 && !world.markets.is_empty() {
                             let target = self.find_nearest(world.markets.as_slice());
                             self.state = AgentState::Wandering { target };
-                        } else if !world.workshops.is_empty() && rand::gen_range(0, 100) < 5 {
+                        } else if !world.workshops.is_empty() && rng::gen_range(0, 100) < 5 {
                             let target = self.find_nearest(world.workshops.as_slice());
                             self.state = AgentState::Wandering { target };
                         } else if !world.construction_sites.is_empty() && self.job == Job::Builder {
                             // Builders go to construction sites
                             let (target, zone_idx) = world.construction_sites[0];
                             self.state = AgentState::Building { target, zone_idx };
-                        } else if rand::gen_range(0, 100) < 3 {
+                        } else if rng::gen_range(0, 100) < 3 {
                             let target = self.pick_random_target();
                             self.state = AgentState::Wandering { target };
                         }
@@ -249,7 +249,7 @@ impl Agent {
                         } else if self.social < 0.5 && !world.parks.is_empty() {
                             let target = self.find_nearest(world.parks.as_slice());
                             self.state = AgentState::Wandering { target };
-                        } else if rand::gen_range(0, 100) < 3 {
+                        } else if rng::gen_range(0, 100) < 3 {
                             let target = self.pick_random_target();
                             self.state = AgentState::Wandering { target };
                         }
@@ -374,10 +374,7 @@ impl Agent {
     }
 
     fn pick_random_target(&self) -> Vec2 {
-        vec2(
-            rand::gen_range(100.0, 1500.0),
-            rand::gen_range(100.0, 1500.0),
-        )
+        vec2(rng::gen_range(100.0, 1500.0), rng::gen_range(100.0, 1500.0))
     }
 }
 

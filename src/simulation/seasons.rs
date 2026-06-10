@@ -1,6 +1,6 @@
 //! Season and weather system
 
-use macroquad::rand;
+use macroquad_toolkit::rng;
 use serde::{Deserialize, Serialize};
 
 /// The four seasons of the year
@@ -207,7 +207,7 @@ impl SeasonState {
 
     /// Roll new weather based on season probabilities
     fn roll_new_weather(&mut self) {
-        let roll = rand::gen_range(0.0, 1.0);
+        let roll = rng::gen_range(0.0, 1.0);
 
         self.weather = match self.season {
             Season::Spring => {
@@ -257,7 +257,7 @@ impl SeasonState {
         };
 
         // Set new duration (3-12 hours)
-        self.weather_duration = rand::gen_range(3.0, 12.0);
+        self.weather_duration = rng::gen_range(3.0, 12.0);
     }
 
     /// Get current season display string

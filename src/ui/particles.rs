@@ -96,7 +96,7 @@ impl ParticleSystem {
                 }
                 ParticleType::Snow => {
                     // Snow drifts
-                    p.velocity.x += macroquad::rand::gen_range(-10.0, 10.0) * delta;
+                    p.velocity.x += macroquad_toolkit::rng::gen_range(-10.0, 10.0) * delta;
                 }
                 ParticleType::Dust => {
                     p.color.a = p.lifetime / p.max_lifetime;
