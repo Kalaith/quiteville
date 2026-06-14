@@ -3,6 +3,7 @@ use crate::ui::theme;
 use crate::ui::theme::colors;
 use crate::PlayerAction;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// Draw the active guide dialog if any
 pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
@@ -59,7 +60,7 @@ pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
                 },
             );
         } else {
-            draw_text("Artie", portrait_x + 30.0, portrait_y + 60.0, 20.0, WHITE);
+            draw_ui_text("Artie", portrait_x + 30.0, portrait_y + 60.0, 20.0, WHITE);
         }
 
         // Content Area (Right)
@@ -77,7 +78,7 @@ pub fn draw_guide_dialog(state: &GameState) -> Option<PlayerAction> {
         let wrapped = crate::ui::text_util::wrap_text(&dialog.text, font_size, text_w);
         let mut text_y = content_y + 40.0;
         for line in wrapped {
-            draw_text(&line, content_x, text_y, font_size, colors::TEXT);
+            draw_ui_text(&line, content_x, text_y, font_size, colors::TEXT);
             text_y += 24.0;
         }
 

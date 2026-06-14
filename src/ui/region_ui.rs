@@ -2,6 +2,7 @@
 
 use crate::region::{RegionMap, TownNode, TradeManager};
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::{draw_ui_text, measure_ui_text};
 
 /// Render the region/world map with trade info
 pub fn draw_region_map(
@@ -66,7 +67,7 @@ pub fn draw_region_map(
 
                 // Draw caravan icon
                 draw_circle(caravan_pos.x, caravan_pos.y, 8.0, ORANGE);
-                draw_text("🚚", caravan_pos.x - 6.0, caravan_pos.y + 4.0, 12.0, WHITE);
+                draw_ui_text("🚚", caravan_pos.x - 6.0, caravan_pos.y + 4.0, 12.0, WHITE);
 
                 // Show cargo name on hover would go here
                 let _cargo_name = caravan.cargo.name();
@@ -143,22 +144,22 @@ pub fn draw_region_map(
 
         // Capital star or Wonder icon
         if node.is_capital {
-            draw_text("★", pos.x - 8.0, pos.y + 6.0, 24.0, GOLD);
+            draw_ui_text("★", pos.x - 8.0, pos.y + 6.0, 24.0, GOLD);
         } else if node.is_wonder_site {
             if let Some(ref ws) = node.wonder_site {
                 if ws.completed {
-                    draw_text("🏛️", pos.x - 10.0, pos.y + 6.0, 20.0, GOLD);
+                    draw_ui_text("🏛️", pos.x - 10.0, pos.y + 6.0, 20.0, GOLD);
                 } else {
-                    draw_text("⚒️", pos.x - 8.0, pos.y + 6.0, 16.0, WHITE);
+                    draw_ui_text("⚒️", pos.x - 8.0, pos.y + 6.0, 16.0, WHITE);
                 }
             } else {
-                draw_text("◆", pos.x - 6.0, pos.y + 6.0, 18.0, MAGENTA);
+                draw_ui_text("◆", pos.x - 6.0, pos.y + 6.0, 18.0, MAGENTA);
             }
         }
 
         // Name label
-        let name_x = pos.x - measure_text(&node.name, None, 16, 1.0).width / 2.0;
-        draw_text(&node.name, name_x, pos.y + 40.0, 16.0, WHITE);
+        let name_x = pos.x - measure_ui_text(&node.name, None, 16, 1.0).width / 2.0;
+        draw_ui_text(&node.name, name_x, pos.y + 40.0, 16.0, WHITE);
 
         // Biome or Wonder label
         let label: String = if let Some(ref ws) = node.wonder_site {
@@ -179,12 +180,12 @@ pub fn draw_region_map(
         } else {
             node.biome.name().to_string()
         };
-        let label_x = pos.x - measure_text(&label, None, 12, 1.0).width / 2.0;
-        draw_text(&label, label_x, pos.y + 55.0, 12.0, LIGHTGRAY);
+        let label_x = pos.x - measure_ui_text(&label, None, 12, 1.0).width / 2.0;
+        draw_ui_text(&label, label_x, pos.y + 55.0, 12.0, LIGHTGRAY);
     }
 
     // Draw title
-    draw_text("REGION MAP", screen_width / 2.0 - 80.0, 35.0, 32.0, WHITE);
+    draw_ui_text("REGION MAP", screen_width / 2.0 - 80.0, 35.0, 32.0, WHITE);
 
     // Draw region info panel (uses active_town, settled_count, routes_from)
     let panel_x = 10.0;
@@ -196,11 +197,11 @@ pub fn draw_region_map(
         140.0,
         Color::from_rgba(0, 0, 0, 180),
     );
-    draw_text("Region Status", panel_x + 10.0, panel_y + 20.0, 16.0, WHITE);
+    draw_ui_text("Region Status", panel_x + 10.0, panel_y + 20.0, 16.0, WHITE);
 
     // Use settled_count method
     let settled = region.settled_count();
-    draw_text(
+    draw_ui_text(
         &format!("Settled Towns: {}/{}", settled, region.nodes.len()),
         panel_x + 10.0,
         panel_y + 40.0,
@@ -210,7 +211,7 @@ pub fn draw_region_map(
 
     // Use active_town method
     if let Some(active) = region.active_town() {
-        draw_text(
+        draw_ui_text(
             &format!("Current: {}", active.name),
             panel_x + 10.0,
             panel_y + 58.0,
@@ -220,7 +221,7 @@ pub fn draw_region_map(
 
         // Use routes_from on RegionMap
         let connected_routes = region.routes_from(active.id);
-        draw_text(
+        draw_ui_text(
             &format!("Connected Routes: {}", connected_routes.len()),
             panel_x + 10.0,
             panel_y + 76.0,
@@ -231,7 +232,7 @@ pub fn draw_region_map(
         // Show travel times using Route::travel_time
         for (i, route) in connected_routes.iter().take(2).enumerate() {
             let travel = route.travel_time();
-            draw_text(
+            draw_ui_text(
                 &format!("  Route {}: {:.1} days", i + 1, travel),
                 panel_x + 10.0,
                 panel_y + 94.0 + i as f32 * 16.0,
@@ -243,7 +244,7 @@ pub fn draw_region_map(
 
     // Trade info (uses TradeManager::routes_from and routes_to)
     let caravan_count = trade_manager.active_caravan_count();
-    draw_text(
+    draw_ui_text(
         &format!("Caravans: {}", caravan_count),
         panel_x + 10.0,
         panel_y + 130.0,
@@ -255,7 +256,7 @@ pub fn draw_region_map(
     if let Some(active_id) = region.active_town_id {
         let export_routes = trade_manager.routes_from(active_id).len();
         let import_routes = trade_manager.routes_to(active_id).len();
-        draw_text(
+        draw_ui_text(
             &format!("Trade: {}↑ {}↓", export_routes, import_routes),
             panel_x + 100.0,
             panel_y + 130.0,
@@ -265,7 +266,7 @@ pub fn draw_region_map(
     }
 
     // Draw instructions
-    draw_text(
+    draw_ui_text(
         "Click a town to select • Press M to return to town",
         screen_width / 2.0 - 180.0,
         screen_height - 20.0,
@@ -327,7 +328,7 @@ pub fn draw_node_tooltip(node: &TownNode, mouse_pos: Vec2) {
 
     let max_width = lines
         .iter()
-        .map(|l| measure_text(l, None, 14, 1.0).width)
+        .map(|l| measure_ui_text(l, None, 14, 1.0).width)
         .fold(0.0_f32, f32::max);
 
     let width = max_width + 20.0;
@@ -343,6 +344,6 @@ pub fn draw_node_tooltip(node: &TownNode, mouse_pos: Vec2) {
     // Text
     for (i, line) in lines.iter().enumerate() {
         let color = if i == 0 { WHITE } else { LIGHTGRAY };
-        draw_text(line, x + 10.0, y + 18.0 + i as f32 * 18.0, 14.0, color);
+        draw_ui_text(line, x + 10.0, y + 18.0 + i as f32 * 18.0, 14.0, color);
     }
 }

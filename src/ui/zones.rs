@@ -2,6 +2,7 @@ use crate::data::GameState;
 use crate::ui::theme::colors;
 use crate::PlayerAction;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// Draw the list of zones with interactive buttons
 pub fn draw_zone_list(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Option<PlayerAction> {
@@ -10,7 +11,7 @@ pub fn draw_zone_list(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Opti
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
 
     // Header
-    draw_text("Zones", x + 10.0, y + 25.0, 24.0, colors::TEXT);
+    draw_ui_text("Zones", x + 10.0, y + 25.0, 24.0, colors::TEXT);
 
     let list_y = y + 40.0;
     let list_h = h - 50.0; // Margin at bottom
@@ -132,13 +133,13 @@ fn draw_zone_card(
 
     // Name & Status
     let name_color = if zone.dormant { GRAY } else { colors::ACCENT };
-    draw_text(&template.name, x + 10.0, y + 25.0, 24.0, name_color);
+    draw_ui_text(&template.name, x + 10.0, y + 25.0, 24.0, name_color);
 
     // Stats (Condition, etc.)
     // Stats & Effects
     let mut y_offset = 50.0;
 
-    draw_text(
+    draw_ui_text(
         &format!("Condition: {:.0}%", zone.condition * 100.0),
         x + 10.0,
         y + y_offset,
@@ -169,7 +170,7 @@ fn draw_zone_card(
     // Join effects into a single line or two
     // For small card, maybe just 1-2 lines.
     let effects_str = effects.join(", ");
-    draw_text(&effects_str, x + 10.0, y + y_offset, 16.0, LIGHTGRAY);
+    draw_ui_text(&effects_str, x + 10.0, y + y_offset, 16.0, LIGHTGRAY);
 
     // Interactive Button (Restore)
     // Only if damaged (< 100%) or dormant
@@ -200,7 +201,7 @@ fn draw_zone_card(
         };
 
         draw_rectangle(btn_x, btn_y, btn_w, btn_h, btn_color);
-        draw_text(
+        draw_ui_text(
             &format!("Restore ({:.1})", cost),
             btn_x + 5.0,
             btn_y + 20.0,

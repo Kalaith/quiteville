@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 // Import toolkit utilities
 pub use macroquad_toolkit::ui::panel_with_shadow as draw_panel;
@@ -33,6 +34,6 @@ pub fn draw_button(x: f32, y: f32, w: f32, h: f32, text: &str) -> bool {
 
 /// Helper to draw a header text
 pub fn draw_header(text: &str, x: f32, y: f32) {
-    draw_text(text, x + 2.0, y + 2.0, 30.0, Color::new(0.0, 0.0, 0.0, 0.5)); // Shadow
-    draw_text(text, x, y, 30.0, colors::ACCENT);
+    draw_ui_text(text, x + 2.0, y + 2.0, 30.0, Color::new(0.0, 0.0, 0.0, 0.5)); // Shadow
+    draw_ui_text(text, x, y, 30.0, colors::ACCENT);
 }

@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -138,7 +139,7 @@ impl ParticleSystem {
                 }
                 ParticleType::Heart => {
                     // Draw a simple heart shape or circle
-                    draw_text("♥", screen_pos.x, screen_pos.y, size, p.color);
+                    draw_ui_text("♥", screen_pos.x, screen_pos.y, size, p.color);
                 }
                 _ => {
                     draw_rectangle(screen_pos.x, screen_pos.y, size, size, p.color);

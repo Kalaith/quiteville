@@ -4,6 +4,7 @@ use crate::ui::theme;
 use crate::ui::theme::colors;
 use crate::PlayerAction;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 pub fn draw_chronicle_ui(
     state: &GameState,
@@ -17,7 +18,7 @@ pub fn draw_chronicle_ui(
 
     // Header
     theme::draw_header("The Chronicle", x + 20.0, y + 20.0);
-    draw_text(
+    draw_ui_text(
         &format!("Legacy: {}", state.dynasty.legacy_points),
         x + w - 200.0,
         y + 40.0,
@@ -28,7 +29,7 @@ pub fn draw_chronicle_ui(
     // Achievement count badge
     let ach_count = state.achievements.count();
     let ach_total = state.achievements.total();
-    draw_text(
+    draw_ui_text(
         &format!("Ach: {}/{}", ach_count, ach_total),
         x + w - 350.0,
         y + 40.0,
@@ -84,13 +85,13 @@ fn draw_dynasty_section(
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
 
     // Section header
-    draw_text("Dynasty", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
+    draw_ui_text("Dynasty", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
 
     let mut sy = y + 45.0;
     let line_h = 22.0;
 
     // Past towns
-    draw_text(
+    draw_ui_text(
         &format!("Past Towns: {}", state.dynasty.past_towns.len()),
         x + 10.0,
         sy,
@@ -100,23 +101,23 @@ fn draw_dynasty_section(
     sy += line_h;
 
     // Hall of Heroes (recent)
-    draw_text("Hall of Heroes:", x + 10.0, sy, 15.0, GOLD);
+    draw_ui_text("Hall of Heroes:", x + 10.0, sy, 15.0, GOLD);
     sy += line_h;
 
     for hero in state.dynasty.hall_of_heroes.iter().take(5) {
         let text = format!("  {} - {}", hero.name, hero.description);
-        draw_text(&text, x + 10.0, sy, 13.0, LIGHTGRAY);
+        draw_ui_text(&text, x + 10.0, sy, 13.0, LIGHTGRAY);
         sy += line_h - 4.0;
     }
     if state.dynasty.hall_of_heroes.is_empty() {
-        draw_text("  No heroes immortalized yet.", x + 10.0, sy, 12.0, GRAY);
+        draw_ui_text("  No heroes immortalized yet.", x + 10.0, sy, 12.0, GRAY);
         sy += line_h;
     }
 
     sy += 10.0;
 
     // Ancestors
-    draw_text("Active Ancestors:", x + 10.0, sy, 15.0, colors::SECONDARY);
+    draw_ui_text("Active Ancestors:", x + 10.0, sy, 15.0, colors::SECONDARY);
     sy += line_h;
 
     for ancestor in state.dynasty.ancestors.iter().take(4) {
@@ -127,11 +128,11 @@ fn draw_dynasty_section(
             crate::narrative::AncestorBuff::GrowthBoost => "Growth",
         };
         let text = format!("  {} (+{})", ancestor.hero.name, buff_name);
-        draw_text(&text, x + 10.0, sy, 12.0, LIGHTGRAY);
+        draw_ui_text(&text, x + 10.0, sy, 12.0, LIGHTGRAY);
         sy += line_h - 4.0;
     }
     if state.dynasty.ancestors.is_empty() {
-        draw_text(
+        draw_ui_text(
             "  No ancestors watching over yet.",
             x + 10.0,
             sy,
@@ -144,11 +145,11 @@ fn draw_dynasty_section(
     sy += 15.0;
 
     // Wonders completed
-    draw_text("Completed Wonders:", x + 10.0, sy, 15.0, YELLOW);
+    draw_ui_text("Completed Wonders:", x + 10.0, sy, 15.0, YELLOW);
     sy += line_h;
 
     for wonder in state.dynasty.completed_wonders.iter().take(3) {
-        draw_text(
+        draw_ui_text(
             &format!("  {}", wonder.name()),
             x + 10.0,
             sy,
@@ -158,7 +159,7 @@ fn draw_dynasty_section(
         sy += line_h - 4.0;
     }
     if state.dynasty.completed_wonders.is_empty() {
-        draw_text("  No wonders completed yet.", x + 10.0, sy, 12.0, GRAY);
+        draw_ui_text("  No wonders completed yet.", x + 10.0, sy, 12.0, GRAY);
     }
 
     // Retire hero button (if there's a top agent eligible)
@@ -181,15 +182,15 @@ fn draw_achievements_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) 
     draw_rectangle(x, y, w, h, Color::new(0.1, 0.1, 0.15, 0.8));
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
 
-    draw_text("Achievements", x + 10.0, y + 20.0, 18.0, YELLOW);
+    draw_ui_text("Achievements", x + 10.0, y + 20.0, 18.0, YELLOW);
 
     let unlocked = state.achievements.unlocked_list();
     let mut ax = x + 10.0;
     let mut ay = y + 40.0;
 
     if unlocked.is_empty() {
-        draw_text("No achievements yet.", x + 10.0, ay, 14.0, GRAY);
-        draw_text(
+        draw_ui_text("No achievements yet.", x + 10.0, ay, 14.0, GRAY);
+        draw_ui_text(
             "Keep playing to unlock!",
             x + 10.0,
             ay + 18.0,
@@ -201,15 +202,15 @@ fn draw_achievements_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) 
             // Draw achievement badge (wider to fit description)
             let badge_w = 150.0;
             draw_rectangle(ax, ay, badge_w - 5.0, 45.0, Color::new(0.2, 0.3, 0.2, 0.8));
-            // draw_text(&achievement.icon, ax + 5.0, ay + 20.0, 18.0, WHITE);
+            // draw_ui_text(&achievement.icon, ax + 5.0, ay + 20.0, 18.0, WHITE);
 
             // Name
-            draw_text(&achievement.name, ax + 28.0, ay + 15.0, 12.0, WHITE);
+            draw_ui_text(&achievement.name, ax + 28.0, ay + 15.0, 12.0, WHITE);
 
             // Description (truncated)
             let desc = &achievement.description;
             let display_desc = if desc.len() > 20 { &desc[..18] } else { desc };
-            draw_text(display_desc, ax + 28.0, ay + 30.0, 9.0, GRAY);
+            draw_ui_text(display_desc, ax + 28.0, ay + 30.0, 9.0, GRAY);
 
             ax += badge_w;
             if ax + badge_w > x + w - 5.0 {
@@ -227,7 +228,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     draw_rectangle(x, y, w, h, Color::new(0.1, 0.12, 0.1, 0.8));
     draw_rectangle_lines(x, y, w, h, 1.0, GRAY);
 
-    draw_text("Lifetime Stats", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
+    draw_ui_text("Lifetime Stats", x + 10.0, y + 20.0, 18.0, colors::ACCENT);
 
     let stats = &state.stats;
     let col1_x = x + 10.0;
@@ -236,7 +237,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     let line_h = 18.0;
 
     // Column 1
-    draw_text(
+    draw_ui_text(
         &format!("Zones Restored: {}", stats.zones_restored),
         col1_x,
         sy,
@@ -244,7 +245,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Resources: {:.0}", stats.resources_collected),
         col1_x,
         sy,
@@ -252,7 +253,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Peak Resources: {:.0}", stats.peak_resources),
         col1_x,
         sy,
@@ -260,7 +261,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Peak Pop: {}", stats.peak_population),
         col1_x,
         sy,
@@ -268,7 +269,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Play Time: {:.1}h", stats.total_play_hours),
         col1_x,
         sy,
@@ -278,7 +279,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
 
     // Column 2
     sy = y + 40.0;
-    draw_text(
+    draw_ui_text(
         &format!("Agents Born: {}", stats.agents_born),
         col2_x,
         sy,
@@ -286,7 +287,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Agents Died: {}", stats.agents_died),
         col2_x,
         sy,
@@ -294,7 +295,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Techs: {}", stats.techs_researched),
         col2_x,
         sy,
@@ -302,7 +303,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Heroes: {}", stats.heroes_immortalized),
         col2_x,
         sy,
@@ -310,7 +311,7 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
         WHITE,
     );
     sy += line_h;
-    draw_text(
+    draw_ui_text(
         &format!("Wonders: {}", stats.wonders_built),
         col2_x,
         sy,
@@ -320,8 +321,8 @@ fn draw_stats_section(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
 }
 
 fn draw_town_entry(town: &TownRecord, x: f32, y: f32) {
-    draw_text(&town.name, x, y + 14.0, 14.0, WHITE);
-    draw_text(
+    draw_ui_text(&town.name, x, y + 14.0, 14.0, WHITE);
+    draw_ui_text(
         &format!("Pop: {} • {}", town.population, town.outcome),
         x,
         y + 28.0,

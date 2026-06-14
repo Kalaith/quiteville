@@ -1,6 +1,7 @@
 //! Floating text for resource change notifications
 
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// A floating text popup that rises and fades
 #[derive(Debug, Clone)]
@@ -84,14 +85,14 @@ impl FloatingTextManager {
             let color = Color::new(text.color.r, text.color.g, text.color.b, alpha);
 
             // Shadow for readability
-            draw_text(
+            draw_ui_text(
                 &text.text,
                 screen_pos.x + 1.0,
                 screen_pos.y + 1.0,
                 20.0,
                 Color::new(0.0, 0.0, 0.0, alpha * 0.5),
             );
-            draw_text(&text.text, screen_pos.x, screen_pos.y, 20.0, color);
+            draw_ui_text(&text.text, screen_pos.x, screen_pos.y, 20.0, color);
         }
     }
 

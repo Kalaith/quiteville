@@ -1,6 +1,7 @@
 use crate::data::GameState;
 use crate::ui::theme::colors;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// Draw the top bar with resources and time
 pub fn draw_top_bar(state: &GameState, time_scale: f32, paused: bool) {
@@ -17,7 +18,7 @@ pub fn draw_top_bar(state: &GameState, time_scale: f32, paused: bool) {
         "Time: {:.1}h | x{:.0} | {}",
         state.game_time_hours, time_scale, status_text
     );
-    draw_text(&time_text, 10.0, 35.0, 20.0, colors::TEXT);
+    draw_ui_text(&time_text, 10.0, 35.0, 20.0, colors::TEXT);
 
     // Resources (Right/Center)
     // Layout: Materials | Maintenance | Attractiveness | Stability (Pop/Cap)
@@ -40,9 +41,9 @@ pub fn draw_top_bar(state: &GameState, time_scale: f32, paused: bool) {
     // Pop/Cap
     let cap = state.calculate_housing_capacity();
     let pop_text = format!("Pop: {:.0}/{:.0}", state.population.value(), cap);
-    draw_text(&pop_text, start_x + spacing * 4.0, 35.0, 20.0, PURPLE);
+    draw_ui_text(&pop_text, start_x + spacing * 4.0, 35.0, 20.0, PURPLE);
 }
 
 fn draw_resource_item(label: &str, value: f32, x: f32, y: f32, color: Color) {
-    draw_text(&format!("{}: {:.1}", label, value), x, y, 20.0, color);
+    draw_ui_text(&format!("{}: {:.1}", label, value), x, y, 20.0, color);
 }

@@ -2,6 +2,7 @@ use crate::data::GameState;
 use crate::ui::theme::colors;
 use crate::PlayerAction;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// Draw the tech tree window
 pub fn draw_tech_tree_window(
@@ -16,8 +17,8 @@ pub fn draw_tech_tree_window(
     draw_rectangle_lines(x, y, w, h, 2.0, colors::ACCENT);
 
     // Header
-    draw_text("Research & Development", x + 20.0, y + 30.0, 30.0, WHITE);
-    draw_text(
+    draw_ui_text("Research & Development", x + 20.0, y + 30.0, 30.0, WHITE);
+    draw_ui_text(
         "Unlock new capabilities to expand the town.",
         x + 20.0,
         y + 55.0,
@@ -87,11 +88,11 @@ pub fn draw_tech_tree_window(
         draw_rectangle_lines(nx, ny, node_w, node_h, 2.0, WHITE);
 
         // Text
-        draw_text(&tech.name, nx + 5.0, ny + 20.0, 20.0, WHITE);
+        draw_ui_text(&tech.name, nx + 5.0, ny + 20.0, 20.0, WHITE);
         if tech.unlocked {
-            draw_text("RESEARCHED", nx + 5.0, ny + 40.0, 16.0, LIGHTGRAY);
+            draw_ui_text("RESEARCHED", nx + 5.0, ny + 40.0, 16.0, LIGHTGRAY);
         } else {
-            draw_text(
+            draw_ui_text(
                 &format!("Cost: {:.0} Mat", tech.cost),
                 nx + 5.0,
                 ny + 40.0,
@@ -112,7 +113,7 @@ pub fn draw_tech_tree_window(
                     // Show tooltip
                     let _tooltip = format!("{}\nEffect: {:?}", tech.description, tech.effect);
                     // Simplified tooltip for now
-                    draw_text(&tech.description, x + 20.0, y + h - 30.0, 20.0, WHITE);
+                    draw_ui_text(&tech.description, x + 20.0, y + h - 30.0, 20.0, WHITE);
 
                     if is_mouse_button_pressed(MouseButton::Left) && afford {
                         clicked_tech = Some(tech.id.clone());
@@ -136,7 +137,7 @@ fn draw_button(text: &str, x: f32, y: f32, w: f32, h: f32) -> bool {
 
     let color = if is_hover { GRAY } else { DARKGRAY };
     draw_rectangle(x, y, w, h, color);
-    draw_text(text, x + 10.0, y + 20.0, 20.0, WHITE);
+    draw_ui_text(text, x + 10.0, y + 20.0, 20.0, WHITE);
 
     is_hover && is_mouse_button_pressed(MouseButton::Left)
 }

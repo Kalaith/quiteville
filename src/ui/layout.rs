@@ -4,6 +4,7 @@ use crate::data::GameState;
 use crate::ui::theme::colors;
 use crate::PlayerAction;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 /// Draw the main content layout
 pub fn draw_main_layout(state: &GameState) -> Option<PlayerAction> {
@@ -107,15 +108,15 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                     .iter()
                     .find(|t| t.id == zone.template_id)
                 {
-                    draw_text(&template.name, x + 10.0, y + 30.0, 30.0, WHITE);
-                    draw_text(
+                    draw_ui_text(&template.name, x + 10.0, y + 30.0, 30.0, WHITE);
+                    draw_ui_text(
                         &format!("Condition: {:.0}%", zone.condition * 100.0),
                         x + 10.0,
                         y + 60.0,
                         20.0,
                         LIGHTGRAY,
                     );
-                    draw_text(
+                    draw_ui_text(
                         &format!("Activity: {:.0}%", zone.activity * 100.0),
                         x + 10.0,
                         y + 85.0,
@@ -126,7 +127,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                     // Outputs
                     let mut output_y = 115.0;
                     if template.population.capacity > 0.0 {
-                        draw_text(
+                        draw_ui_text(
                             &format!("Housing: {:.0}", template.population.capacity),
                             x + 10.0,
                             y + output_y,
@@ -137,7 +138,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                     }
 
                     if template.output.materials > 0.0 {
-                        draw_text(
+                        draw_ui_text(
                             &format!("Production: +{:.3} Material", template.output.materials),
                             x + 10.0,
                             y + output_y,
@@ -152,7 +153,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                     if zone.is_under_construction() {
                         // Show construction progress
                         let progress = zone.construction_progress(template.construction_work);
-                        draw_text(
+                        draw_ui_text(
                             &format!("BUILDING: {:.0}%", progress * 100.0),
                             x + 10.0,
                             status_y + 20.0,
@@ -172,7 +173,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                             action = Some(PlayerAction::RestoreZone(idx));
                         }
                     } else {
-                        draw_text(
+                        draw_ui_text(
                             "STATUS: FULLY RESTORED",
                             x + 10.0,
                             status_y + 20.0,
@@ -192,7 +193,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                             if let Some(target_template) =
                                 state.zone_templates.iter().find(|t| t.id == upgrade_to)
                             {
-                                draw_text(
+                                draw_ui_text(
                                     &format!(
                                         "→ {}: {} mat",
                                         target_template.name, target_template.construction_cost
@@ -211,7 +212,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                             } else {
                                 // Draw disabled button (just visual)
                                 draw_rectangle(btn_x, btn_y, btn_w, btn_h, DARKGRAY);
-                                draw_text("Upgrade", btn_x + 20.0, btn_y + 20.0, 16.0, GRAY);
+                                draw_ui_text("Upgrade", btn_x + 20.0, btn_y + 20.0, 16.0, GRAY);
                             }
                         }
                     }
@@ -221,8 +222,8 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
         crate::data::Selection::Agent(id) => {
             if let Some(agent) = state.agents.iter().find(|a| a.id == id) {
                 // Agent name header
-                draw_text(&agent.name, x + 10.0, y + 30.0, 28.0, WHITE);
-                draw_text(
+                draw_ui_text(&agent.name, x + 10.0, y + 30.0, 28.0, WHITE);
+                draw_ui_text(
                     &format!("{}", agent.job.name()),
                     x + 10.0,
                     y + 52.0,
@@ -231,28 +232,28 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                 );
 
                 // Stats section
-                draw_text(
+                draw_ui_text(
                     &format!("Energy: {:.0}%", agent.energy * 100.0),
                     x + 10.0,
                     y + 80.0,
                     18.0,
                     get_bar_color(agent.energy),
                 );
-                draw_text(
+                draw_ui_text(
                     &format!("Hunger: {:.0}%", agent.hunger * 100.0),
                     x + 10.0,
                     y + 100.0,
                     18.0,
                     get_bar_color(agent.hunger),
                 );
-                draw_text(
+                draw_ui_text(
                     &format!("Social: {:.0}%", agent.social * 100.0),
                     x + 10.0,
                     y + 120.0,
                     18.0,
                     get_bar_color(agent.social),
                 );
-                draw_text(
+                draw_ui_text(
                     &format!("Spirit: {:.0}%", agent.spirit * 100.0),
                     x + 10.0,
                     y + 140.0,
@@ -279,7 +280,7 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                         "Building".to_string()
                     }
                 };
-                draw_text(
+                draw_ui_text(
                     &format!("Doing: {}", state_text),
                     x + 10.0,
                     y + 165.0,
@@ -291,10 +292,10 @@ fn draw_selection_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) -> Op
                 let feats = agent.feats.to_strings();
                 if !feats.is_empty() {
                     let mut feat_y = y + 190.0;
-                    draw_text("Feats:", x + 10.0, feat_y, 16.0, GOLD);
+                    draw_ui_text("Feats:", x + 10.0, feat_y, 16.0, GOLD);
                     feat_y += 18.0;
                     for feat in feats.iter().take(2) {
-                        draw_text(&format!("• {}", feat), x + 15.0, feat_y, 14.0, LIGHTGRAY);
+                        draw_ui_text(&format!("• {}", feat), x + 15.0, feat_y, 14.0, LIGHTGRAY);
                         feat_y += 16.0;
                     }
                 }
@@ -346,7 +347,7 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
     } else {
         format!("History: {} Events", history_count)
     };
-    draw_text(&history_label, x + w - 150.0, y + 25.0, 16.0, LIGHTGRAY);
+    draw_ui_text(&history_label, x + w - 150.0, y + 25.0, 16.0, LIGHTGRAY);
 
     // Just to use the methods: get all events and events on day 0
     let _all_events = state.town_chronicle.events();
@@ -394,7 +395,7 @@ fn draw_log_panel(state: &GameState, x: f32, y: f32, w: f32, h: f32) {
             if current_y + line_height > max_y {
                 break;
             }
-            draw_text(&line, x + 10.0, current_y + 12.0, font_size, color);
+            draw_ui_text(&line, x + 10.0, current_y + 12.0, font_size, color);
             current_y += line_height;
         }
 

@@ -2,6 +2,7 @@ use crate::data::GameState;
 use crate::simulation::camera::Camera2D;
 use crate::simulation::map::TileType;
 use macroquad::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text;
 
 pub const TILE_SIZE: f32 = 32.0;
 
@@ -184,7 +185,7 @@ pub fn draw_map(state: &GameState) {
                     // "Under Construction" text
                     if camera.zoom > 0.5 {
                         let text = format!("{:.0}%", progress * 100.0);
-                        draw_text(
+                        draw_ui_text(
                             &text,
                             screen_pos.x + width / 2.0 - 15.0,
                             bar_y - 2.0,
@@ -253,7 +254,7 @@ fn draw_season_hud(state: &GameState) {
         25.0,
         Color::new(0.0, 0.0, 0.0, 0.5),
     );
-    draw_text(&text, x, y, 18.0, WHITE);
+    draw_ui_text(&text, x, y, 18.0, WHITE);
 }
 
 /// Draw a screen-wide tint based on time of day
@@ -364,13 +365,13 @@ fn draw_agents(state: &GameState, camera: &Camera2D) {
                     crate::simulation::agents::AgentState::GoingHome => "Zzz",
                     _ => "!",
                 };
-                draw_text(text, screen_pos.x, screen_pos.y - size, 20.0, WHITE);
+                draw_ui_text(text, screen_pos.x, screen_pos.y - size, 20.0, WHITE);
             }
         }
 
         // Status Indicator (Hungry/Tired?)
         if agent.hunger < 0.3 && icon_name.is_empty() {
-            draw_text("!", screen_pos.x, screen_pos.y - size, 20.0, RED);
+            draw_ui_text("!", screen_pos.x, screen_pos.y - size, 20.0, RED);
         }
     }
 }
