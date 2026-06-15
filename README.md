@@ -29,3 +29,10 @@ Rebuild the forgotten settlement into a stable, attractive, living town.
 ## Current Scope
 
 Playable idle-builder loop with restoration projects, villagers, needs, resources, research, and offline-style progression.
+# Practical Future Improvements
+
+- Add deterministic region and zone simulation tests for resource production, technology unlocks, and chronicle entries.
+- Introduce render culling for map, particle, and floating-text layers so large settlements stay responsive.
+- Consolidate theme and layout constants for dialog, region, tech, and resource UI to keep future screens visually consistent.
+- Add scenario fixtures that verify zone upgrades, resource shortages, and event chains over several turns.
+
